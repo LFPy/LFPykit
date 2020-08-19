@@ -1,0 +1,7 @@
+include README.md
+include LICENSE
+
+recursive-include examples *.py
+recursive-include examples *.ipynb
+
+recursive-include doc *
