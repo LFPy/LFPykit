@@ -45,7 +45,8 @@ setuptools.setup(
         'scipy>=1.4',
         ],
     extras_require={'tests': ['pytest'],
-                    'docs': ['sphinx', 'numpydoc', 'sphinx_rtd_theme'],
+                    'docs': ['sphinx', 'numpydoc', 'sphinx_rtd_theme',
+                             'recommonmark'],
                     },
     dependency_links=[],
     provides=['lfpy_forward_models']
