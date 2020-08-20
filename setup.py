@@ -24,8 +24,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/LFPy/lfpy_forward_models',
-    download_url='https://github.com/LFPy/lfpy_forward_models/tarball/v{}'.format(
-            version),
+    download_url='https://github.com/LFPy/lfpy_forward_models/tarball/v{}'.format(version),
     packages=setuptools.find_packages(),
     classifiers=[
         'Programming Language :: Python :: 3',
