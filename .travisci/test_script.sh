@@ -8,7 +8,7 @@ python -c "import lfpy_forward_models; print('lfpy_forward_models {}'.format(lfp
 python setup.py develop
 
 while true; do
-    py.test -v
+    py.test -v lfpy_forward_models/tests/test_module.py --cov-report term --cov=lfpy_forward_models/tests/
     if [ $? -eq 0 ]
     then
         exit 0
