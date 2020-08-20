@@ -44,7 +44,7 @@ class TestSuite(unittest.TestCase):
 
         imem = np.arange(24).reshape((4, -1))
 
-        self.assertTrue(np.all(imem == np.dot(M, imem)))
+        self.assertTrue(np.all(imem == M@imem))
 
     def test_CurrentDipoleMoment_00(self):
         '''test CurrentDipoleMoment'''
@@ -56,7 +56,7 @@ class TestSuite(unittest.TestCase):
                          [0., 0.],
                          [1., -1.]])
 
-        P = np.dot(M, imem)
+        P = M@imem
 
         P_gt = np.array([[0., 0.], [0., 0.], [2., -2.]])
 
