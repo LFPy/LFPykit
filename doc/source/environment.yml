@@ -1,4 +1,4 @@
-name: lfpy_forward_models
+name: readthedocs
 channels:
   - conda-forge
   - defaults
