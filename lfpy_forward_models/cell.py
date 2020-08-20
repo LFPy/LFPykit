@@ -69,9 +69,11 @@ class CellGeometry(object):
         models.
 
         Assumptions
-            - each segment is piecewise linear between their start and endpoints
+            - each segment is piecewise linear between their
+              start and endpoints
             - each segment has a constant diameter
-            - the transmembrane current density is constant along the segment axis
+            - the transmembrane current density is constant along the
+              segment axis
 
 
         Parameters
