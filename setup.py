@@ -42,7 +42,6 @@ setuptools.setup(
     python_requires='>=3.7',
     install_requires=[
         'numpy>=1.18',
-        'scipy>=1.4',
         ],
     extras_require={'tests': ['pytest'],
                     'docs': ['sphinx', 'numpydoc', 'sphinx_rtd_theme',
