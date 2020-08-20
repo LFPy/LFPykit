@@ -20,12 +20,13 @@ setuptools.setup(
     version=version,
     author='LFPy-team',
     author_email='lfpy@users.noreply.github.com',
-    description='Electrostatic forward models for multicompartment neuron models',
+    description='Electrostatic forward models for '.join(
+        'multicompartment neuron models'),
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/LFPy/lfpy_forward_models',
-    download_url='https://github.com/LFPy/lfpy_forward_models/tarball/v{}'.format(
-            version),
+    download_url='https://github.com/LFPy/lfpy_forward_models/'.join(
+        'tarball/v{}'.format(version)),
     packages=setuptools.find_packages(),
     classifiers=[
         'Programming Language :: Python :: 3',

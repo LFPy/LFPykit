@@ -1,3 +1,5 @@
+name: Lintly flake8 checks
+
 on: [pull_request]
 
 jobs:
