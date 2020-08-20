@@ -16,3 +16,4 @@ Build Status
 
 [![Build Status](https://travis-ci.org/LFPy/lfpy_forward_models.svg?branch=master)](https://travis-ci.org/LFPy/lfpy_forward_models)
 [![Coverage Status](https://coveralls.io/repos/github/LFPy/lfpy_forward_models/badge.svg?branch=master)](https://coveralls.io/github/LFPy/lfpy_forward_models?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/lfpy-forward-models/badge/?version=latest)](https://lfpy-forward-models.readthedocs.io/en/latest/?badge=latest)
