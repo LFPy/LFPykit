@@ -1,0 +1,11 @@
+name: lfpyforwardmodels
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.7
+  - sphinx_rtd_theme
+  - numpydoc
+  - recommonmark
+  - pip
+  - pip:
