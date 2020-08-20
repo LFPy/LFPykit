@@ -17,15 +17,62 @@ import numpy as np
 
 
 class CellGeometry(object):
+    '''
+    Base class representing the geometry of multicompartment neuron
+    models.
+
+    Assumptions
+        - each segment is piecewise linear between their start and endpoints
+        - each segment has a constant diameter
+        - the transmembrane current density is constant along the segment axis
+
+
+    Parameters
+    ----------
+    x: ndarray of floats
+        shape (n_seg x 2) array of start- and end-point coordinates of
+        each compartment along x-axis in units of [um]
+    y: ndarray
+        shape (n_seg x 2) array of start- and end-point coordinates of
+        each compartment along y-axis in units of [um]
+    z: ndarray
+        shape (n_seg x 2) array of start- and end-point coordinates of
+        each compartment along z-axis in units of [um]
+    diam: ndarray
+        shape (n_seg) array of compartment diameters in units of [um]
+
+    For compatibility with LFPy v2.x, the following class attributes
+    will be calculated and set:
+
+
+    Attributes
+    ----------
+    totnsegs: int
+        number of compartments
+    xstart, ystart, zstart: ndarray
+        arrays of length totnsegs with start (x,y,z) coordinate of segments
+        in units of um
+    xmid, ymid, zmid: ndarray
+        midpoint coordinates of segments
+    xend, yend, zend : ndarray
+        endpoint coordinateso of segments
+    diam: ndarray
+        array of length totnsegs with segment diameters in units of um
+    length: ndarray
+        lenght of each segment in units of um
+    area : ndarray
+        array of segment surface areas in units of um^2
+    '''
     def __init__(self, x, y, z, diam):
         '''
         Base class representing the geometry of multicompartment neuron
         models.
 
-        Assumptions:
-        - each segment is piecewise linear between their start and endpoints
-        - each segment has a constant diameter
-        - the transmembrane current density is constant along the segment axis
+        Assumptions
+            - each segment is piecewise linear between their start and endpoints
+            - each segment has a constant diameter
+            - the transmembrane current density is constant along the segment axis
+
 
         Parameters
         ----------
@@ -43,6 +90,7 @@ class CellGeometry(object):
 
         For compatibility with LFPy v2.x, the following class attributes
         will be calculated and set:
+
 
         Attributes
         ----------

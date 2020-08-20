@@ -17,19 +17,19 @@ import numpy as np
 
 
 class LinearModel(object):
+    '''
+    Base LinearModel class skeleton that defines a linear response matrix M
+    between transmembrane currents I of a multicompartment neuron model and
+    some measurement Y as Y=MI.
+
+    LinearModel just returns a mapping that returns the current themselves
+
+    Parameters
+    ----------
+    cell: object
+        CellGeometry or similar instance.
+    '''
     def __init__(self, cell):
-        '''
-        Base LinearModel class skeleton that defines a linear response matrix M
-        between transmembrane currents I of a multicompartment neuron model and
-        some measurement Y as Y=MI.
-
-        LinearModel just returns a mapping that returns the current themselves
-
-        Parameters
-        ----------
-        cell: object
-            CellGeometry or similar instance.
-        '''
         self.cell = cell
 
     def get_response_matrix(self):
@@ -45,20 +45,20 @@ class LinearModel(object):
 
 
 class CurrentDipoleMoment(LinearModel):
+    '''
+    LinearModel subclass that defines a linear response matrix M between
+    transmembrane currents I of a multicompartment neuron model and the
+    corresponding current dipole moment p as p = MI.
+
+    The current dipole moment can be used to compute distal measures of
+    neural activity such as the EEG and MEG
+
+    Parameters
+    ----------
+    cell: object
+        CellGeometry or similar instance.
+    '''
     def __init__(self, cell):
-        '''
-        LinearModel subclass that defines a linear response matrix M between
-        transmembrane currents I of a multicompartment neuron model and the
-        corresponding current dipole moment p as p = MI. 
-
-        The current dipole moment can be used to compute distal measures of
-        neural activity such as the EEG and MEG
-
-        Parameters
-        ----------
-        cell: object
-            CellGeometry or similar instance.
-        '''
         LinearModel.__init__(self, cell=cell)
 
     def get_response_matrix(self):

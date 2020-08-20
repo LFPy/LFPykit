@@ -21,7 +21,8 @@ GNU General Public License for more details.
   * InfiniteVolumeConductor - To compute extracellular potentials with current dipoles in infinite volume conductor
   * MEG - Class for computing magnetic field from current dipole moment
 :Modules:
-  *
+  * cell
+  * models
 """
 
 from .version import version as __version__
