@@ -20,11 +20,11 @@ import lfpy_forward_models as lfp
 
 
 def get_cell(n_seg=4):
-    cell = lfp.CellGeometry(x=np.array([[0.]*2]*n_seg),
-                            y=np.array([[0.]*2]*n_seg),
-                            z=np.array([[1.*x, 1.*(x+1)]
+    cell = lfp.CellGeometry(x=np.array([[0.] * 2] * n_seg),
+                            y=np.array([[0.] * 2] * n_seg),
+                            z=np.array([[1. * x, 1. * (x + 1)]
                                         for x in range(n_seg)]),
-                            d=np.array([1.]*n_seg))
+                            d=np.array([1.] * n_seg))
     return cell
 
 
@@ -56,7 +56,7 @@ class TestSuite(unittest.TestCase):
                          [0., 0.],
                          [1., -1.]])
 
-        P = M@imem
+        P = M @ imem
 
         P_gt = np.array([[0., 0.], [0., 0.], [2., -2.]])
 

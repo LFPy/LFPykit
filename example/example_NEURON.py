@@ -33,7 +33,7 @@ class NeuronCell(lfpy_forward_models.CellGeometry, neuron.nrn.Section):
         neuron.h.pt3dadd(neuron.h.Vector([0, 0]),    # x
                          neuron.h.Vector([0, 0]),    # y
                          neuron.h.Vector([0, 200]),  # z
-                         neuron.h.Vector([2, 2]),   # diam
+                         neuron.h.Vector([2, 2]),    # diam
                          sec=self)
 
         # passive parameters and spatial discretization
@@ -83,7 +83,7 @@ class NeuronCell(lfpy_forward_models.CellGeometry, neuron.nrn.Section):
             segx[i] = seg.x
 
         # can't be <0 which may happen due to NEURON->Python float comm.:
-        gsen2 = 1./2/self.nseg
+        gsen2 = 1 / 2 / self.nseg
         segx0 = (segx - gsen2).round(decimals=9)
         segx1 = (segx + gsen2).round(decimals=9)
 
@@ -179,7 +179,7 @@ def apply_transform(M):
         shape (3, n_seg) linear response matrix
     '''
     I_m = np.array([seg.i_membrane_ for seg in cell])  # membrane current [nA]
-    return M@I_m
+    return M @ I_m
 
 
 def integrate(calculate_P=True, M=None):
@@ -209,7 +209,7 @@ cell.I_m = np.array(cell.I_m)
 # membrane currents
 ###############################################################################
 try:
-    np.testing.assert_allclose(P, M@cell.I_m)
+    np.testing.assert_allclose(P, M @ cell.I_m)
 except AssertionError as ae:
     raise ae('not so useful error message')
 
@@ -229,7 +229,7 @@ def colorbar(fig, ax, im,
     rect = np.array(ax.get_position().bounds)
     rect = np.array(ax.get_position().bounds)
     caxrect = [0]*4
-    caxrect[0] = rect[0] + rect[2] + hoffset*rect[2]
+    caxrect[0] = rect[0] + rect[2] + hoffset * rect[2]
     caxrect[1] = rect[1] + voffset*rect[3]
     caxrect[2] = rect[2] * width
     caxrect[3] = rect[3] * height
@@ -246,7 +246,7 @@ gs = GridSpec(3, 10)
 ax0 = fig.add_subplot(gs[:, 0])
 norm = plt.Normalize(vmin=cell.V_m.min(), vmax=cell.V_m.max())
 for z, d, v in zip(cell.z, cell.d, cell.V_m[:, -1]):
-    ax0.add_patch(plt.Rectangle((-d/2, z[0]), d, z[1]-z[0],
+    ax0.add_patch(plt.Rectangle((-d/2, z[0]), d, z[1] - z[0],
                                 ec='k', fc=plt.cm.viridis(norm(v))))
 ax0.axis(ax0.axis('equal'))
 ax0.set_xlabel(r'$x$ ($\mu$m)')
