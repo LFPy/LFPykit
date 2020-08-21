@@ -246,7 +246,7 @@ gs = GridSpec(3, 10)
 ax0 = fig.add_subplot(gs[:, 0])
 norm = plt.Normalize(vmin=cell.V_m.min(), vmax=cell.V_m.max())
 for z, d, v in zip(cell.z, cell.d, cell.V_m[:, -1]):
-    ax0.add_patch(plt.Rectangle((-d/2, z[0]), d, z[1] - z[0],
+    ax0.add_patch(plt.Rectangle((-d / 2, z[0]), d, z[1] - z[0],
                                 ec='k', fc=plt.cm.viridis(norm(v))))
 ax0.axis(ax0.axis('equal'))
 ax0.set_xlabel(r'$x$ ($\mu$m)')
