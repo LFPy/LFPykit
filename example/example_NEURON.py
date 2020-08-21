@@ -228,9 +228,9 @@ def colorbar(fig, ax, im,
     '''
     rect = np.array(ax.get_position().bounds)
     rect = np.array(ax.get_position().bounds)
-    caxrect = [0]*4
+    caxrect = [0] * 4
     caxrect[0] = rect[0] + rect[2] + hoffset * rect[2]
-    caxrect[1] = rect[1] + voffset*rect[3]
+    caxrect[1] = rect[1] + voffset * rect[3]
     caxrect[2] = rect[2] * width
     caxrect[3] = rect[3] * height
     cax = fig.add_axes(caxrect)
