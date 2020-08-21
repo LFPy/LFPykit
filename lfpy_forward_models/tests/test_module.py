@@ -24,7 +24,7 @@ def get_cell(n_seg=4):
                             y=np.array([[0.]*2]*n_seg),
                             z=np.array([[1.*x, 1.*(x+1)]
                                         for x in range(n_seg)]),
-                            diam=np.array([1.]*n_seg))
+                            d=np.array([1.]*n_seg))
     return cell
 
 
