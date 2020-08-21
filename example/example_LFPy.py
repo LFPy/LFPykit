@@ -54,7 +54,7 @@ lfpy_cell = LFPy.Cell(morphology=morphology,
                       )
 # position cell so zstart[0] = 0 (similar to example_NEURON.py)
 lfpy_cell.set_pos(0, 0, lfpy_cell.length[0] / 2)
-stim = LFPy.StimIntElectrode(lfpy_cell, idx=lfpy_cell.totnsegs-1,
+stim = LFPy.StimIntElectrode(lfpy_cell, idx=lfpy_cell.totnsegs - 1,
                              pptype='SinSyn')
 
 # CellGeometry object
