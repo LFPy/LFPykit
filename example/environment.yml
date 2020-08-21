@@ -6,7 +6,7 @@ dependencies:
   - python=3
   - numpy
   - matplotlib
-  - neuron
+  - lfpy
   - pip
   pip:
     pip install ..
