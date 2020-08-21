@@ -38,7 +38,7 @@ class CellGeometry(object):
     z: ndarray
         shape (n_seg x 2) array of start- and end-point coordinates of
         each compartment along z-axis in units of [um]
-    diam: ndarray
+    d: ndarray
         shape (n_seg) array of compartment diameters in units of [um]
 
     For compatibility with LFPy v2.x, the following class attributes
@@ -56,14 +56,14 @@ class CellGeometry(object):
         midpoint coordinates of segments
     xend, yend, zend : ndarray
         endpoint coordinateso of segments
-    diam: ndarray
+    d: ndarray
         array of length totnsegs with segment diameters in units of um
     length: ndarray
         lenght of each segment in units of um
     area : ndarray
         array of segment surface areas in units of um^2
     '''
-    def __init__(self, x, y, z, diam):
+    def __init__(self, x, y, z, d):
         '''
         Base class representing the geometry of multicompartment neuron
         models.
@@ -87,7 +87,7 @@ class CellGeometry(object):
         z: ndarray
             shape (n_seg x 2) array of start- and end-point coordinates of
             each compartment along z-axis in units of [um]
-        diam: ndarray
+        d: ndarray
             shape (n_seg) array of compartment diameters in units of [um]
 
         For compatibility with LFPy v2.x, the following class attributes
@@ -105,7 +105,7 @@ class CellGeometry(object):
             midpoint coordinates of segments
         xend, yend, zend : ndarray
             endpoint coordinateso of segments
-        diam: ndarray
+        d: ndarray
             array of length totnsegs with segment diameters in units of um
         length: ndarray
             lenght of each segment in units of um
@@ -117,9 +117,9 @@ class CellGeometry(object):
             assert(np.all([type(x) is np.ndarray,
                            type(x) is np.ndarray,
                            type(x) is np.ndarray,
-                           type(diam) is np.ndarray]))
+                           type(d) is np.ndarray]))
         except AssertionError as ae:
-            raise ae('x, y, z and diam must be of type numpy.ndarray')
+            raise ae('x, y, z and d must be of type numpy.ndarray')
         try:
             assert(x.ndim == y.ndim == z.ndim == 2)
         except AssertionError as ae:
@@ -133,18 +133,18 @@ class CellGeometry(object):
         except AssertionError as ae:
             raise ae('the last axis of x, y and z must be of length 2')
         try:
-            assert(diam.ndim == 1 and diam.size == x.shape[0])
+            assert(d.ndim == 1 and d.size == x.shape[0])
         except AssertionError as ae:
-            raise ae('diam must be 1-dimensional with size == n_seg')
+            raise ae('d must be 1-dimensional with size == n_seg')
 
         # set attributes
         self.x = x
         self.y = y
         self.z = z
-        self.diam = diam
+        self.d = d
 
         # derived attributes
-        self.totnsegs = self.diam.size
+        self.totnsegs = self.d.size
         self.xstart = self.x[:, 0]
         self.xend = self.x[:, -1]
         self.xmid = self.x.mean(axis=-1)
@@ -160,4 +160,4 @@ class CellGeometry(object):
         self.length = np.sqrt(np.diff(x, axis=-1)**2 +
                               np.diff(y, axis=-1)**2 +
                               np.diff(z, axis=-1)**2)
-        self.area = self.length * np.pi * self.diam
+        self.area = self.length * np.pi * self.d
