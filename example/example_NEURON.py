@@ -109,8 +109,12 @@ class NeuronCell(lfpy_forward_models.CellGeometry, neuron.nrn.Section):
         return x, y, z, d
 
     def create_sinsyn(self):
-        '''create some stimuli - stick with default params in sinsyn.mod'''
-        self.synapses.append(neuron.h.SinSyn(1, sec=self))
+        '''
+        Create some stimuli at center of terminating segment.
+        Stick with default params in sinsyn.mod'''
+        for seg in self:
+            pass
+        self.synapses.append(neuron.h.SinSyn(seg.x, sec=self))
 
     def create_time_recorder(self):
         '''record simulation time'''
