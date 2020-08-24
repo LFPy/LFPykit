@@ -21,6 +21,30 @@ import numpy as np
 def return_dist_from_segments(xstart, ystart, zstart, xend, yend, zend, p):
     """
     Returns distance and closest point on line segments from point p
+
+    Parameters
+    ----------
+    xstart: ndarray
+        start points of segments along x-axis
+    ystart: ndarray
+        start points of segments along y-axis
+    zstart: ndarray
+        start point of segments along z-axis
+    xend: ndarray
+        end points of segments along x-axis
+    yend: ndarray
+        end points of segments along y-axis
+    zend: ndarray
+        end points of segments along z-axis
+    p: ndarray
+        position of contact
+
+    Returns
+    -------
+    dist: ndarray
+        distance to segments
+    closest_point: ndarray
+        closest point
     """
     px = xend - xstart
     py = yend - ystart

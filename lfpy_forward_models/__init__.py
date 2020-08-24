@@ -24,7 +24,7 @@ GNU General Public License for more details.
         Class for predicting extracellular potentials
         assuming point sources and contacts
 
-  :Classes to be implemented:
+:Classes to be implemented:
   * RecExtElectrode:
         Class for simulations of extracellular potentials
   * RecMEAElectrode:
@@ -41,6 +41,7 @@ GNU General Public License for more details.
         dipoles in infinite volume conductor
   * MEG:
         Class for computing magnetic field from current dipole moments
+
 :Modules:
   * cell
   * models
@@ -50,4 +51,5 @@ GNU General Public License for more details.
 from .version import version as __version__
 
 from .cell import CellGeometry
-from .models import LinearModel, CurrentDipoleMoment, PointSourcePotential
+from .models import LinearModel, CurrentDipoleMoment, PointSourcePotential, \
+    LineSourcePotential
