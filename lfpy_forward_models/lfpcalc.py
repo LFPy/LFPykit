@@ -357,11 +357,11 @@ def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
 
     too_close_idxs = np.where(r2 < r_limit * r_limit)[0]
     r2[too_close_idxs] = r_limit[too_close_idxs]**2
-    l = h + deltaS
+    l_ = h + deltaS
     hnegi = h < 0
     hposi = h >= 0
-    lnegi = l < 0
-    lposi = l >= 0
+    lnegi = l_ < 0
+    lposi = l_ >= 0
 
     mapping = np.zeros(len(cell.x[:, 0]))
 
@@ -372,9 +372,9 @@ def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
     # case iii, h >= 0, l >= 0
     [iii] = np.where(hposi & lposi)
 
-    mapping[i] = _linesource_calc_case1(l[i], r2[i], h[i])
-    mapping[ii] = _linesource_calc_case2(l[ii], r2[ii], h[ii])
-    mapping[iii] = _linesource_calc_case3(l[iii], r2[iii], h[iii])
+    mapping[i] = _linesource_calc_case1(l_[i], r2[i], h[i])
+    mapping[ii] = _linesource_calc_case2(l_[ii], r2[ii], h[ii])
+    mapping[iii] = _linesource_calc_case3(l_[iii], r2[iii], h[iii])
     return 1 / (4 * np.pi * sigma * deltaS) * mapping
 
 
@@ -427,12 +427,12 @@ def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
 
     too_close_idxs = np.where(r2 < r_limit * r_limit)[0]
     r2[too_close_idxs] = r_limit[too_close_idxs]**2
-    l = h + deltaS
+    l_ = h + deltaS
 
     hnegi = h < 0
     hposi = h >= 0
-    lnegi = l < 0
-    lposi = l >= 0
+    lnegi = l_ < 0
+    lposi = l_ >= 0
 
     # Ensuring that soma is not treated as line-source
     hnegi[somainds] = hposi[somainds] = lnegi[somainds] = lposi[somainds] = \
@@ -451,9 +451,9 @@ def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
     mapping[somainds] = 1 / r_soma
     deltaS[somainds] = 1.
 
-    mapping[i] = _linesource_calc_case1(l[i], r2[i], h[i])
-    mapping[ii] = _linesource_calc_case2(l[ii], r2[ii], h[ii])
-    mapping[iii] = _linesource_calc_case3(l[iii], r2[iii], h[iii])
+    mapping[i] = _linesource_calc_case1(l_[i], r2[i], h[i])
+    mapping[ii] = _linesource_calc_case2(l_[ii], r2[ii], h[ii])
+    mapping[iii] = _linesource_calc_case3(l_[iii], r2[iii], h[iii])
 
     return 1 / (4 * np.pi * sigma * deltaS) * mapping
 
