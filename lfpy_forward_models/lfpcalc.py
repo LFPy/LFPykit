@@ -67,8 +67,8 @@ def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma, r_limit):
     zstart = cell.z[:, 0]
     zend = cell.z[:, -1]
     l_vecs = np.array([xend - xstart,
-                      yend - ystart,
-                      zend - zstart])
+                       yend - ystart,
+                       zend - zstart])
 
     pos = np.array([x, y, z])
 
@@ -78,9 +78,9 @@ def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma, r_limit):
     dx2 = (xend - xstart)**2
     dy2 = (yend - ystart)**2
     dz2 = (zend - zstart)**2
-    a = (sigma[1] * sigma[2] * dx2 +
-         sigma[0] * sigma[2] * dy2 +
-         sigma[0] * sigma[1] * dz2)
+    a = (sigma[1] * sigma[2] * dx2
+         + sigma[0] * sigma[2] * dy2
+         + sigma[0] * sigma[1] * dz2)
 
     b = -2 * (sigma[1] * sigma[2] * (x - xstart) * (xend - xstart) +
               sigma[0] * sigma[2] * (y - ystart) * (yend - ystart) +
@@ -127,13 +127,13 @@ def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma, r_limit):
 
     [i] = np.where(np.abs(b) <= 1e-6)
     [iia] = np.where(np.bitwise_and(np.abs(4 * a * c - b * b) < 1e-6,
-                     np.abs(a - c) < 1e-6))
+                                    np.abs(a - c) < 1e-6))
     [iib] = np.where(np.bitwise_and(np.abs(4 * a * c - b * b) < 1e-6,
-                     np.abs(a - c) >= 1e-6))
+                                    np.abs(a - c) >= 1e-6))
     [iii] = np.where(np.bitwise_and(4 * a * c - b * b < -1e-6,
-                     np.abs(b) > 1e-6))
+                                    np.abs(b) > 1e-6))
     [iiii] = np.where(np.bitwise_and(4 * a * c - b * b > 1e-6,
-                      np.abs(b) > 1e-6))
+                                     np.abs(b) > 1e-6))
 
     if len(i) + len(iia) + len(iib) + len(iii) + len(iiii) != cell.totnsegs:
         print(a, b, c)
@@ -270,7 +270,8 @@ def calc_lfp_soma_as_point_anisotropic(cell, x, y, z, sigma, r_limit):
     try:
         somainds = cell.get_idx("soma")
     except Exception:
-        raise Exception('Call {}.get_idx("soma") failed in method lfpcalc.calc_lfp_soma_as_point'.format(cell))
+        raise Exception('Call {}.get_idx("soma") failed in method'.format(cell)
+                        + 'lfpcalc.calc_lfp_soma_as_point')
 
     dx2_soma = (cell.x[somainds, :].mean(axis=-1) - x)**2
     dy2_soma = (cell.y[somainds, :].mean(axis=-1) - y)**2
@@ -402,7 +403,8 @@ def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
     try:
         somainds = cell.get_idx("soma")
     except Exception:
-        raise Exception('Call {}.get_idx("soma") failed in method lfpcalc.calc_lfp_soma_as_point'.format(cell))
+        raise Exception('Call {}.get_idx("soma") failed in method'.format(cell)
+                        + ' lfpcalc.calc_lfp_soma_as_point')
 
     # some variables for h, r2, r_soma calculations
     xstart = cell.x[:, 0]
@@ -698,8 +700,8 @@ def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     x1, y1, z1 = cell.x[:, -1], cell.y[:, -1], cell.z[:, -1]
 
     pos = np.array([x, y, z])
-    rs, closest_points = return_dist_from_segments(xstart, ystart, zstart,
-                                                   xend, yend, zend, pos)
+    rs, _ = return_dist_from_segments(xstart, ystart, zstart,
+                                      xend, yend, zend, pos)
     z0_ = z0.copy()
     z0_[np.where(rs < r_limit)] = r_limit[np.where(rs < r_limit)]
 
@@ -727,9 +729,11 @@ def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
             num[case1_idxs] = factor_a[case1_idxs] + factor_b[case1_idxs]
             den[case1_idxs] = factor_b[case1_idxs]
         if not len(case2_idxs) == 0:
-            num[case2_idxs] = (factor_a[case2_idxs] + factor_b[case2_idxs] +
-                               ds[case2_idxs]*np.sqrt(factor_a[case2_idxs] +
-                               2 * factor_b[case2_idxs] + factor_c[case2_idxs])
+            num[case2_idxs] = (factor_a[case2_idxs] + factor_b[case2_idxs]
+                               + ds[case2_idxs]
+                               * np.sqrt(factor_a[case2_idxs]
+                                         + 2 * factor_b[case2_idxs]
+                                         + factor_c[case2_idxs])
                                )
             den[case2_idxs] = (factor_b[case2_idxs] +
                                ds[case2_idxs] * np.sqrt(factor_c[case2_idxs]))
@@ -795,8 +799,8 @@ def calc_lfp_soma_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     x1, y1, z1 = cell.x[:, -1], cell.y[:, -1], cell.z[:, -1]
 
     pos = np.array([x, y, z])
-    rs, closest_points = return_dist_from_segments(xstart, ystart, zstart,
-                                                   xend, yend, zend, pos)
+    rs, _ = return_dist_from_segments(xstart, ystart, zstart,
+                                      xend, yend, zend, pos)
     z0_ = np.array(z0)
     if np.any(rs < r_limit):
         z0_[rs < r_limit] = r_limit
@@ -821,13 +825,15 @@ def calc_lfp_soma_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
         case1_idxs = np.where(np.abs(b_2_ac) <= 1e-12)
         case2_idxs = np.where(np.abs(b_2_ac) > 1e-12)
 
-        if not len(case1_idxs) == 0:
+        if len(case1_idxs) != 0:
             num[case1_idxs] = factor_a[case1_idxs] + factor_b[case1_idxs]
             den[case1_idxs] = factor_b[case1_idxs]
-        if not len(case2_idxs) == 0:
+        if len(case2_idxs) != 0:
             num[case2_idxs] = (factor_a[case2_idxs] + factor_b[case2_idxs] +
-                               ds[case2_idxs] * np.sqrt(factor_a[case2_idxs] +
-                               2 * factor_b[case2_idxs] + factor_c[case2_idxs])
+                               + ds[case2_idxs]
+                               * np.sqrt(factor_a[case2_idxs]
+                                         + 2 * factor_b[case2_idxs]
+                                         + factor_c[case2_idxs])
                                )
             den[case2_idxs] = (factor_b[case2_idxs] +
                                ds[case2_idxs] * np.sqrt(factor_c[case2_idxs]))
@@ -848,7 +854,8 @@ def calc_lfp_soma_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     try:
         somainds = cell.get_idx("soma")
     except Exception:
-        raise Exception('Call {}.get_idx("soma") failed in method lfpcalc.calc_lfp_soma_as_point'.format(cell))
+        raise Exception('Call {}.get_idx("soma") failed in method'.format(cell)
+                        + ' lfpcalc.calc_lfp_soma_as_point')
 
     dx2 = (x - cell.x[somainds, :].mean(axis=-1))**2
     dy2 = (y - cell.y[somainds, :].mean(axis=-1))**2
