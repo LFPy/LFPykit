@@ -94,3 +94,25 @@ class TestSuite(unittest.TestCase):
         V_gt = (1 / (4 * np.pi * sigma * r_norm)) @ imem
 
         self.assertTrue(np.all(V_ex == V_gt))
+
+
+    def test_PointSoucePotential_01(self):
+        '''test PointSourcePotential implementation, when contact is within
+        d/2 distance to segment'''
+        cell = get_cell(n_seg=1)
+        cell.d = np.array([2.])
+        sigma = 0.3
+        r = np.array([[0.1254235242],
+                      [0.],
+                      [cell.z.mean()]])
+        psp = lfp.PointSourcePotential(cell=cell, x=r[0], y=r[1, ], z=r[2, ],
+                                       sigma=sigma)
+        M = psp.get_response_matrix()
+
+        imem = np.array([[0., 1., -1.]]) * (4 * np.pi * sigma * cell.d[0] / 2)
+
+        V_ex = M @ imem
+
+        V_gt = np.array([[0., 1., -1.]])
+
+        np.testing.assert_allclose(V_ex, V_gt)
