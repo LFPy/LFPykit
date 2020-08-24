@@ -95,7 +95,6 @@ class TestSuite(unittest.TestCase):
 
         self.assertTrue(np.all(V_ex == V_gt))
 
-
     def test_PointSoucePotential_01(self):
         '''test PointSourcePotential implementation, when contact is within
         d/2 distance to segment'''
