@@ -238,13 +238,13 @@ def calc_lfp_soma_as_point_anisotropic(cell, x, y, z, sigma, r_limit):
                   sigma[0] * sigma[1] * (p_[2] - zstart[idx])**2)
 
     [i] = np.where(np.abs(b) <= 1e-6)
-    [iia] = np.where(np.bitwise_and(np.abs(4 * a * c - b*b) < 1e-6,
+    [iia] = np.where(np.bitwise_and(np.abs(4 * a * c - b * b) < 1e-6,
                                     np.abs(a - c) < 1e-6))
-    [iib] = np.where(np.bitwise_and(np.abs(4 * a * c - b*b) < 1e-6,
+    [iib] = np.where(np.bitwise_and(np.abs(4 * a * c - b * b) < 1e-6,
                                     np.abs(a - c) >= 1e-6))
-    [iii] = np.where(np.bitwise_and(4 * a * c - b*b < -1e-6,
+    [iii] = np.where(np.bitwise_and(4 * a * c - b * b < -1e-6,
                                     np.abs(b) > 1e-6))
-    [iiii] = np.where(np.bitwise_and(4 * a * c - b*b > 1e-6,
+    [iiii] = np.where(np.bitwise_and(4 * a * c - b * b > 1e-6,
                                      np.abs(b) > 1e-6))
 
     if len(i) + len(iia) + len(iib) + len(iii) + len(iiii) != cell.totnsegs:
@@ -324,7 +324,6 @@ def _anisotropic_line_source_case_iiii(a, b, c):
 
 
 def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
-
     """Calculate electric field potential using the line-source method, all
     compartments treated as line sources, including soma.
 
@@ -356,7 +355,7 @@ def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
     h = _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
     r2 = _r2_calc(xend, yend, zend, x, y, z, h)
 
-    too_close_idxs = np.where(r2 < r_limit*r_limit)[0]
+    too_close_idxs = np.where(r2 < r_limit * r_limit)[0]
     r2[too_close_idxs] = r_limit[too_close_idxs]**2
     l = h + deltaS
     hnegi = h < 0
@@ -426,7 +425,7 @@ def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
         r_soma[r_soma < r_limit[somainds]
                ] = r_limit[somainds][r_soma < r_limit[somainds]]
 
-    too_close_idxs = np.where(r2 < r_limit*r_limit)[0]
+    too_close_idxs = np.where(r2 < r_limit * r_limit)[0]
     r2[too_close_idxs] = r_limit[too_close_idxs]**2
     l = h + deltaS
 
@@ -492,7 +491,7 @@ def _deltaS_calc(xstart, xend, ystart, yend, zstart, zend):
 
 def _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z):
     """Subroutine used by calc_lfp_*()"""
-    aa = np.array([x - xend, y - yend, z-zend])
+    aa = np.array([x - xend, y - yend, z - zend])
     bb = np.array([xend - xstart, yend - ystart, zend - zstart])
     cc = np.sum(aa * bb, axis=0)
     hh = cc / deltaS
@@ -706,13 +705,13 @@ def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     z0_[np.where(rs < r_limit)] = r_limit[np.where(rs < r_limit)]
 
     ds = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
-    factor_a = ds*ds
+    factor_a = ds * ds
     dx = x1 - x0
     dy = y1 - y0
     dz = z1 - z0
     a_x = x - x0
     a_y = y - y0
-    W = (sigma_T - sigma_S)/(sigma_T + sigma_S)
+    W = (sigma_T - sigma_S) / (sigma_T + sigma_S)
     num = np.zeros(factor_a.shape)
     den = np.zeros(factor_a.shape)
 
@@ -812,7 +811,7 @@ def calc_lfp_soma_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     dz = z1 - z0
     a_x = x - x0
     a_y = y - y0
-    W = (sigma_T - sigma_S)/(sigma_T + sigma_S)
+    W = (sigma_T - sigma_S) / (sigma_T + sigma_S)
     num = np.zeros(factor_a.shape)
     den = np.zeros(factor_a.shape)
 
