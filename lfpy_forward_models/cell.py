@@ -115,8 +115,8 @@ class CellGeometry(object):
         # check input
         try:
             assert(np.all([type(x) is np.ndarray,
-                           type(x) is np.ndarray,
-                           type(x) is np.ndarray,
+                           type(y) is np.ndarray,
+                           type(z) is np.ndarray,
                            type(d) is np.ndarray]))
         except AssertionError as ae:
             raise ae('x, y, z and d must be of type numpy.ndarray')
