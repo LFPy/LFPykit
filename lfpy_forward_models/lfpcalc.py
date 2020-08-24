@@ -869,16 +869,16 @@ def calc_lfp_soma_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
 
     mapping[somainds] = _omega(z - cell.z[somainds, :].mean(axis=-1))
     mapping[somainds] += (W * _omega(cell.z[somainds, :].mean(axis=-1) - 2 * h
-                                     ) +
-                          _omega(cell.z[somainds, :].mean(axis=-1)))
+                                     )
+                          + _omega(cell.z[somainds, :].mean(axis=-1)))
 
     n = np.arange(1, steps)
     a = (W)**n[:, None] * (W * _omega(cell.z[somainds, :].mean(axis=-1)
-                                      - 2 * (n[:, None] + 1) * h) +
-                           2 * _omega(cell.z[somainds, :].mean(axis=-1)
-                                      + 2 * n[:, None] * h) +
-                           _omega(cell.z[somainds, :].mean(axis=-1)
-                                  - 2 * n[:, None] * h))
+                                      - 2 * (n[:, None] + 1) * h)
+                           + 2 * _omega(cell.z[somainds, :].mean(axis=-1)
+                                        + 2 * n[:, None] * h)
+                           + _omega(cell.z[somainds, :].mean(axis=-1)
+                                    - 2 * n[:, None] * h))
     mapping[somainds] += np.sum(a, axis=0)
     mapping[somainds] *= 1 / (4 * np.pi * sigma_T)
 
