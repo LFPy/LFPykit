@@ -180,11 +180,11 @@ class testLfpCalc(unittest.TestCase):
         steps = 20
         cell = DummyCell()
 
-        in_vivo = lfpcalc.calc_lfp_soma_as_point(cell,
+        in_vivo = lfpcalc.calc_lfp_root_as_point(cell,
                                                  x=0.0, y=0, z=0,
                                                  sigma=sigma_T,
                                                  r_limit=cell.d / 2)
-        in_vitro = lfpcalc.calc_lfp_soma_as_point_moi(cell,
+        in_vitro = lfpcalc.calc_lfp_root_as_point_moi(cell,
                                                       x=0.0, y=0, z=0,
                                                       sigma_T=sigma_T,
                                                       sigma_G=sigma_G,
@@ -263,7 +263,7 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_almost_equal(2 * in_vivo, in_vitro, decimal=9)
 
-    def test_lfpcalc_calc_lfp_soma_as_point_moi_doubling(self):
+    def test_lfpcalc_calc_lfp_root_as_point_moi_doubling(self):
         """
         Test that slice with zero conductivity in MEA region (z<0) has twice
         the potential as in vivo case at MEA electrode plane
@@ -276,11 +276,11 @@ class testLfpCalc(unittest.TestCase):
 
         cell = DummyCell(z=np.array([[50, 50]]))
 
-        in_vivo = lfpcalc.calc_lfp_soma_as_point(cell,
+        in_vivo = lfpcalc.calc_lfp_root_as_point(cell,
                                                  x=50., y=0, z=0,
                                                  sigma=sigma_T,
                                                  r_limit=cell.d / 2)
-        in_vitro = lfpcalc.calc_lfp_soma_as_point_moi(cell,
+        in_vitro = lfpcalc.calc_lfp_root_as_point_moi(cell,
                                                       x=50, y=0, z=0,
                                                       sigma_T=sigma_T,
                                                       sigma_G=sigma_G,
@@ -355,7 +355,7 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_array_less(with_saline, without_saline)
 
-    def test_lfpcalc_calc_lfp_soma_as_point_moi_saline_effect(self):
+    def test_lfpcalc_calc_lfp_root_as_point_moi_saline_effect(self):
         """
         Test that the saline bath decreases signal as expected
         """
@@ -367,7 +367,7 @@ class testLfpCalc(unittest.TestCase):
 
         cell = DummyCell(z=np.array([[100, 100]]))
 
-        with_saline = lfpcalc.calc_lfp_soma_as_point_moi(cell,
+        with_saline = lfpcalc.calc_lfp_root_as_point_moi(cell,
                                                          x=0, y=0, z=0,
                                                          sigma_T=sigma_T,
                                                          sigma_G=sigma_G,
@@ -376,7 +376,7 @@ class testLfpCalc(unittest.TestCase):
                                                          h=h,
                                                          steps=steps)
 
-        without_saline = lfpcalc.calc_lfp_soma_as_point_moi(cell,
+        without_saline = lfpcalc.calc_lfp_root_as_point_moi(cell,
                                                             x=0, y=0, z=0,
                                                             sigma_T=sigma_T,
                                                             sigma_G=sigma_G,
@@ -440,9 +440,9 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_almost_equal(correct, calculated, 5)
 
-    def test_lfpcalc_calc_lfp_soma_as_point_moi_20steps(self):
+    def test_lfpcalc_calc_lfp_root_as_point_moi_20steps(self):
         """
-        Test that the calc_lfp_soma_as_point_moi reproduces previously known
+        Test that the calc_lfp_root_as_point_moi reproduces previously known
         nummerical value
         """
         sigma_T = 0.3
@@ -457,7 +457,7 @@ class testLfpCalc(unittest.TestCase):
                          y=np.array([[0., 0.]]),
                          z=np.array([[0, 220]]))
 
-        calculated = lfpcalc.calc_lfp_soma_as_point_moi(cell,
+        calculated = lfpcalc.calc_lfp_root_as_point_moi(cell,
                                                         x=100, y=0, z=0,
                                                         sigma_T=sigma_T,
                                                         sigma_G=sigma_G,
@@ -532,7 +532,7 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_almost_equal(with_saline, without_saline)
 
-    def test_lfpcalc_calc_lfp_soma_as_point_moi_infinite_slice(self):
+    def test_lfpcalc_calc_lfp_root_as_point_moi_infinite_slice(self):
         """
         Test that infinitely thick slice does not affect potential.
         """
@@ -544,7 +544,7 @@ class testLfpCalc(unittest.TestCase):
 
         cell = DummyCell(z=np.array([[100, 100]]))
 
-        with_saline = lfpcalc.calc_lfp_soma_as_point_moi(cell,
+        with_saline = lfpcalc.calc_lfp_root_as_point_moi(cell,
                                                          x=0, y=0, z=0,
                                                          sigma_T=sigma_T,
                                                          sigma_G=sigma_G,
@@ -553,7 +553,7 @@ class testLfpCalc(unittest.TestCase):
                                                          h=h,
                                                          steps=steps)
 
-        without_saline = lfpcalc.calc_lfp_soma_as_point_moi(cell,
+        without_saline = lfpcalc.calc_lfp_root_as_point_moi(cell,
                                                             x=0, y=0, z=0,
                                                             sigma_T=sigma_T,
                                                             sigma_G=sigma_G,
@@ -593,10 +593,10 @@ class DummyCell(CellGeometry):
     """CellGeometry like object with attributes for predicting extracellular
     potentials, but with:
         - 1 compartment
-        - position in (0.5,0,0)
-        - length 1
-        - diam 1
-        - current amplitude 1
+        - position in (0.5,0,0) [um]
+        - length 1 [um]
+        - diam 1 [um]
+        - current amplitude 1 [nA]
         - 1 timestep
     """
 
@@ -609,9 +609,3 @@ class DummyCell(CellGeometry):
 
         # set Attributes
         self.imem = np.array([[1.]])
-
-    def get_idx(self, section="soma"):
-        if section == "soma":
-            return np.array([0])
-        else:
-            return np.array([])

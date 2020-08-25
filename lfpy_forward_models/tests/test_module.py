@@ -116,6 +116,27 @@ class TestSuite(unittest.TestCase):
 
         np.testing.assert_allclose(V_ex, V_gt)
 
+    def test_PointSoucePotential_02(self):
+        '''test PointSourcePotential implementation, when contact is at
+        d/2 distance to segment'''
+        cell = get_cell(n_seg=1)
+        cell.d = np.array([2.])
+        sigma = 0.3
+        r = np.array([[cell.d[0] / 2],
+                      [0.],
+                      [cell.z.mean()]])
+        psp = lfp.PointSourcePotential(cell=cell, x=r[0], y=r[1, ], z=r[2, ],
+                                       sigma=sigma)
+        M = psp.get_response_matrix()
+
+        imem = np.array([[0., 1., -1.]]) * (4 * np.pi * sigma * cell.d[0] / 2)
+
+        V_ex = M @ imem
+
+        V_gt = np.array([[0., 1., -1.]])
+
+        np.testing.assert_allclose(V_ex, V_gt)
+
     def test_LineSourcePotential_00(self):
         '''test LineSourcePotential implementation'''
         cell = get_cell(n_seg=1)
@@ -228,5 +249,107 @@ class TestSuite(unittest.TestCase):
         V_gt = imem / (4 * np.pi * lsp.sigma * Deltas_n) * np.log(
             (np.sqrt(l_n**2 + r_n**2) + l_n)
             / (np.sqrt(h_n**2 + r_n**2) + h_n))
+
+        np.testing.assert_allclose(V_ex, V_gt)
+
+    def test_RecExtElectrode_00(self):
+        """test RecExcElectrode implementation,
+        method='pointsource'"""
+        cell = get_cell(n_seg=1)
+        sigma = 0.3
+        r = np.array([[cell.d[0]],
+                      [0.],
+                      [cell.z.mean()]])
+        el = lfp.RecExtElectrode(cell=cell,
+                                 x=r[0], y=r[1, ], z=r[2, ],
+                                 sigma=sigma,
+                                 method='pointsource')
+        M = el.get_response_matrix()
+
+        imem = np.array([[0., 1., -1.]]) * (4 * np.pi * sigma * cell.d[0])
+
+        V_ex = M @ imem
+
+        V_gt = np.array([[0., 1., -1.]])
+
+        np.testing.assert_allclose(V_ex, V_gt)
+
+    def test_RecExtElectrode_01(self):
+        """test LineSourcePotential implementation,
+        method='linesource'"""
+        cell = get_cell(n_seg=1)
+        cell.z = cell.z * 10
+
+        el = lfp.RecExtElectrode(cell=cell,
+                                 x=np.array([2.]),
+                                 y=np.array([0.]),
+                                 z=np.array([5.]),
+                                 sigma=0.3,
+                                 method='linesource')
+        M = el.get_response_matrix()
+
+        imem = np.array([[0., 1., -1.]])
+
+        V_ex = M @ imem
+
+        Deltas_n = 10.
+        h_n = -5.
+        r_n = 2.
+        l_n = Deltas_n + h_n
+
+        # Use Eq. C.13 case II (h<0, l>0) from Gary Holt's 1998 thesis
+        V_gt = imem / (4 * np.pi * el.sigma * Deltas_n) * np.log(
+            (np.sqrt(h_n**2 + r_n**2) - h_n)
+            * (np.sqrt(l_n**2 + r_n**2) + l_n)
+            / r_n**2)
+
+        np.testing.assert_allclose(V_ex, V_gt)
+
+    def test_RecExtElectrode_02(self):
+        """test RecExcElectrode implementation,
+        method='root_as_point'"""
+        cell = get_cell(n_seg=1)
+        sigma = 0.3
+        r = np.array([[cell.d[0]],
+                      [0.],
+                      [cell.z.mean()]])
+        el = lfp.RecExtElectrode(cell=cell,
+                                 x=r[0], y=r[1, ], z=r[2, ],
+                                 sigma=sigma,
+                                 method='root_as_point')
+        M = el.get_response_matrix()
+
+        imem = np.array([[0., 1., -1.]]) * (4 * np.pi * sigma * cell.d[0])
+
+        V_ex = M @ imem
+
+        V_gt = np.array([[0., 1., -1.]])
+
+        np.testing.assert_allclose(V_ex, V_gt)
+
+    def test_RecExtElectrode_03(self):
+        """test RecExcElectrode implementation,
+        method='pointsource' with anisotropy"""
+        cell = get_cell(n_seg=1)
+        cell.x = np.array([[0., 2.4]])
+        cell.y = np.array([[0., 2.4]])
+        cell.z = np.array([[0., 2.4]])
+
+        sigma = [0.6, 0.3, 0.45]
+        r = np.array([[0.], [0.], [0.]])
+        el = lfp.RecExtElectrode(cell=cell,
+                                 x=r[0], y=r[1], z=r[2],
+                                 sigma=sigma,
+                                 method='pointsource')
+        M = el.get_response_matrix()
+
+        imem = np.array([[0., 1., -1.]])
+
+        V_ex = M @ imem
+
+        sigma_r = np.sqrt(sigma[1] * sigma[2] * 1.2**2
+                          + sigma[0] * sigma[2] * 1.2**2
+                          + sigma[0] * sigma[1] * 1.2**2)
+        V_gt = np.array([[0., 1., -1.]]) / (4 * np.pi * sigma_r)
 
         np.testing.assert_allclose(V_ex, V_gt)

@@ -65,7 +65,7 @@ def return_dist_from_segments(xstart, ystart, zstart, xend, yend, zend, p):
 
 def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma, r_limit):
     """Calculate electric field potential using the line-source method, all
-    compartments treated as line sources, including the soma.
+    segments treated as line sources.
 
     Parameters
     ----------
@@ -83,7 +83,7 @@ def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma, r_limit):
         minimum distance to source current for each compartment
     """
 
-    # some variables for h, r2, r_soma calculations
+    # some variables for h, r2, r_root calculations
     xstart = cell.x[:, 0]
     xend = cell.x[:, -1]
     ystart = cell.y[:, 0]
@@ -178,9 +178,9 @@ def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma, r_limit):
     return 1 / (4 * np.pi) * mapping / np.sqrt(a)
 
 
-def calc_lfp_soma_as_point_anisotropic(cell, x, y, z, sigma, r_limit):
-    """Calculate electric field potential, soma is treated as point source, all
-    compartments except soma are treated as line sources.
+def calc_lfp_root_as_point_anisotropic(cell, x, y, z, sigma, r_limit):
+    """Calculate electric field potential, root is treated as point source, all
+    segments except root are treated as line sources.
 
     Parameters
     ----------
@@ -289,38 +289,34 @@ def calc_lfp_soma_as_point_anisotropic(cell, x, y, z, sigma, r_limit):
 
     mapping /= np.sqrt(a)
 
-    # Get compartment indices for somatic compartments (to be treated as point
+    # Get compartment indices for root segment (to be treated as point
     # sources)
-    try:
-        somainds = cell.get_idx("soma")
-    except Exception:
-        raise Exception('Call {}.get_idx("soma") failed in method'.format(cell)
-                        + 'lfpcalc.calc_lfp_soma_as_point')
+    rootinds = np.array([0])
 
-    dx2_soma = (cell.x[somainds, :].mean(axis=-1) - x)**2
-    dy2_soma = (cell.y[somainds, :].mean(axis=-1) - y)**2
-    dz2_soma = (cell.z[somainds, :].mean(axis=-1) - z)**2
+    dx2_root = (cell.x[rootinds, :].mean(axis=-1) - x)**2
+    dy2_root = (cell.y[rootinds, :].mean(axis=-1) - y)**2
+    dz2_root = (cell.z[rootinds, :].mean(axis=-1) - z)**2
 
-    r2_soma = dx2_soma + dy2_soma + dz2_soma
+    r2_root = dx2_root + dy2_root + dz2_root
 
-    # Go through and correct all (if any) somatic idxs that are too close
-    for close_idx in np.where(np.abs(r2_soma) < 1e-6)[0]:
-        dx2_soma[close_idx] += 0.001
-        r2_soma[close_idx] += 0.001
+    # Go through and correct all (if any) root idxs that are too close
+    for close_idx in np.where(np.abs(r2_root) < 1e-6)[0]:
+        dx2_root[close_idx] += 0.001
+        r2_root[close_idx] += 0.001
 
-    for close_idx in np.where(r2_soma < r_limit[somainds]**2)[0]:
+    for close_idx in np.where(r2_root < r_limit[rootinds]**2)[0]:
         # For anisotropic media, the direction in which to move points matter.
         # Radial distance between point source and electrode is scaled to r_lim
-        r2_scale_factor = r_limit[somainds[close_idx]
-                                  ] * r_limit[somainds[close_idx]
-                                              ] / r2_soma[close_idx]
-        dx2_soma[close_idx] *= r2_scale_factor
-        dy2_soma[close_idx] *= r2_scale_factor
-        dz2_soma[close_idx] *= r2_scale_factor
+        r2_scale_factor = r_limit[rootinds[close_idx]
+                                  ] * r_limit[rootinds[close_idx]
+                                              ] / r2_root[close_idx]
+        dx2_root[close_idx] *= r2_scale_factor
+        dy2_root[close_idx] *= r2_scale_factor
+        dz2_root[close_idx] *= r2_scale_factor
 
-    mapping[somainds] = 1 / np.sqrt(sigma[1] * sigma[2] * dx2_soma
-                                    + sigma[0] * sigma[2] * dy2_soma
-                                    + sigma[0] * sigma[1] * dz2_soma)
+    mapping[rootinds] = 1 / np.sqrt(sigma[1] * sigma[2] * dx2_root
+                                    + sigma[0] * sigma[2] * dy2_root
+                                    + sigma[0] * sigma[1] * dz2_root)
 
     return 1. / (4 * np.pi) * mapping
 
@@ -349,7 +345,7 @@ def _anisotropic_line_source_case_iiii(a, b, c):
 
 def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
     """Calculate electric field potential using the line-source method, all
-    compartments treated as line sources, including soma.
+    segments treated as line sources.
 
     Parameters
     ----------
@@ -367,7 +363,7 @@ def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
         minimum distance to source current for each compartment
     """
 
-    # some variables for h, r2, r_soma calculations
+    # some variables for h, r2, r_root calculations
     xstart = cell.x[:, 0]
     xend = cell.x[:, -1]
     ystart = cell.y[:, 0]
@@ -403,9 +399,9 @@ def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
     return 1 / (4 * np.pi * sigma * deltaS) * mapping
 
 
-def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
+def calc_lfp_root_as_point(cell, x, y, z, sigma, r_limit):
     """Calculate electric field potential using the line-source method,
-    soma is treated as point/sphere source
+    root is treated as point/sphere source
 
     Parameters
     ----------
@@ -422,33 +418,29 @@ def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
     r_limit : np.ndarray
         minimum distance to source current for each compartment.
     """
-    # get compartment indices for somatic compartments (to be treated as point
+    # get compartment indices for root segment (to be treated as point
     # sources)
-    try:
-        somainds = cell.get_idx("soma")
-    except Exception:
-        raise Exception('Call {}.get_idx("soma") failed in method'.format(cell)
-                        + ' lfpcalc.calc_lfp_soma_as_point')
+    rootinds = np.array([0])
 
-    # some variables for h, r2, r_soma calculations
+    # some variables for h, r2, r_root calculations
     xstart = cell.x[:, 0]
-    xmid = cell.x[somainds, :].mean(axis=-1)
+    xmid = cell.x[rootinds, :].mean(axis=-1)
     xend = cell.x[:, -1]
     ystart = cell.y[:, 0]
-    ymid = cell.y[somainds, :].mean(axis=-1)
+    ymid = cell.y[rootinds, :].mean(axis=-1)
     yend = cell.y[:, -1]
     zstart = cell.z[:, 0]
-    zmid = cell.z[somainds, :].mean(axis=-1)
+    zmid = cell.z[rootinds, :].mean(axis=-1)
     zend = cell.z[:, -1]
 
     deltaS = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
     h = _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
     r2 = _r2_calc(xend, yend, zend, x, y, z, h)
-    r_soma = _r_soma_calc(xmid, ymid, zmid, x, y, z)
-    if np.any(r_soma < r_limit[somainds]):
-        print('Adjusting r-distance to soma segments')
-        r_soma[r_soma < r_limit[somainds]
-               ] = r_limit[somainds][r_soma < r_limit[somainds]]
+    r_root = _r_root_calc(xmid, ymid, zmid, x, y, z)
+    if np.any(r_root < r_limit[rootinds]):
+        print('Adjusting r-distance to root segments')
+        r_root[r_root < r_limit[rootinds]
+               ] = r_limit[rootinds][r_root < r_limit[rootinds]]
 
     too_close_idxs = np.where(r2 < r_limit * r_limit)[0]
     r2[too_close_idxs] = r_limit[too_close_idxs]**2
@@ -459,8 +451,8 @@ def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
     lnegi = l_ < 0
     lposi = l_ >= 0
 
-    # Ensuring that soma is not treated as line-source
-    hnegi[somainds] = hposi[somainds] = lnegi[somainds] = lposi[somainds] = \
+    # Ensuring that root is not treated as line-source
+    hnegi[rootinds] = hposi[rootinds] = lnegi[rootinds] = lposi[rootinds] = \
         False
 
     # Line sources
@@ -473,8 +465,8 @@ def calc_lfp_soma_as_point(cell, x, y, z, sigma, r_limit):
 
     # Sum all potential contributions
     mapping = np.zeros(cell.totnsegs)
-    mapping[somainds] = 1 / r_soma
-    deltaS[somainds] = 1.
+    mapping[rootinds] = 1 / r_root
+    deltaS[rootinds] = 1.
 
     mapping[i] = _linesource_calc_case1(l_[i], r2[i], h[i])
     mapping[ii] = _linesource_calc_case2(l_[ii], r2[ii], h[ii])
@@ -529,10 +521,10 @@ def _r2_calc(xend, yend, zend, x, y, z, h):
     return abs(r2)
 
 
-def _r_soma_calc(xmid, ymid, zmid, x, y, z):
-    """calculate the distance to soma midpoint"""
-    r_soma = np.sqrt((x - xmid)**2 + (y - ymid)**2 + (z - zmid)**2)
-    return r_soma
+def _r_root_calc(xmid, ymid, zmid, x, y, z):
+    """calculate the distance to root midpoint"""
+    r_root = np.sqrt((x - xmid)**2 + (y - ymid)**2 + (z - zmid)**2)
+    return r_root
 
 
 def calc_lfp_pointsource(cell, x, y, z, sigma, r_limit):
@@ -774,10 +766,10 @@ def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     return mapping
 
 
-def calc_lfp_soma_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
+def calc_lfp_root_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
                                steps, h, r_limit, **kwargs):
     """Calculate extracellular potentials for in vitro
-    Microelectrode Array (MEA) slices, where soma (compartment zero) is
+    Microelectrode Array (MEA) slices, where root (compartment zero) is
     treated as a point source, and all other compartments as line sources.
 
     Parameters
@@ -871,40 +863,36 @@ def calc_lfp_soma_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
 
     mapping *= 2 / (4 * np.pi * sigma_T * ds)
 
-    # NOW DOING SOMA
+    # NOW DOING root
 
-    # get compartment indices for somatic compartments (to be treated as point
+    # get compartment indices for root segment (to be treated as point
     # sources)
-    try:
-        somainds = cell.get_idx("soma")
-    except Exception:
-        raise Exception('Call {}.get_idx("soma") failed in method'.format(cell)
-                        + ' lfpcalc.calc_lfp_soma_as_point')
+    rootinds = np.array([0])
 
-    dx2 = (x - cell.x[somainds, :].mean(axis=-1))**2
-    dy2 = (y - cell.y[somainds, :].mean(axis=-1))**2
-    dz2 = (z - cell.z[somainds, :].mean(axis=-1))**2
+    dx2 = (x - cell.x[rootinds, :].mean(axis=-1))**2
+    dy2 = (y - cell.y[rootinds, :].mean(axis=-1))**2
+    dz2 = (z - cell.z[rootinds, :].mean(axis=-1))**2
 
     dL2 = dx2 + dy2
-    inds = np.where(dL2 + dz2 < r_limit[somainds] * r_limit[somainds])[0]
+    inds = np.where(dL2 + dz2 < r_limit[rootinds] * r_limit[rootinds])[0]
     dL2[inds] = r_limit[inds] * r_limit[inds] - dz2[inds]
 
     def _omega(dz):
         return 1 / np.sqrt(dL2 + dz * dz)
 
-    mapping[somainds] = _omega(z - cell.z[somainds, :].mean(axis=-1))
-    mapping[somainds] += (W * _omega(cell.z[somainds, :].mean(axis=-1) - 2 * h
+    mapping[rootinds] = _omega(z - cell.z[rootinds, :].mean(axis=-1))
+    mapping[rootinds] += (W * _omega(cell.z[rootinds, :].mean(axis=-1) - 2 * h
                                      )
-                          + _omega(cell.z[somainds, :].mean(axis=-1)))
+                          + _omega(cell.z[rootinds, :].mean(axis=-1)))
 
     n = np.arange(1, steps)
-    a = (W)**n[:, None] * (W * _omega(cell.z[somainds, :].mean(axis=-1)
+    a = (W)**n[:, None] * (W * _omega(cell.z[rootinds, :].mean(axis=-1)
                                       - 2 * (n[:, None] + 1) * h)
-                           + 2 * _omega(cell.z[somainds, :].mean(axis=-1)
+                           + 2 * _omega(cell.z[rootinds, :].mean(axis=-1)
                                         + 2 * n[:, None] * h)
-                           + _omega(cell.z[somainds, :].mean(axis=-1)
+                           + _omega(cell.z[rootinds, :].mean(axis=-1)
                                     - 2 * n[:, None] * h))
-    mapping[somainds] += np.sum(a, axis=0)
-    mapping[somainds] *= 1 / (4 * np.pi * sigma_T)
+    mapping[rootinds] += np.sum(a, axis=0)
+    mapping[rootinds] *= 1 / (4 * np.pi * sigma_T)
 
     return mapping
