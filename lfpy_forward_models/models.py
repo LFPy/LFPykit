@@ -205,8 +205,8 @@ class PointSourcePotential(LinearModel):
         # check input
         try:
             assert(np.all([type(x) is np.ndarray,
-                           type(x) is np.ndarray,
-                           type(x) is np.ndarray]))
+                           type(y) is np.ndarray,
+                           type(z) is np.ndarray]))
         except AssertionError as ae:
             raise ae('x, y and z must be of type numpy.ndarray')
         try:
@@ -348,8 +348,8 @@ class LineSourcePotential(LinearModel):
         # check input
         try:
             assert(np.all([type(x) is np.ndarray,
-                           type(x) is np.ndarray,
-                           type(x) is np.ndarray]))
+                           type(y) is np.ndarray,
+                           type(z) is np.ndarray]))
         except AssertionError as ae:
             raise ae('x, y and z must be of type numpy.ndarray')
         try:
