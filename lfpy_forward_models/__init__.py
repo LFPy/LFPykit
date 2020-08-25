@@ -23,8 +23,11 @@ GNU General Public License for more details.
   * PointSourcePotential:
         Class for predicting extracellular potentials
         assuming point sources and contacts
+  * LineSourcePotential:
+        Class for predicting extracellular potentials assuming
+        line sourcers and point contacts
 
-:Classes to be implemented:
+:LFPy classes to be implemented:
   * RecExtElectrode:
         Class for simulations of extracellular potentials
   * RecMEAElectrode:
