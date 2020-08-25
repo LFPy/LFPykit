@@ -53,3 +53,4 @@ from .version import version as __version__
 from .cell import CellGeometry
 from .models import LinearModel, CurrentDipoleMoment, PointSourcePotential, \
     LineSourcePotential
+from .tests import _test

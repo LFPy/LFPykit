@@ -615,8 +615,3 @@ class DummyCell(CellGeometry):
             return np.array([0])
         else:
             return np.array([])
-
-
-if __name__ == '__main__':
-    cell = DummyCell()
-    print(cell.x, cell.y, cell.z, cell.d, cell.imem, cell.totnsegs)
