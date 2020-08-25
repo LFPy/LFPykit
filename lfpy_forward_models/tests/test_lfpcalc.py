@@ -24,7 +24,8 @@ class testLfpCalc(unittest.TestCase):
     test module lfpy_forward_models.lfpcalc
     """
 
-    def test_return_dist_from_segment(self):
+    def test_lfpcalc_return_dist_from_segments_00(self):
+        """test function lfpcalc.return_dist_from_segments"""
         cell = DummyCell()
         dist, clostest_point = lfpcalc.return_dist_from_segments(
             cell.x[:, 0], cell.y[:, 0],
@@ -42,8 +43,8 @@ class testLfpCalc(unittest.TestCase):
         np.testing.assert_equal([np.sqrt(101)], dist)
         np.testing.assert_equal([0, 0, 0], clostest_point.T[0])
 
-    def test_calc_lfp_pointsource(self):
-        """Test that function calc_lfp_pointsource
+    def test_lfpcalc_calc_lfp_pointsource_00(self):
+        """Test that function lfpcalc.calc_lfp_pointsource
         reproduces analytic formula"""
         sigma = 0.3
         cell = DummyCell()
@@ -54,10 +55,10 @@ class testLfpCalc(unittest.TestCase):
                                                              r_limit=cell.d / 2
                                                              ))
 
-    def test_calc_lfp_pointsource_moi_homogeneous(self):
+    def test_lfpcalc_calc_lfp_pointsource_moi_00(self):
         """
-        Test that slice where all layers have same conductivity reproduces
-        in vivo results.
+        Test slice where all layers have same conductivity reproduces
+        isotropic case.
         """
         sigma_T = 0.3
         sigma_G = 0.3
@@ -80,7 +81,7 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_equal(in_vivo, in_vitro)
 
-    def test_calc_lfp_moi_ecog(self):
+    def test_lfpcalc_calc_lfp_pointsource_moi_01(self):
         """
         Test that ECoG scenario gives expected analytical result
         """
@@ -113,7 +114,7 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_equal(analytic, moi_method_lfpy)
 
-    def test_calc_lfp_pointsource_moi_too_close(self):
+    def test_lfpcalc_calc_lfp_pointsource_moi_02(self):
         """
         Very close to point source, in vivo and in vitro have similar results,
         e.g., the positions should be adjusted similarly.
@@ -140,7 +141,7 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_almost_equal(in_vivo, in_vitro, 4)
 
-    def test_calc_lfp_linesource_moi_too_close(self):
+    def test_lfpcalc_calc_lfp_linesource_moi_00(self):
         """
         Very close to point source, in vivo and in vitro have similar results,
         e.g., the positions should be adjusted similarly.
@@ -167,7 +168,7 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_almost_equal(2 * in_vivo, in_vitro, 4)
 
-    def test_calc_lfp_soma_as_point_moi_too_close(self):
+    def test_lfpcalc_calc_lfp_pointsource_moi_03(self):
         """
         Very close to point source, in vivo and in vitro have similar results,
         e.g., the positions should be adjusted similarly.
@@ -194,7 +195,7 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_almost_equal(2 * in_vivo, in_vitro, 4)
 
-    def test_calc_lfp_linesource_too_close(self):
+    def test_lfpcalc_calc_lfp_linesource_00(self):
         """
         Test that calc_lfp_linesource method does not give infinite potential
         """
@@ -206,7 +207,7 @@ class testLfpCalc(unittest.TestCase):
                                               r_limit=cell.d / 2)[0]
         np.testing.assert_array_less(in_vivo, 1e12)
 
-    def test_calc_lfp_pointsource_moi_doubling(self):
+    def test_lfpcalc_calc_lfp_pointsource_moi_04(self):
         """
         Test that slice with zero-conductivity MEA region (z<0) has twice
         the potential as in vivo case at MEA electrode plane
@@ -234,7 +235,7 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_almost_equal(2 * in_vivo, in_vitro, decimal=9)
 
-    def test_calc_lfp_linesource_moi_doubling(self):
+    def test_lfpcalc_calc_lfp_linesource_moi_01(self):
         """
         Test that slice with zero conductivity in MEA region (z<0) has twice
         the potential as in vivo case at MEA electrode plane
@@ -262,7 +263,7 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_almost_equal(2 * in_vivo, in_vitro, decimal=9)
 
-    def test_calc_lfp_soma_as_point_moi_doubling(self):
+    def test_lfpcalc_calc_lfp_soma_as_point_moi_doubling(self):
         """
         Test that slice with zero conductivity in MEA region (z<0) has twice
         the potential as in vivo case at MEA electrode plane
@@ -290,7 +291,7 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_almost_equal(2 * in_vivo, in_vitro, decimal=9)
 
-    def test_calc_lfp_pointsource_moi_saline_effect(self):
+    def test_lfpcalc_calc_lfp_pointsource_moi_saline_effect(self):
         """
         Test that the saline bath decreases signal as expected
         """
@@ -322,7 +323,7 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_array_less(with_saline, without_saline)
 
-    def test_calc_lfp_linesource_moi_saline_effect(self):
+    def test_lfpcalc_calc_lfp_linesource_moi_saline_effect(self):
         """
         Test that the saline bath decreases signal as expected
         """
@@ -354,7 +355,7 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_array_less(with_saline, without_saline)
 
-    def test_calc_lfp_soma_as_point_moi_saline_effect(self):
+    def test_lfpcalc_calc_lfp_soma_as_point_moi_saline_effect(self):
         """
         Test that the saline bath decreases signal as expected
         """
@@ -386,7 +387,7 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_array_less(with_saline, without_saline)
 
-    def test_calc_lfp_pointsource_moi_20steps(self):
+    def test_lfpcalc_calc_lfp_pointsource_moi_20steps(self):
         """
         Test that the calc_lfp_pointsource_moi reproduces previously known
         nummerical value
@@ -412,7 +413,7 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_almost_equal(correct, calculated, 5)
 
-    def test_calc_lfp_linesource_moi_20steps(self):
+    def test_lfpcalc_calc_lfp_linesource_moi_20steps(self):
         """
         Test that the calc_lfp_linesource_moi reproduces previously known
         nummerical value
@@ -439,7 +440,7 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_almost_equal(correct, calculated, 5)
 
-    def test_calc_lfp_soma_as_point_moi_20steps(self):
+    def test_lfpcalc_calc_lfp_soma_as_point_moi_20steps(self):
         """
         Test that the calc_lfp_soma_as_point_moi reproduces previously known
         nummerical value
@@ -467,7 +468,7 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_almost_equal(correct, calculated, 5)
 
-    def test_calc_lfp_pointsource_moi_infinite_slice(self):
+    def test_lfpcalc_calc_lfp_pointsource_moi_infinite_slice(self):
         """
         Test that infinitely thick slice does not affect potential.
         """
@@ -499,7 +500,7 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_almost_equal(with_saline, without_saline)
 
-    def test_calc_lfp_linesource_moi_infinite_slice(self):
+    def test_lfpcalc_calc_lfp_linesource_moi_infinite_slice(self):
         """
         Test that infinitely thick slice does not affect potential.
         """
@@ -531,7 +532,7 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_almost_equal(with_saline, without_saline)
 
-    def test_calc_lfp_soma_as_point_moi_infinite_slice(self):
+    def test_lfpcalc_calc_lfp_soma_as_point_moi_infinite_slice(self):
         """
         Test that infinitely thick slice does not affect potential.
         """
@@ -563,7 +564,7 @@ class testLfpCalc(unittest.TestCase):
 
         np.testing.assert_almost_equal(with_saline, without_saline)
 
-    def test_calc_lfp_pointsource_anisotropic(self):
+    def test_lfpcalc_calc_lfp_pointsource_anisotropic(self):
 
         sigma = [0.6, 0.3, 0.45]
         cell = DummyCell(x=np.array([[0., 2.4]]),
