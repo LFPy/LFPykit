@@ -448,12 +448,13 @@ class RecExtElectrode(LinearModel):
     >>>
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
-    >>>     'v_init' : -65,                          # initial voltage
+    >>>     'v_init' : -65,                         # initial voltage
     >>>     'cm' : 1.0,                             # membrane capacitance
     >>>     'Ra' : 150,                             # axial resistivity
-    >>>     'passive' : True,                        # insert passive channels
-    >>>     'passive_parameters' : {"g_pas":1./3E4, "e_pas":-65}, # passive params
-    >>>     'dt' : 2**-4,                           # simulation time res
+    >>>     'passive' : True,                       # insert passive channels
+    >>>     'passive_parameters' : {"g_pas":1./3E4,
+                                    "e_pas":-65}, # passive params
+    >>>     'dt' : 2**-4,                         # simulation time res
     >>>     'tstart' : 0.,                        # start t of simulation
     >>>     'tstop' : 50.,                        # end t of simulation
     >>> }
@@ -464,7 +465,7 @@ class RecExtElectrode(LinearModel):
     >>>     'e' : 0,                                # reversal potential
     >>>     'syntype' : 'ExpSyn',                   # synapse type
     >>>     'tau' : 2,                              # syn. time constant
-    >>>     'weight' : 0.01,                       # syn. weight
+    >>>     'weight' : 0.01,                        # syn. weight
     >>>     'record_current' : True                 # syn. current record
     >>> }
     >>> synapse = LFPy.Synapse(cell, **synapseParameters)
@@ -473,10 +474,10 @@ class RecExtElectrode(LinearModel):
     >>> cell.simulate(rec_imem=True)
     >>>
     >>> N = np.empty((16, 3))
-    >>> for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal vec. of contacts
-    >>> electrodeParameters = {         #parameters for RecExtElectrode class
-    >>>     'sigma' : 0.3,              #Extracellular potential
-    >>>     'x' : np.zeros(16)+25,      #Coordinates of electrode contacts
+    >>> for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] # normal vectors
+    >>> electrodeParameters = {         # parameters for RecExtElectrode class
+    >>>     'sigma' : 0.3,              # Extracellular potential
+    >>>     'x' : np.zeros(16)+25,      # Coordinates of electrode contacts
     >>>     'y' : np.zeros(16),
     >>>     'z' : np.linspace(-500,1000,16),
     >>>     'n' : 20,
@@ -499,12 +500,13 @@ class RecExtElectrode(LinearModel):
     >>>
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
-    >>>     'v_init' : -65,                          # initial voltage
+    >>>     'v_init' : -65,                         # initial voltage
     >>>     'cm' : 1.0,                             # membrane capacitance
     >>>     'Ra' : 150,                             # axial resistivity
-    >>>     'passive' : True,                        # insert passive channels
-    >>>     'passive_parameters' : {"g_pas":1./3E4, "e_pas":-65}, # passive params
-    >>>     'dt' : 2**-4,                           # simulation time res
+    >>>     'passive' : True,                       # insert passive channels
+    >>>     'passive_parameters' : {"g_pas":1./3E4,
+                                    "e_pas":-65}, # passive params
+    >>>     'dt' : 2**-4,                         # simulation time res
     >>>     'tstart' : 0.,                        # start t of simulation
     >>>     'tstop' : 50.,                        # end t of simulation
     >>> }
@@ -515,7 +517,7 @@ class RecExtElectrode(LinearModel):
     >>>     'e' : 0,                                # reversal potential
     >>>     'syntype' : 'ExpSyn',                   # synapse type
     >>>     'tau' : 2,                              # syn. time constant
-    >>>     'weight' : 0.01,                       # syn. weight
+    >>>     'weight' : 0.01,                        # syn. weight
     >>>     'record_current' : True                 # syn. current record
     >>> }
     >>> synapse = LFPy.Synapse(cell, **synapseParameters)
@@ -523,9 +525,9 @@ class RecExtElectrode(LinearModel):
     >>>
     >>> N = np.empty((16, 3))
     >>> for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal vec. of contacts
-    >>> electrodeParameters = {         #parameters for RecExtElectrode class
-    >>>     'sigma' : 0.3,              #Extracellular potential
-    >>>     'x' : np.zeros(16)+25,      #Coordinates of electrode contacts
+    >>> electrodeParameters = {         # parameters for RecExtElectrode class
+    >>>     'sigma' : 0.3,              # Extracellular potential
+    >>>     'x' : np.zeros(16)+25,      # Coordinates of electrode contacts
     >>>     'y' : np.zeros(16),
     >>>     'z' : np.linspace(-500,1000,16),
     >>>     'n' : 20,
@@ -550,12 +552,13 @@ class RecExtElectrode(LinearModel):
     >>>
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
-    >>>     'v_init' : -65,                          # initial voltage
+    >>>     'v_init' : -65,                         # initial voltage
     >>>     'cm' : 1.0,                             # membrane capacitance
     >>>     'Ra' : 150,                             # axial resistivity
-    >>>     'passive' : True,                        # insert passive channels
-    >>>     'passive_parameters' : {"g_pas":1./3E4, "e_pas":-65}, # passive params
-    >>>     'dt' : 2**-4,                           # simulation time res
+    >>>     'passive' : True,                       # insert passive channels
+    >>>     'passive_parameters' : {"g_pas":1./3E4,
+                                    "e_pas":-65}, # passive params
+    >>>     'dt' : 2**-4,                         # simulation time res
     >>>     'tstart' : 0.,                        # start t of simulation
     >>>     'tstop' : 50.,                        # end t of simulation
     >>> }
@@ -566,7 +569,7 @@ class RecExtElectrode(LinearModel):
     >>>     'e' : 0,                                # reversal potential
     >>>     'syntype' : 'ExpSyn',                   # synapse type
     >>>     'tau' : 2,                              # syn. time constant
-    >>>     'weight' : 0.01,                       # syn. weight
+    >>>     'weight' : 0.01,                        # syn. weight
     >>>     'record_current' : True                 # syn. current record
     >>> }
     >>> synapse = LFPy.Synapse(cell, **synapseParameters)
