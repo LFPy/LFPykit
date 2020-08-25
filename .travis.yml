@@ -24,4 +24,4 @@ install:
 script:
   - bash .travisci/test_script.sh
 after_success:
-  coveralls
+  - coveralls
