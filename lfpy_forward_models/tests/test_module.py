@@ -115,3 +115,118 @@ class TestSuite(unittest.TestCase):
         V_gt = np.array([[0., 1., -1.]])
 
         np.testing.assert_allclose(V_ex, V_gt)
+
+    def test_LineSourcePotential_00(self):
+        '''test LineSourcePotential implementation'''
+        cell = get_cell(n_seg=1)
+        cell.z = cell.z * 10
+
+        lsp = lfp.LineSourcePotential(cell=cell,
+                                      x=np.array([2.]),
+                                      y=np.array([0.]),
+                                      z=np.array([11.]),
+                                      sigma=0.3)
+        M = lsp.get_response_matrix()
+
+        imem = np.array([[0., 1., -1.]])
+
+        V_ex = M @ imem
+
+        Deltas_n = 10.
+        h_n = -11.
+        r_n = 2.
+        l_n = Deltas_n + h_n
+
+        # Use Eq. C.13 case I (h<0, l<0) from Gary Holt's 1998 thesis
+        V_gt = imem / (4 * np.pi * lsp.sigma * Deltas_n) * np.log(
+            (np.sqrt(h_n**2 + r_n**2) - h_n)
+            / (np.sqrt(l_n**2 + r_n**2) - l_n))
+
+        np.testing.assert_allclose(V_ex, V_gt)
+
+    def test_LineSourcePotential_01(self):
+        '''test LineSourcePotential implementation'''
+        cell = get_cell(n_seg=1)
+        cell.z = cell.z * 10
+
+        lsp = lfp.LineSourcePotential(cell=cell,
+                                      x=np.array([2.]),
+                                      y=np.array([0.]),
+                                      z=np.array([5.]),
+                                      sigma=0.3)
+        M = lsp.get_response_matrix()
+
+        imem = np.array([[0., 1., -1.]])
+
+        V_ex = M @ imem
+
+        Deltas_n = 10.
+        h_n = -5.
+        r_n = 2.
+        l_n = Deltas_n + h_n
+
+        # Use Eq. C.13 case II (h<0, l>0) from Gary Holt's 1998 thesis
+        V_gt = imem / (4 * np.pi * lsp.sigma * Deltas_n) * np.log(
+            (np.sqrt(h_n**2 + r_n**2) - h_n)
+            * (np.sqrt(l_n**2 + r_n**2) + l_n)
+            / r_n**2)
+
+        np.testing.assert_allclose(V_ex, V_gt)
+
+    def test_LineSourcePotential_02(self):
+        '''test LineSourcePotential implementation when assigning
+        a location inside cylindric volume'''
+        cell = get_cell(n_seg=1)
+        cell.z = cell.z * 10
+
+        lsp = lfp.LineSourcePotential(cell=cell,
+                                      x=np.array([.131441]),
+                                      y=np.array([0.]),
+                                      z=np.array([5.]),
+                                      sigma=0.3)
+        M = lsp.get_response_matrix()
+
+        imem = np.array([[0., 1., -1.]])
+
+        V_ex = M @ imem
+
+        Deltas_n = 10.
+        h_n = -5.
+        r_n = cell.d[0] / 2
+        l_n = Deltas_n + h_n
+
+        # Use Eq. C.13 case II (h<0, l>0) from Gary Holt's 1998 thesis
+        V_gt = imem / (4 * np.pi * lsp.sigma * Deltas_n) * np.log(
+            (np.sqrt(h_n**2 + r_n**2) - h_n)
+            * (np.sqrt(l_n**2 + r_n**2) + l_n)
+            / r_n**2)
+
+        np.testing.assert_allclose(V_ex, V_gt)
+
+    def test_LineSourcePotential_03(self):
+        '''test LineSourcePotential implementation'''
+        cell = get_cell(n_seg=1)
+        cell.z = cell.z * 10
+
+        lsp = lfp.LineSourcePotential(cell=cell,
+                                      x=np.array([2.]),
+                                      y=np.array([0.]),
+                                      z=np.array([-1.]),
+                                      sigma=0.3)
+        M = lsp.get_response_matrix()
+
+        imem = np.array([[0., 1., -1.]])
+
+        V_ex = M @ imem
+
+        Deltas_n = 10.
+        h_n = 1.
+        r_n = 2.
+        l_n = Deltas_n + h_n
+
+        # Use Eq. C.13 case III (h>0, l>0) from Gary Holt's 1998 thesis
+        V_gt = imem / (4 * np.pi * lsp.sigma * Deltas_n) * np.log(
+            (np.sqrt(l_n**2 + r_n**2) + l_n)
+            / (np.sqrt(h_n**2 + r_n**2) + h_n))
+
+        np.testing.assert_allclose(V_ex, V_gt)

@@ -382,6 +382,7 @@ def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
     too_close_idxs = np.where(r2 < r_limit * r_limit)[0]
     r2[too_close_idxs] = r_limit[too_close_idxs]**2
     l_ = h + deltaS
+
     hnegi = h < 0
     hposi = h >= 0
     lnegi = l_ < 0
@@ -389,7 +390,7 @@ def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
 
     mapping = np.zeros(len(cell.x[:, 0]))
 
-    # case i, h < 0, l < 0
+    # case i, h < 0, l < 0, see Eq. C.13 in Gary Holt's thesis, 1998.
     [i] = np.where(hnegi & lnegi)
     # case ii, h < 0, l >= 0
     [ii] = np.where(hnegi & lposi)
