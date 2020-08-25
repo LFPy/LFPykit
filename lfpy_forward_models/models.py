@@ -37,6 +37,7 @@ class LinearModel(object):
     cell: object
         CellGeometry or similar instance.
     '''
+
     def __init__(self, cell):
         self.cell = cell
 
@@ -98,6 +99,7 @@ class CurrentDipoleMoment(LinearModel):
            [ 0.,  0.],
            [ 2., -2.]])
     '''
+
     def __init__(self, cell):
         super().__init__(cell=cell)
 
@@ -202,14 +204,15 @@ class PointSourcePotential(LinearModel):
             Signals With LFPy 2.0. Front. Neuroinform. 12:92.
             doi: 10.3389/fninf.2018.00092
     '''
+
     def __init__(self, cell, x, y, z, sigma=0.3):
         super().__init__(cell=cell)
 
         # check input
         try:
-            assert(np.all([type(x) is np.ndarray,
-                           type(y) is np.ndarray,
-                           type(z) is np.ndarray]))
+            assert(np.all([isinstance(x, np.ndarray),
+                           isinstance(y, np.ndarray),
+                           isinstance(z, np.ndarray)]))
         except AssertionError as ae:
             raise ae('x, y and z must be of type numpy.ndarray')
         try:
@@ -221,7 +224,7 @@ class PointSourcePotential(LinearModel):
         except AssertionError as ae:
             raise ae('x, y and z must contain the same number of elements')
         try:
-            assert(type(sigma) is float and sigma > 0)
+            assert(isinstance(sigma, float) and sigma > 0)
         except AssertionError as ae:
             raise ae('sigma must be a float number greater than zero')
 
@@ -345,14 +348,15 @@ class LineSourcePotential(LinearModel):
             Signals With LFPy 2.0. Front. Neuroinform. 12:92.
             doi: 10.3389/fninf.2018.00092
     '''
+
     def __init__(self, cell, x, y, z, sigma=0.3):
         super().__init__(cell=cell)
 
         # check input
         try:
-            assert(np.all([type(x) is np.ndarray,
-                           type(y) is np.ndarray,
-                           type(z) is np.ndarray]))
+            assert(np.all([isinstance(x, np.ndarray),
+                           isinstance(y, np.ndarray),
+                           isinstance(z, np.ndarray)]))
         except AssertionError as ae:
             raise ae('x, y and z must be of type numpy.ndarray')
         try:
@@ -364,7 +368,7 @@ class LineSourcePotential(LinearModel):
         except AssertionError as ae:
             raise ae('x, y and z must contain the same number of elements')
         try:
-            assert(type(sigma) is float and sigma > 0)
+            assert(isinstance(sigma, float) and sigma > 0)
         except AssertionError as ae:
             raise ae('sigma must be a float number greater than zero')
 
@@ -426,7 +430,7 @@ class RecExtElectrode(LinearModel):
         If 'circle' r is the radius, if 'square' r is the side length
     method : str
         switch between the assumption of 'linesource', 'pointsource',
-        'soma_as_point' to represent each compartment when computing
+        'root_as_point' to represent each compartment when computing
         extracellular potentials
     verbose : bool
         Flag for verbose output, i.e., print more information
@@ -577,6 +581,7 @@ class RecExtElectrode(LinearModel):
     >>> plt.axis('tight')
     >>> plt.show()
     """
+
     def __init__(self, cell, sigma=0.3, probe=None,
                  x=None, y=None, z=None,
                  N=None, r=None, n=None, contact_shape='circle',
@@ -622,7 +627,7 @@ class RecExtElectrode(LinearModel):
                 raise ae("The number of elements in [x, y, z] must be equal")
 
             if N is not None:
-                if type(N) != np.array:
+                if not isinstance(N, np.array):
                     try:
                         N = np.array(N)
                     except TypeError as te:
@@ -685,14 +690,11 @@ class RecExtElectrode(LinearModel):
         self.circle = None
         self.offsets = None
 
-        if method == 'soma_as_point':
+        if method == 'root_as_point':
             if self.anisotropic:
-                self.lfp_method = lfpcalc.calc_lfp_soma_as_point_anisotropic
+                self.lfp_method = lfpcalc.calc_lfp_root_as_point_anisotropic
             else:
-                self.lfp_method = lfpcalc.calc_lfp_soma_as_point
-        elif method == 'som_as_point':
-            raise RuntimeError('The method "som_as_point" is deprecated.'
-                                     'Use "soma_as_point" instead')
+                self.lfp_method = lfpcalc.calc_lfp_root_as_point
         elif method == 'linesource':
             if self.anisotropic:
                 self.lfp_method = lfpcalc.calc_lfp_linesource_anisotropic
@@ -705,7 +707,7 @@ class RecExtElectrode(LinearModel):
                 self.lfp_method = lfpcalc.calc_lfp_pointsource
         else:
             raise ValueError("LFP method not recognized. "
-                             "Should be 'soma_as_point', 'linesource' "
+                             "Should be 'root_as_point', 'linesource' "
                              "or 'pointsource'")
 
     def get_response_matrix(self):
@@ -735,7 +737,6 @@ class RecExtElectrode(LinearModel):
                                                          str(self.cell)))
         # return mapping
         return M
-
 
     def _loop_over_contacts(self, **kwargs):
         """Loop over electrode contacts, and return LFPs across channels"""
