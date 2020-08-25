@@ -439,12 +439,54 @@ class RecExtElectrode(LinearModel):
 
     Examples
     --------
+
+    Mock cell geometry and transmembrane currents:
+
+    >>> import numpy as np
+    >>> from lfpy_forward_models import CellGeometry, RecExtElectrode
+    >>> # cell geometry with three segments [um]
+    >>> cell = CellGeometry(x=np.array([[0, 0], [0, 0], [0, 0]]),
+    >>>                     y=np.array([[0, 0], [0, 0], [0, 0]]),
+    >>>                     z=np.array([[0, 10], [10, 20], [20, 30]]),
+    >>>                     d=np.array([1, 1, 1]))
+    >>> # transmembrane currents, three time steps [nA]
+    >>> I_m = np.array([[0., -1., 1.], [-1., 1., 0.], [1., 0., -1.]])
+    >>> # electrode locations [um]
+    >>> r = np.array([[28.24653166, 8.97563241, 18.9492774, 3.47296614,
+    >>>                1.20517729, 9.59849603, 21.91956616, 29.84686727,
+    >>>                4.41045505, 3.61146625],
+    >>>               [24.4954352, 24.04977922, 22.41262238, 10.09702942,
+    >>>                3.28610789, 23.50277637, 8.14044367, 4.46909208,
+    >>>                10.93270117, 24.94698813],
+    >>>               [19.16644585, 15.20196335, 18.08924828, 24.22864702,
+    >>>                5.85216751, 14.8231048, 24.72666694, 17.77573431,
+    >>>                29.34508292, 9.28381892]])
+    >>> # instantiate electrode, get linear response matrix
+    >>> el = RecExtElectrode(cell=cell, x=r[0, ], y=r[1, ], z=r[2, ],
+    >>>                      sigma=0.3,
+    >>>                      method='pointsource')
+    >>> M = el.get_response_matrix()
+    >>> # compute extracellular potential
+    >>> M @ I_m
+    array([[-4.11657148e-05,  4.16621950e-04, -3.75456235e-04],
+           [-6.79014892e-04,  7.30256301e-04, -5.12414088e-05],
+           [-1.90930536e-04,  7.34007655e-04, -5.43077119e-04],
+           [ 5.98270144e-03,  6.73490846e-03, -1.27176099e-02],
+           [-1.34547752e-02, -4.65520036e-02,  6.00067788e-02],
+           [-7.49957880e-04,  7.03763787e-04,  4.61940938e-05],
+           [ 8.69330232e-04,  1.80346156e-03, -2.67279180e-03],
+           [-2.04546513e-04,  6.58419628e-04, -4.53873115e-04],
+           [ 6.82640209e-03,  4.47953560e-03, -1.13059377e-02],
+           [-1.33289553e-03, -1.11818140e-04,  1.44471367e-03]])
+
+
     Compute extracellular potentials after simulating and storage of
     transmembrane currents with the LFPy.Cell class:
 
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> import LFPy
+    >>> from lfpy_forward_models import RecExtElectrode
     >>>
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
@@ -453,7 +495,7 @@ class RecExtElectrode(LinearModel):
     >>>     'Ra' : 150,                             # axial resistivity
     >>>     'passive' : True,                       # insert passive channels
     >>>     'passive_parameters' : {"g_pas":1./3E4,
-                                    "e_pas":-65}, # passive params
+    >>>                             "e_pas":-65}, # passive params
     >>>     'dt' : 2**-4,                         # simulation time res
     >>>     'tstart' : 0.,                        # start t of simulation
     >>>     'tstop' : 50.,                        # end t of simulation
@@ -484,19 +526,20 @@ class RecExtElectrode(LinearModel):
     >>>     'r' : 10,
     >>>     'N' : N,
     >>> }
-    >>> electrode = LFPy.RecExtElectrode(cell, **electrodeParameters)
-    >>> electrode.calc_lfp()
-    >>> plt.matshow(electrode.LFP)
+    >>> electrode = RecExtElectrode(cell, **electrodeParameters)
+    >>> M = electrode.get_response_matrix()
+    >>> V_ex = M @ cell.imem
+    >>> plt.matshow(V_ex)
     >>> plt.colorbar()
     >>> plt.axis('tight')
     >>> plt.show()
-
 
     Compute extracellular potentials during simulation (recommended):
 
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> import LFPy
+    >>> from lfpy_forward_models import RecExtElectrode
     >>>
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
@@ -505,7 +548,7 @@ class RecExtElectrode(LinearModel):
     >>>     'Ra' : 150,                             # axial resistivity
     >>>     'passive' : True,                       # insert passive channels
     >>>     'passive_parameters' : {"g_pas":1./3E4,
-                                    "e_pas":-65}, # passive params
+    >>>                             "e_pas":-65}, # passive params
     >>>     'dt' : 2**-4,                         # simulation time res
     >>>     'tstart' : 0.,                        # start t of simulation
     >>>     'tstop' : 50.,                        # end t of simulation
@@ -534,11 +577,10 @@ class RecExtElectrode(LinearModel):
     >>>     'r' : 10,
     >>>     'N' : N,
     >>> }
-    >>> electrode = LFPy.RecExtElectrode(**electrodeParameters)
-    >>>
-    >>> cell.simulate(electrode=electrode)
-    >>>
-    >>> plt.matshow(electrode.LFP)
+    >>> electrode = LFPy.RecExtElectrode(cell, **electrodeParameters)
+    >>> cell.simulate(dotprodcoeffs=[electrode.get_response_matrix()])
+    >>> V_ex = cell.dotprodresults[0]
+    >>> plt.matshow(V_ex)
     >>> plt.colorbar()
     >>> plt.axis('tight')
     >>> plt.show()
@@ -549,6 +591,7 @@ class RecExtElectrode(LinearModel):
     >>> import matplotlib.pyplot as plt
     >>> import MEAutility as mu
     >>> import LFPy
+    >>> from lfpy_forward_models import RecExtElectrode
     >>>
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
@@ -557,7 +600,7 @@ class RecExtElectrode(LinearModel):
     >>>     'Ra' : 150,                             # axial resistivity
     >>>     'passive' : True,                       # insert passive channels
     >>>     'passive_parameters' : {"g_pas":1./3E4,
-                                    "e_pas":-65}, # passive params
+    >>>                             "e_pas":-65}, # passive params
     >>>     'dt' : 2**-4,                         # simulation time res
     >>>     'tstart' : 0.,                        # start t of simulation
     >>>     'tstop' : 50.,                        # end t of simulation
@@ -578,9 +621,9 @@ class RecExtElectrode(LinearModel):
     >>> cell.simulate(rec_imem=True)
     >>>
     >>> probe = mu.return_mea('Neuropixels-128')
-    >>> electrode = LFPy.RecExtElectrode(cell, probe=probe)
-    >>> electrode.calc_lfp()
-    >>> mu.plot_mea_recording(electrode.LFP, probe)
+    >>> electrode = RecExtElectrode(cell, probe=probe)
+    >>> V_ex = electrode.get_response_matrix() @ cell.imem
+    >>> mu.plot_mea_recording(V_ex, probe)
     >>> plt.axis('tight')
     >>> plt.show()
     """
