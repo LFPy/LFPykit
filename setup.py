@@ -4,8 +4,8 @@
 
 '''
 
-import setuptools
 import os
+import setuptools
 
 d = {}
 exec(open(os.path.join('lfpy_forward_models', 'version.py')).read(), None, d)

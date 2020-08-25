@@ -46,6 +46,20 @@ class :class:`CurrentDipoleMoment`
     :undoc-members:
 
 
+class :class:`PointSourcePotential`
+===================================
+.. autoclass:: lfpy_forward_models.PointSourcePotential
+    :members:
+    :show-inheritance:
+    :undoc-members:
+
+class :class:`LineSourcePotential`
+===================================
+.. autoclass:: lfpy_forward_models.LineSourcePotential
+    :members:
+    :show-inheritance:
+    :undoc-members:
+
 Indices and tables
 ==================
 

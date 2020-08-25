@@ -13,15 +13,16 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('.'))
-#sys.path.insert(0, os.path.abspath('./stubs'))
+# sys.path.insert(0, os.path.abspath('./stubs'))
 
 
-#source_suffix = ['.rst', '.md']
+# source_suffix = ['.rst', '.md']
 
 
 # -- Release information
 _d = {}
-exec(open(os.path.join('..', '..', 'lfpy_forward_models', 'version.py')).read(), None, _d)
+exec(open(os.path.join('..', '..', 'lfpy_forward_models', 'version.py')
+          ).read(), None, _d)
 _release = _d['version']
 
 
