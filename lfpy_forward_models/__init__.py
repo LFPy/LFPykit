@@ -26,10 +26,10 @@ GNU General Public License for more details.
   * LineSourcePotential:
         Class for predicting extracellular potentials assuming
         line sourcers and point contacts
-
-:LFPy classes to be implemented:
   * RecExtElectrode:
         Class for simulations of extracellular potentials
+
+:LFPy classes to be implemented:
   * RecMEAElectrode:
         Class for simulations of in vitro (slice) extracellular
         potentials
@@ -55,4 +55,4 @@ from .version import version as __version__
 
 from .cell import CellGeometry
 from .models import LinearModel, CurrentDipoleMoment, PointSourcePotential, \
-    LineSourcePotential
+    LineSourcePotential, RecExtElectrode

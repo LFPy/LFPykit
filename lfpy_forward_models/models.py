@@ -405,19 +405,19 @@ class RecExtElectrode(LinearModel):
     cell : object
         CellGeometry or similar instance.
     sigma : float or list/ndarray of floats
-        extracellular conductivity in units of (S/m). A scalar value implies an
+        extracellular conductivity in units of [S/m]. A scalar value implies an
         isotropic extracellular conductivity. If a length 3 list or array of
         floats is provided, these values corresponds to an anisotropic
         conductor with conductivities [sigma_x, sigma_y, sigma_z] accordingly.
     probe : MEAutility MEA object or None
         MEAutility probe object
-    x, y, z : np.ndarray
-        coordinates or arrays of coordinates in units of (um). Must be same length
+    x, y, z : ndarray
+        coordinates or same length arrays of coordinates in units of [um].
     N : None or list of lists
         Normal vectors [x, y, z] of each circular electrode contact surface,
         default None
     r : float
-        radius of each contact surface, default None
+        radius of each contact surface, default None [um]
     n : int
         if N is not None and r > 0, the number of discrete points used to
         compute the n-point average potential on each circular contact point.
@@ -428,10 +428,6 @@ class RecExtElectrode(LinearModel):
         switch between the assumption of 'linesource', 'pointsource',
         'soma_as_point' to represent each compartment when computing
         extracellular potentials
-    # from_file : bool
-    #    if True, load cell object from file
-    # cellfile : str
-    #    path to cell pickle
     verbose : bool
         Flag for verbose output, i.e., print more information
     seedvalue : int
@@ -447,7 +443,7 @@ class RecExtElectrode(LinearModel):
     >>> import LFPy
     >>>
     >>> cellParameters = {
-    >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',  # morphology file
+    >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
     >>>     'v_init' : -65,                          # initial voltage
     >>>     'cm' : 1.0,                             # membrane capacitance
     >>>     'Ra' : 150,                             # axial resistivity
@@ -498,7 +494,7 @@ class RecExtElectrode(LinearModel):
     >>> import LFPy
     >>>
     >>> cellParameters = {
-    >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',  # morphology file
+    >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
     >>>     'v_init' : -65,                          # initial voltage
     >>>     'cm' : 1.0,                             # membrane capacitance
     >>>     'Ra' : 150,                             # axial resistivity
@@ -549,7 +545,7 @@ class RecExtElectrode(LinearModel):
     >>> import LFPy
     >>>
     >>> cellParameters = {
-    >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',  # morphology file
+    >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
     >>>     'v_init' : -65,                          # initial voltage
     >>>     'cm' : 1.0,                             # membrane capacitance
     >>>     'Ra' : 150,                             # axial resistivity
@@ -580,15 +576,11 @@ class RecExtElectrode(LinearModel):
     >>> mu.plot_mea_recording(electrode.LFP, probe)
     >>> plt.axis('tight')
     >>> plt.show()
-
     """
-
     def __init__(self, cell, sigma=0.3, probe=None,
                  x=None, y=None, z=None,
                  N=None, r=None, n=None, contact_shape='circle',
-                 # perCellLFP=False,
                  method='linesource',
-                 # from_file=False, cellfile=None,
                  verbose=False,
                  seedvalue=None, **kwargs):
         """Initialize RecExtElectrode class"""
@@ -599,7 +591,7 @@ class RecExtElectrode(LinearModel):
             self.sigma = np.array(sigma)
             if not self.sigma.shape == (3,):
                 raise ValueError("Conductivity, sigma, should be float "
-                                 "or array of length 3: "
+                                 "or ndarray of length 3: "
                                  "[sigma_x, sigma_y, sigma_z]")
             self.anisotropic = True
         else:
@@ -682,8 +674,6 @@ class RecExtElectrode(LinearModel):
             self.contact_shape = self.probe.shape
             self.n = n
 
-        # self.perCellLFP = perCellLFP
-
         self.method = method
         self.verbose = verbose
         self.seedvalue = seedvalue
@@ -694,19 +684,6 @@ class RecExtElectrode(LinearModel):
         self.electrodecoeff = None
         self.circle = None
         self.offsets = None
-
-        # if from_file:
-        #     if type(cellfile) == type(str()):
-        #        cell = tools.load(cellfile)
-        #    elif type(cellfile) == type([]):
-        #        cell = []
-        #        for fil in cellfile:
-        #            cell.append(tools.load(fil))
-        #    else:
-        #        raise ValueError('cell either string or list of strings')
-
-        # if cell is not None:
-        #     self.set_cell(cell)
 
         if method == 'soma_as_point':
             if self.anisotropic:
@@ -731,49 +708,6 @@ class RecExtElectrode(LinearModel):
                              "Should be 'soma_as_point', 'linesource' "
                              "or 'pointsource'")
 
-    '''
-    def set_cell(self, cell):
-        """Set the supplied cell object as attribute "cell" of the
-        RecExtElectrode object
-
-        Parameters
-        ----------
-        cell : obj
-            `LFPy.Cell` or `LFPy.TemplateCell` instance.
-
-        Returns
-        -------
-        None
-        """
-        self.cell = cell
-        if self.cell is not None:
-            self.r_limit = self.cell.diam/2
-            self.mapping = np.zeros((self.x.size, len(cell.xmid)))
-        '''
-
-    '''
-    def _test_imem_sum(self, tolerance=1E-8):
-        """Test that the membrane currents sum to zero"""
-        if type(self.cell) == dict or type(self.cell) == list:
-            raise DeprecationWarning('no support for more than one cell-object')
-
-        sum_imem = self.cell.imem.sum(axis=0)
-        #check if eye matrix is supplied:
-        if ((self.cell.imem.shape == (self.cell.totnsegs, self.cell.totnsegs))
-            and (np.all(self.cell.imem == np.eye(self.cell.totnsegs)))):
-            pass
-        else:
-            if abs(sum_imem).max() >= tolerance:
-                warnings.warn('Membrane currents do not sum to zero')
-                [inds] = np.where((abs(sum_imem) >= tolerance))
-                if self.cell.verbose:
-                    for i in inds:
-                        print('membrane current sum of celltimestep %i: %.3e'
-                            % (i, sum_imem[i]))
-            else:
-                pass
-     '''
-
     def get_response_matrix(self):
         '''
         Get linear response matrix
@@ -783,9 +717,6 @@ class RecExtElectrode(LinearModel):
         response_matrix: ndarray
             shape (n_coords, n_seg) ndarray
         '''
-        # if cell is not None:
-        #    self.set_cell(cell)
-
         if self.n is not None and self.N is not None and self.r is not None:
             if self.n <= 1:
                 raise ValueError("n = %i must be larger that 1" % self.n)
@@ -805,33 +736,6 @@ class RecExtElectrode(LinearModel):
         # return mapping
         return M
 
-    '''
-    def calc_lfp(self, t_indices=None, cell=None):
-        """Calculate LFP on electrode geometry from all cell instances.
-        Will chose distributed calculated if electrode contain 'n', 'N', and 'r'
-
-        Parameters
-        ----------
-        cell : obj, optional
-            `LFPy.Cell` or `LFPy.TemplateCell` instance. Must be specified here
-            if it was not specified at the initiation of the `RecExtElectrode`
-            class
-        t_indices : np.ndarray
-            Array of timestep indexes where extracellular potential should
-            be calculated.
-        """
-
-        self.calc_mapping(cell)
-
-        if t_indices is not None:
-            currmem = self.cell.imem[:, t_indices]
-        else:
-            currmem = self.cell.imem
-
-        self._test_imem_sum()
-        self.LFP = np.dot(self.mapping, currmem)
-        # del self.mapping
-    '''
 
     def _loop_over_contacts(self, **kwargs):
         """Loop over electrode contacts, and return LFPs across channels"""
@@ -847,7 +751,6 @@ class RecExtElectrode(LinearModel):
         return M
 
     def _lfp_el_pos_calc_dist(self, **kwargs):
-
         """
         Calc. of LFP over an n-point integral approximation over flat
         electrode surface: circle of radius r or square of side r. The
@@ -867,10 +770,7 @@ class RecExtElectrode(LinearModel):
                                       sigma=self.sigma,
                                       **kwargs
                                       )
-
                 lfp_e += tmp
-                # no longer needed
-                del tmp
 
             return lfp_e / self.n
 
