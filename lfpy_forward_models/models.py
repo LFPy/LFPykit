@@ -20,8 +20,8 @@ from . import lfpcalc
 class LinearModel(object):
     '''
     Base LinearModel class skeleton that defines a 2D linear response
-    matrix `M` between transmembrane currents `I` [nA] of a multicompartment
-    neuron model and some measurement `Y` as
+    matrix :math:`M` between transmembrane currents :math:`I` [nA] of a
+    multicompartment neuron model and some measurement :math:`Y` as
 
     .. math:: Y = MI
 
@@ -51,16 +51,17 @@ class LinearModel(object):
 
 class CurrentDipoleMoment(LinearModel):
     '''
-    LinearModel subclass that defines a 2D linear response matrix `M` between
-    transmembrane current array `I` [nA] of a multicompartment neuron model
-    and the corresponding current dipole moment `P` [nA um] as
+    LinearModel subclass that defines a 2D linear response matrix :math:`M`
+    between transmembrane current array :math:`I` [nA] of a multicompartment
+    neuron model and the corresponding current dipole moment :math:`P` [nA um]
+    as
 
     .. math:: P = MI
 
 
-    The current `I` is an ndarray of shape (n_seg, n_tsteps) with unit [nA],
-    and the rows of `P` represent the x-, y- and z-components of the current
-    diple moment for every time step.
+    The current :math:`I` is an ndarray of shape (n_seg, n_tsteps) with
+    unit [nA], and the rows of :math:`P` represent the x-, y- and z-components
+    of the current diple moment for every time step.
 
     The current dipole moment can be used to compute distal measures of
     neural activity such as the EEG and MEG using
@@ -113,22 +114,23 @@ class CurrentDipoleMoment(LinearModel):
 
 class PointSourcePotential(LinearModel):
     '''
-    LinearModel subclass that defines a 2D linear response matrix `M` between
-    transmembrane current array `I` [nA] of a multicompartment neuron model
-    and the corresponding extracellular electric potential `V_ex` [mV] as
+    LinearModel subclass that defines a 2D linear response matrix :math:`M`
+    between transmembrane current array :math:`I` [nA] of a multicompartment
+    neuron model and the corresponding extracellular electric potential
+    :math:`V_{ex}` [mV] as
 
     .. math:: V_{ex} = MI
 
-    The current `I` is an ndarray of shape (n_seg, n_tsteps) with unit [nA],
-    and each row indexed by `j` of :math:`V_{ex}` represents the electric
-    potential at each measurement site for every time step.
-    The elements of `M` are computed as
+    The current :math:`I` is an ndarray of shape (n_seg, n_tsteps) with
+    unit [nA], and each row indexed by :math:`j` of :math:`V_{ex}` represents
+    the electric potential at each measurement site for every time step.
+    The elements of :math:`M` are computed as
 
     .. math:: M_{ji} = 1 / (4 \\pi \\sigma |r_i - r_j|)
 
     where :math:`\\sigma` is the electric conductivity of the extracellular
-    medium, :math:`r_i` the midpoint coordinate of segment `i` and :math:`r_j`
-    the coordinate of measurement site `j` [1, 2].
+    medium, :math:`r_i` the midpoint coordinate of segment :math:`i`
+    and :math:`r_j` the coordinate of measurement site :math:`j` [1, 2].
 
     Assumptions:
         - the extracellular conductivity :math:`\\sigma` is infinite,
@@ -248,28 +250,31 @@ class PointSourcePotential(LinearModel):
 
 class LineSourcePotential(LinearModel):
     '''
-    LinearModel subclass that defines a 2D linear response matrix `M` between
-    transmembrane current array `I` [nA] of a multicompartment neuron model
-    and the corresponding extracellular electric potential :math:`V_ex` [mV] as
+    LinearModel subclass that defines a 2D linear response matrix :math:`M`
+    between transmembrane current array :math:`I` [nA] of a multicompartment
+    neuron model and the corresponding extracellular electric potential
+    :math:`V_ex` [mV] as
 
     .. math:: V_{ex} = MI
 
-    The current `I` is an ndarray of shape (n_seg, n_tsteps) with unit [nA],
-    and each row indexed by `j` of :math:`V_{ex}` represents the electric
-    potential at each measurement site for every time step.
-    The elements of `M` are computed as
+    The current :math:`I` is an ndarray of shape (n_seg, n_tsteps) with
+    unit [nA], and each row indexed by :math:`j` of :math:`V_{ex}` represents
+    the electric potential at each measurement site for every time step.
+    The elements of :math:`M` are computed as
 
     .. math:: M_{ji} = \\frac{1}{ 4 \\pi \\sigma L_i } \\log
         \\left|
-            \\frac{\\sqrt{h_i^2+r_{pi}^2} - h_i}{\\sqrt{l_i^2+r_{pi}^2}-l_i}
+        \\frac{\\sqrt{h_{ji}^2+r_{ji}^2}-h_{ji}
+               }{
+               \\sqrt{l_{ji}^2+r_{ji}^2}-l_{ji}}
         \\right|
 
 
     Segment length is denoted :math:`L_i`, perpendicular distance from the
     electrode point contact to the axis of the line segment is denoted
-    :math:`r_{pi}`, longitudinal distance measured from the start of the
-    segment is denoted :math:`h_i`, and longitudinal distance from the other
-    end of the segment is denoted :math:`l_i = L_i + h_i` [1, 2].
+    :math:`r_{ji}`, longitudinal distance measured from the start of the
+    segment is denoted :math:`h_{ji}`, and longitudinal distance from the other
+    end of the segment is denoted :math:`l_{ji}= L_i + h_{ji}` [1, 2].
 
     Assumptions:
         - the extracellular conductivity :math:`\\sigma` is infinite,
