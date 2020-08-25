@@ -326,3 +326,30 @@ class TestSuite(unittest.TestCase):
         V_gt = np.array([[0., 1., -1.]])
 
         np.testing.assert_allclose(V_ex, V_gt)
+
+    def test_RecExtElectrode_03(self):
+        """test RecExcElectrode implementation,
+        method='pointsource' with anisotropy"""
+        cell = get_cell(n_seg=1)
+        cell.x = np.array([[0., 2.4]])
+        cell.y = np.array([[0., 2.4]])
+        cell.z = np.array([[0., 2.4]])
+
+        sigma = [0.6, 0.3, 0.45]
+        r = np.array([[0.], [0.], [0.]])
+        el = lfp.RecExtElectrode(cell=cell,
+                                 x=r[0], y=r[1], z=r[2],
+                                 sigma=sigma,
+                                 method='pointsource')
+        M = el.get_response_matrix()
+
+        imem = np.array([[0., 1., -1.]])
+
+        V_ex = M @ imem
+
+        sigma_r = np.sqrt(sigma[1] * sigma[2] * 1.2**2
+                          + sigma[0] * sigma[2] * 1.2**2
+                          + sigma[0] * sigma[1] * 1.2**2)
+        V_gt = np.array([[0., 1., -1.]]) / (4 * np.pi * sigma_r)
+
+        np.testing.assert_allclose(V_ex, V_gt)

@@ -593,10 +593,10 @@ class DummyCell(CellGeometry):
     """CellGeometry like object with attributes for predicting extracellular
     potentials, but with:
         - 1 compartment
-        - position in (0.5,0,0)
-        - length 1
-        - diam 1
-        - current amplitude 1
+        - position in (0.5,0,0) [um]
+        - length 1 [um]
+        - diam 1 [um]
+        - current amplitude 1 [nA]
         - 1 timestep
     """
 
@@ -609,9 +609,3 @@ class DummyCell(CellGeometry):
 
         # set Attributes
         self.imem = np.array([[1.]])
-
-    def get_idx(self, section="soma"):
-        if section == "soma":
-            return np.array([0])
-        else:
-            return np.array([])
