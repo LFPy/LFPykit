@@ -3,15 +3,14 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to LFPy forward models's documentation!
+Welcome to LFPy forward models' documentation!
 ===============================================
 
+.. include:: readme.md
+
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-
-.. include:: ../../README.md
+    :maxdepth: 20
+    :caption: Contents:
 
 
 Module :mod:`lfpy_forward_models`
@@ -21,14 +20,12 @@ Module :mod:`lfpy_forward_models`
     :show-inheritance:
     :undoc-members:
 
-
 class :class:`CellGeometry`
 ===========================
 .. autoclass:: lfpy_forward_models.CellGeometry
     :members:
     :show-inheritance:
     :undoc-members:
-
 
 class :class:`LinearModel`
 ===========================
@@ -37,14 +34,12 @@ class :class:`LinearModel`
     :show-inheritance:
     :undoc-members:
 
-
 class :class:`CurrentDipoleMoment`
 ==================================
 .. autoclass:: lfpy_forward_models.CurrentDipoleMoment
     :members:
     :show-inheritance:
     :undoc-members:
-
 
 class :class:`PointSourcePotential`
 ===================================
