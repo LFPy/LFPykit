@@ -213,20 +213,20 @@ class PointSourcePotential(LinearModel):
             assert(np.all([isinstance(x, np.ndarray),
                            isinstance(y, np.ndarray),
                            isinstance(z, np.ndarray)]))
-        except AssertionError as ae:
-            raise ae('x, y and z must be of type numpy.ndarray')
+        except AssertionError:
+            raise AssertionError('x, y and z must be of type numpy.ndarray')
         try:
             assert(x.ndim == y.ndim == z.ndim == 1)
-        except AssertionError as ae:
-            raise ae('x, y and z must be of shape (n_coords, )')
+        except AssertionError:
+            raise AssertionError('x, y and z must be of shape (n_coords, )')
         try:
             assert(x.shape == y.shape == z.shape)
-        except AssertionError as ae:
-            raise ae('x, y and z must contain the same number of elements')
+        except AssertionError:
+            raise AssertionError('x, y and z must contain the same number of elements')
         try:
             assert(isinstance(sigma, float) and sigma > 0)
-        except AssertionError as ae:
-            raise ae('sigma must be a float number greater than zero')
+        except AssertionError:
+            raise AssertionError('sigma must be a float number greater than zero')
 
         # set attributes
         self.x = x
@@ -357,20 +357,20 @@ class LineSourcePotential(LinearModel):
             assert(np.all([isinstance(x, np.ndarray),
                            isinstance(y, np.ndarray),
                            isinstance(z, np.ndarray)]))
-        except AssertionError as ae:
-            raise ae('x, y and z must be of type numpy.ndarray')
+        except AssertionError:
+            raise AssertionError('x, y and z must be of type numpy.ndarray')
         try:
             assert(x.ndim == y.ndim == z.ndim == 1)
-        except AssertionError as ae:
-            raise ae('x, y and z must be of shape (n_coords, )')
+        except AssertionError:
+            raise AssertionError('x, y and z must be of shape (n_coords, )')
         try:
             assert(x.shape == y.shape == z.shape)
-        except AssertionError as ae:
-            raise ae('x, y and z must contain the same number of elements')
+        except AssertionError:
+            raise AssertionError('x, y and z must contain the same number of elements')
         try:
             assert(isinstance(sigma, float) and sigma > 0)
-        except AssertionError as ae:
-            raise ae('sigma must be a float number greater than zero')
+        except AssertionError:
+            raise AssertionError('sigma must be a float number greater than zero')
 
         # set attributes
         self.x = x
@@ -668,8 +668,8 @@ class RecExtElectrode(LinearModel):
             try:
                 assert ((self.x.size == self.y.size) and
                         (self.x.size == self.z.size))
-            except AssertionError as ae:
-                raise ae("The number of elements in [x, y, z] must be equal")
+            except AssertionError:
+                raise AssertionError("The number of elements in [x, y, z] must be equal")
 
             if N is not None:
                 if not isinstance(N, np.array):
@@ -841,6 +841,7 @@ class RecExtElectrode(LinearModel):
                                          **kwargs)
             self.recorded_points = np.array([self.x, self.y, self.z]).T
 
+        return M
 
 class RecMEAElectrode(RecExtElectrode):
     r"""class RecMEAElectrode
@@ -1042,7 +1043,7 @@ class RecMEAElectrode(RecExtElectrode):
             bad_comps, reason = self._return_comp_outside_slice()
             msg = ("Compartments {} of cell ({}) has cell.{} slice. "
                    "Increase squeeze_cell_factor, move or rotate cell."
-                   ).format(bad_comps, self.cell.morphology, reason)
+                   ).format(bad_comps, self.cell, reason)
 
             raise RuntimeError(msg)
 
@@ -1050,7 +1051,7 @@ class RecMEAElectrode(RecExtElectrode):
         """
         Assuming part of the cell is outside the valid region,
         i.e, not in the slice (self.z_shift < z < self.z_shift + self.h)
-        this function check what array (cell.z[:, 0] or cell.zend) that is
+        this function check what array (cell.z[:, 0] or cell.z[:, -1]) that is
         outside, and if it is above or below the valid region.
 
         Raises: RuntimeError
@@ -1061,8 +1062,8 @@ class RecMEAElectrode(RecExtElectrode):
             and a string with additional information on the problem.
         """
         zstart_above = np.where(self.cell.z[:, 0] > self.z_shift + self.h)[0]
-        zend_above = np.where(self.cell.zend > self.z_shift + self.h)[0]
-        zend_below = np.where(self.cell.zend < self.z_shift)[0]
+        zend_above = np.where(self.cell.z[:, -1] > self.z_shift + self.h)[0]
+        zend_below = np.where(self.cell.z[:, -1] < self.z_shift)[0]
         zstart_below = np.where(self.cell.z[:, 0] < self.z_shift)[0]
 
         if len(zstart_above) > 0:
@@ -1085,14 +1086,14 @@ class RecMEAElectrode(RecExtElectrode):
         if self.cell is None:
             raise RuntimeError("Does not have cell instance.")
 
-        if (self.z.max() > self.z_shift + self.h or
-                self.z.min() < self.z_shift):
+        if (self.cell.z.max() > self.z_shift + self.h or
+                self.cell.z.min() < self.z_shift):
 
             if self.verbose:
                 print("Cell extends outside slice.")
 
             if self.squeeze_cell_factor is not None:
-                if not self.z_shift < self.cell.zmid[0] < \
+                if not self.z_shift < self.cell.z[0, ].mean() < \
                         (self.z_shift + self.h):
                     raise RuntimeError("Soma position is not in slice.")
                 self._squeeze_cell_in_depth_direction()
@@ -1100,7 +1101,7 @@ class RecMEAElectrode(RecExtElectrode):
                 bad_comps, reason = self._return_comp_outside_slice()
                 msg = ("Compartments {} of cell ({}) has cell.{} slice "
                        "and argument squeeze_cell_factor is None."
-                       ).format(bad_comps, self.cell.morphology, reason)
+                       ).format(bad_comps, self.cell, reason)
                 raise RuntimeError(msg)
         else:
             if self.verbose:
@@ -1184,13 +1185,13 @@ class RecMEAElectrode(RecExtElectrode):
             else:
                 pass
 
-            self._lfp_el_pos_calc_dist(**self.moi_param_kwargs)
+            M = self._lfp_el_pos_calc_dist(**self.moi_param_kwargs)
 
             if self.verbose:
                 print('calculations finished, %s, %s' % (str(self),
                                                          str(self.cell)))
         else:
-            self._loop_over_contacts(**self.moi_param_kwargs)
+            M = self._loop_over_contacts(**self.moi_param_kwargs)
             if self.verbose:
                 print('calculations finished, %s, %s' % (str(self),
                                                          str(self.cell)))
@@ -1199,3 +1200,5 @@ class RecMEAElectrode(RecExtElectrode):
         # from z=z_shift to z=z_shift + h
         self.z = self.z + self.z_shift
         self.cell.z = self.cell.z + self.z_shift
+
+        return M
