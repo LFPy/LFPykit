@@ -69,6 +69,7 @@ class :class:`RecMEAElectrode`
     :show-inheritance:
     :undoc-members:
 
+
 Indices and tables
 ==================
 
