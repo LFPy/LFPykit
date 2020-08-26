@@ -923,11 +923,48 @@ class RecMEAElectrode(RecExtElectrode):
 
     Examples
     --------
+    Mock cell geometry and transmembrane currents:
+
+    >>> import numpy as np
+    >>> from lfpy_forward_models import CellGeometry, RecMEAElectrode
+    >>> # cell geometry with four segments [um]
+    >>> cell = CellGeometry(
+    >>>     x=np.array([[0, 10], [10, 20], [20, 30], [30, 40]]),
+    >>>     y=np.array([[0, 0], [0, 0], [0, 0], [0, 0]]),
+    >>>     z=np.array([[0, 0], [0, 0], [0, 0], [0, 0]]) * 10,
+    >>>     d=np.array([1, 1, 1, 1]))
+    >>> # transmembrane currents, three time steps [nA]
+    >>> I_m = np.array([[0.25, -1., 1.],
+    >>>                 [-1., 1., -0.25],
+    >>>                 [1., -0.25, -1.],
+    >>>                 [-0.25, 0.25, 0.25]])
+    >>> # electrode locations [um]
+    >>> r = np.stack([np.arange(10)*4 + 2, np.zeros(10), np.zeros(10)])
+    >>> # instantiate electrode, get linear response matrix
+    >>> el = RecMEAElectrode(cell=cell,
+    >>>                      sigma_T=0.3, sigma_S=1.5, sigma_G=0.0,
+    >>>                      x=r[0, ], y=r[1, ], z=r[2, ],
+    >>>                      method='pointsource')
+    >>> M = el.get_response_matrix()
+    >>> # compute extracellular potential
+    >>> M @ I_m
+    array([[ 0.02244775, -0.13777683,  0.14758927],
+           [ 0.09703145, -0.47397696,  0.49243115],
+           [-0.04951479, -0.00353662,  0.04951479],
+           [-0.47386676,  0.46582868, -0.11559584],
+           [-0.09865022,  0.12488441, -0.07138681],
+           [ 0.09865022,  0.01057345, -0.15437628],
+           [ 0.47386676, -0.09492693, -0.50257376],
+           [ 0.04951479,  0.0141465 , -0.06719792],
+           [-0.09703145,  0.12752004,  0.08499705],
+           [-0.02244775,  0.04099623,  0.01371172]])
+
     See also <LFPy>/examples/example_MEA.py
 
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> import LFPy
+    >>> from lfpy_forward_models import CellGeometry, RecMEAElectrode
     >>>
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
@@ -941,18 +978,18 @@ class RecMEAElectrode(RecExtElectrode):
     >>>     'tstart' : 0.,                        # start t of simulation
     >>>     'tstop' : 50.,                        # end t of simulation
     >>> }
-    >>> cell = LFPy.Cell(**cellParameters)
-    >>> cell.set_rotation(x=np.pi/2, z=np.pi/2)
-    >>> cell.set_pos(z=100)
+    >>> lfpy_cell = LFPy.Cell(**cellParameters)
+    >>> lfpy_cell.set_rotation(x=np.pi/2, z=np.pi/2)
+    >>> lfpy_cell.set_pos(z=100)
     >>> synapseParameters = {
-    >>>     'idx' : cell.get_closest_idx(x=800, y=0, z=100), # compartment
+    >>>     'idx' : lfpy_cell.get_closest_idx(x=800, y=0, z=100), # segment
     >>>     'e' : 0,                                # reversal potential
     >>>     'syntype' : 'ExpSyn',                   # synapse type
     >>>     'tau' : 2,                              # syn. time constant
     >>>     'weight' : 0.01,                       # syn. weight
     >>>     'record_current' : True                 # syn. current record
     >>> }
-    >>> synapse = LFPy.Synapse(cell, **synapseParameters)
+    >>> synapse = LFPy.Synapse(lfpy_cell, **synapseParameters)
     >>> synapse.set_spike_times(np.array([10., 15., 20., 25.]))
     >>>
     >>> MEA_electrode_parameters = {
@@ -966,11 +1003,17 @@ class RecMEAElectrode(RecExtElectrode):
     >>>     "h": 300,
     >>>     "squeeze_cell_factor": 0.3,
     >>> }
-    >>> MEA = LFPy.RecMEAElectrode(cell, **MEA_electrode_parameters)
+    >>> lfpy_cell.simulate(rec_imem=True)
     >>>
-    >>> cell.simulate(electrode=MEA)
+    >>> cell = CellGeometry(
+    >>>     x=np.c_[lfpy_cell.xstart, lfpy_cell.xend],
+    >>>     y=np.c_[lfpy_cell.ystart, lfpy_cell.yend],
+    >>>     z=np.c_[lfpy_cell.zstart, lfpy_cell.zend],
+    >>>     d=lfpy_cell.diam)
+    >>> MEA = RecMEAElectrode(cell, **MEA_electrode_parameters)
+    >>> V_ext = MEA.get_response_matrix() @ lfpy_cell.imem
     >>>
-    >>> plt.matshow(MEA.LFP)
+    >>> plt.matshow(V_ext)
     >>> plt.colorbar()
     >>> plt.axis('tight')
     >>> plt.show()
@@ -1120,8 +1163,8 @@ class RecMEAElectrode(RecExtElectrode):
 
     def distort_cell_geometry(self, axis='z', nu=0.0):
         """
-        Distorts cellular morphology with a relative squeeze_factor along a
-        chosen axis preserving Poisson's ratio. A ratio nu=0.5 assumes
+        Distorts cellular morphology with a relative squeeze_cell_factor along
+        a chosen axis preserving Poisson's ratio. A ratio nu=0.5 assumes
         uncompressible and isotropic media that embeds the cell. A ratio nu=0
         will only affect geometry along the chosen axis. A ratio nu=-1 will
         isometrically scale the neuron geometry along each axis.
@@ -1138,10 +1181,10 @@ class RecMEAElectrode(RecExtElectrode):
             compression/stretching. Default is 0.
         """
         try:
-            assert(abs(self.squeeze_factor) < 1.)
+            assert(abs(self.squeeze_cell_factor) < 1.)
         except AssertionError:
-            raise AssertionError('abs(squeeze_factor) >= 1, '
-                                 + ' squeeze_factor must be in <-1, 1>')
+            raise AssertionError('abs(squeeze_cell_factor) >= 1, '
+                                 + ' squeeze_cell_factor must be in <-1, 1>')
         try:
             assert(axis in ['x', 'y', 'z'])
         except AssertionError:
@@ -1154,11 +1197,11 @@ class RecMEAElectrode(RecExtElectrode):
             geometry = getattr(self.cell, dir_)
             if dir_ == axis:
                 geometry -= pos
-                geometry *= (1. - self.squeeze_factor)
+                geometry *= (1. - self.squeeze_cell_factor)
                 geometry += pos
             else:
                 geometry -= pos
-                geometry *= (1. + self.squeeze_factor * nu)
+                geometry *= (1. + self.squeeze_cell_factor * nu)
                 geometry += pos
             setattr(self.cell, dir_, geometry)
 
@@ -1167,7 +1210,7 @@ class RecMEAElectrode(RecExtElectrode):
                                    + np.diff(self.cell.y, axis=-1)**2
                                    + np.diff(self.cell.z, axis=-1)**2)
         # recompute segment areas
-        self.cell.area = self.length * np.pi * self.d
+        self.cell.area = self.cell.length * np.pi * self.cell.d
 
     def get_response_matrix(self):
         '''
