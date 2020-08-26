@@ -849,19 +849,21 @@ class RecMEAElectrode(RecExtElectrode):
     Electrode class that represents an extracellular in vitro slice recording
     as a Microelectrode Array (MEA). Inherits RecExtElectrode class
 
-    Set-up:
+    Illustration:
+    ::
 
-              Above neural tissue (Saline) -> sigma_S
-    <----------------------------------------------------> z = z_shift + h
+                  Above neural tissue (Saline) -> sigma_S
+        <----------------------------------------------------> z = z_shift + h
 
-              Neural Tissue -> sigma_T
+                  Neural Tissue -> sigma_T
 
-                   o -> source_pos = [x',y',z']
+                       o -> source_pos = [x',y',z']
 
-    <-----------*----------------------------------------> z = z_shift + 0
-                 \-> elec_pos = [x,y,z]
+        <-----------*----------------------------------------> z = z_shift + 0
+                     \-> elec_pos = [x,y,z]
 
-              Below neural tissue (MEA Glass plate) -> sigma_G
+                  Below neural tissue (MEA Glass plate) -> sigma_G
+
 
     Parameters
     ----------
@@ -922,12 +924,13 @@ class RecMEAElectrode(RecExtElectrode):
     >>> import LFPy
     >>>
     >>> cellParameters = {
-    >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',  # morphology file
+    >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
     >>>     'v_init' : -65,                          # initial voltage
     >>>     'cm' : 1.0,                             # membrane capacitance
     >>>     'Ra' : 150,                             # axial resistivity
     >>>     'passive' : True,                        # insert passive channels
-    >>>     'passive_parameters' : {"g_pas":1./3E4, "e_pas":-65}, # passive params
+    >>>     'passive_parameters' : {"g_pas":1./3E4,
+    >>>                             "e_pas":-65}, # passive params
     >>>     'dt' : 2**-4,                           # simulation time res
     >>>     'tstart' : 0.,                        # start t of simulation
     >>>     'tstop' : 50.,                        # end t of simulation
@@ -950,7 +953,7 @@ class RecMEAElectrode(RecExtElectrode):
     >>>     'sigma_T' : 0.3,      # extracellular conductivity
     >>>     'sigma_G' : 0.0,      # MEA glass electrode plate conductivity
     >>>     'sigma_S' : 1.5,      # Saline bath conductivity
-    >>>     'x' : np.linspace(0, 1200, 16),  # electrode requires 1d vector of positions
+    >>>     'x' : np.linspace(0, 1200, 16),  # 1d vector of positions
     >>>     'y' : np.zeros(16),
     >>>     'z' : np.zeros(16),
     >>>     "method": "pointsource",
@@ -1079,7 +1082,6 @@ class RecMEAElectrode(RecExtElectrode):
         Test if the cell is confined within the slice.
         If class argument "squeeze_cell" is True, cell is squeezed to to
         fit inside slice.
-
         """
         if self.cell is None:
             raise RuntimeError("Does not have cell instance.")

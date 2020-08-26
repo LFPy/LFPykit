@@ -28,11 +28,11 @@ GNU General Public License for more details.
         line sourcers and point contacts
   * RecExtElectrode:
         Class for simulations of extracellular potentials
-
-:LFPy classes to be implemented:
   * RecMEAElectrode:
         Class for simulations of in vitro (slice) extracellular
         potentials
+
+:LFPy classes to be implemented:
   * OneSphereVolumeConductor:
         For computing extracellular potentials within
         and outside a homogeneous sphere
@@ -55,4 +55,4 @@ from .version import version as __version__
 
 from .cell import CellGeometry
 from .models import LinearModel, CurrentDipoleMoment, PointSourcePotential, \
-    LineSourcePotential, RecExtElectrode
+    LineSourcePotential, RecExtElectrode, RecMEAElectrode
