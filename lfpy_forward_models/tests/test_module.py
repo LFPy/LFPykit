@@ -549,3 +549,69 @@ class TestSuite(unittest.TestCase):
         np.testing.assert_equal(reason, "zend below")
         np.testing.assert_equal(true_bad_comp, bad_comp)
         stick.z[true_bad_comp, -1] = 100
+
+    def test_RecMEAElectrode_02(self):
+        '''test_position_shifted_slice'''
+        electrodeParams = {
+            'sigma_T': 0.3,
+            'sigma_S': 1.5,
+            'sigma_G': 0.0,
+            'h': 200,
+            'z_shift': -200,
+            'x': np.linspace(0, 1000, 11),
+            'y': np.zeros(11),
+            'z': np.zeros(11) - 100,
+            'method': "pointsource",
+            'squeeze_cell_factor': None,
+        }
+
+        stick = lfp.CellGeometry(x=np.array([[-17.5, 17.5],
+                                             [0., 23.],
+                                             [23., 46.],
+                                             [46., 69.],
+                                             [69., 92.],
+                                             [92., 115.],
+                                             [115., 125.],
+                                             [125., 135.],
+                                             [135., 145.],
+                                             [145., 155.],
+                                             [155., 165.],
+                                             [115., 118.33333333],
+                                             [118.33333333, 121.66666667],
+                                             [121.66666667, 125.]]),
+                                 y=np.array([[0., 0.],
+                                             [0., 0.],
+                                             [0., 0.],
+                                             [0., 0.],
+                                             [0., 0.],
+                                             [0., 0.],
+                                             [0., 4.],
+                                             [4., 8.],
+                                             [8., 12.],
+                                             [12., 16.],
+                                             [16., 20.],
+                                             [0., 0.],
+                                             [0., 0.],
+                                             [0., 0.]]),
+                                 z=np.array([[0, 0],
+                                             [0, 0],
+                                             [0, 0],
+                                             [0, 0],
+                                             [0, 0],
+                                             [0, 0],
+                                             [0, 0],
+                                             [10, 20],
+                                             [20, 30],
+                                             [30, 40],
+                                             [40, 50],
+                                             [0, -10],
+                                             [-10, -20],
+                                             [-20, -30]]),
+                                 d=np.zeros(14))
+        stick.z = stick.z - 100
+
+        MEA = lfp.RecMEAElectrode(stick, **electrodeParams)
+        try:
+            MEA._test_cell_extent()
+        except RuntimeError:
+            self.fail('MEA._test_cell_extent() raised unexpected RunTimeError')
