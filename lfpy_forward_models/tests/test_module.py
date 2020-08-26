@@ -611,7 +611,4 @@ class TestSuite(unittest.TestCase):
         stick.z = stick.z - 100
 
         MEA = lfp.RecMEAElectrode(stick, **electrodeParams)
-        try:
-            MEA._test_cell_extent()
-        except RuntimeError:
-            self.fail('MEA._test_cell_extent() raised unexpected RunTimeError')
+        MEA._test_cell_extent()
