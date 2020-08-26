@@ -406,35 +406,35 @@ class RecExtElectrode(LinearModel):
 
     Parameters
     ----------
-    cell : object
+    cell: object
         CellGeometry instance or similar.
-    sigma : float or list/ndarray of floats
+    sigma: float or list/ndarray of floats
         extracellular conductivity in units of [S/m]. A scalar value implies an
         isotropic extracellular conductivity. If a length 3 list or array of
         floats is provided, these values corresponds to an anisotropic
         conductor with conductivities [sigma_x, sigma_y, sigma_z] accordingly.
-    probe : MEAutility MEA object or None
+    probe: MEAutility MEA object or None
         MEAutility probe object
-    x, y, z : ndarray
+    x, y, z: ndarray
         coordinates or same length arrays of coordinates in units of [um].
-    N : None or list of lists
+    N: None or list of lists
         Normal vectors [x, y, z] of each circular electrode contact surface,
         default None
-    r : float
+    r: float
         radius of each contact surface, default None [um]
-    n : int
+    n: int
         if N is not None and r > 0, the number of discrete points used to
         compute the n-point average potential on each circular contact point.
-    contact_shape : str
+    contact_shape: str
         'circle'/'square' (default 'circle') defines the contact point shape
         If 'circle' r is the radius, if 'square' r is the side length
-    method : str
+    method: str
         switch between the assumption of 'linesource', 'pointsource',
         'root_as_point' to represent each compartment when computing
         extracellular potentials
-    verbose : bool
+    verbose: bool
         Flag for verbose output, i.e., print more information
-    seedvalue : int
+    seedvalue: int
         random seed when finding random position on contact with r > 0
 
     Examples
@@ -650,7 +650,6 @@ class RecExtElectrode(LinearModel):
             self.anisotropic = False
 
         if probe is None:
-
             assert np.all([arg is not None] for arg in [x, y, z]), \
                 "instance requires either 'probe' or 'x', 'y', and 'z'"
 
@@ -867,57 +866,57 @@ class RecMEAElectrode(RecExtElectrode):
 
     Parameters
     ----------
-    cell : object
+    cell: object
         GeometryCell instance or similar.
-    sigma_T : float
+    sigma_T: float
         extracellular conductivity of neural tissue in unit (S/m)
-    sigma_S : float
+    sigma_S: float
         conductivity of saline bath that the neural slice is
         immersed in [1.5] (S/m)
-    sigma_G : float
+    sigma_G: float
         conductivity of MEA glass electrode plate. Most commonly
         assumed non-conducting [0.0] (S/m)
-    h : float, int
+    h: float, int
         Thickness in um of neural tissue layer containing current
         the current sources (i.e., in vitro slice or cortex)
-    z_shift : float, int
+    z_shift: float, int
         Height in um of neural tissue layer bottom. If e.g., top of neural
         tissue layer should be z=0, use z_shift=-h. Defaults to z_shift = 0, so
         that the neural tissue layer extends from z=0 to z=h.
-    squeeze_cell_factor : float or None
+    squeeze_cell_factor: float or None
         Factor to squeeze the cell in the z-direction. This is
         needed for large cells that are thicker than the slice, since no part
         of the cell is allowed to be outside the slice. The squeeze is done
         after the neural simulation, and therefore does not affect neuronal
         simulation, only calculation of extracellular potentials.
-    probe : MEAutility MEA object or None
+    probe: MEAutility MEA object or None
         MEAutility probe object
-    x, y, z : np.ndarray
+    x, y, z: np.ndarray
         coordinates or arrays of coordinates in units of (um).
         Must be same length
-    N : None or list of lists
+    N: None or list of lists
         Normal vectors [x, y, z] of each circular electrode contact surface,
         default None
-    r : float
+    r: float
         radius of each contact surface, default None
-    n : int
+    n: int
         if N is not None and r > 0, the number of discrete points used to
         compute the n-point average potential on each circular contact point.
-    contact_shape : str
+    contact_shape: str
         'circle'/'square' (default 'circle') defines the contact point shape
         If 'circle' r is the radius, if 'square' r is the side length
-    method : str
+    method: str
         switch between the assumption of 'linesource', 'pointsource',
         'root_as_point' to represent each compartment when computing
         extracellular potentials
-    verbose : bool
+    verbose: bool
         Flag for verbose output, i.e., print more information
-    seedvalue : int
+    seedvalue: int
         random seed when finding random position on contact with r > 0
 
     Examples
     --------
-    See also examples/example_MEA.py
+    See also <LFPy>/examples/example_MEA.py
 
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
