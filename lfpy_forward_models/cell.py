@@ -131,7 +131,8 @@ class CellGeometry(object):
         try:
             assert(x.shape[1] == 2)
         except AssertionError:
-            raise AssertionError('the last axis of x, y and z must be of length 2')
+            raise AssertionError(
+                'the last axis of x, y and z must be of length 2')
         try:
             assert(d.ndim == 1 and d.size == x.shape[0])
         except AssertionError:

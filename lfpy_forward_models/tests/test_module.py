@@ -464,7 +464,7 @@ class TestSuite(unittest.TestCase):
         MEA = lfp.RecMEAElectrode(stick, **electrodeParams)
         np.testing.assert_raises(RuntimeError, MEA._test_cell_extent)
 
-    def test_RecMEAElectrode_01(self):
+    def test_RecMEAElectrode_02(self):
         '''test return_comp_outside_slice'''
         electrodeParams = {
             'sigma_T': 0.3,
@@ -550,7 +550,7 @@ class TestSuite(unittest.TestCase):
         np.testing.assert_equal(true_bad_comp, bad_comp)
         stick.z[true_bad_comp, -1] = 100
 
-    def test_RecMEAElectrode_02(self):
+    def test_RecMEAElectrode_03(self):
         '''test_position_shifted_slice'''
         electrodeParams = {
             'sigma_T': 0.3,
