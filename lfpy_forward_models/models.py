@@ -544,7 +544,7 @@ class RecExtElectrode(LinearModel):
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> import LFPy
-    >>> from lfpy_forward_models import RecExtElectrode
+    >>> from lfpy_forward_models import CellGeometry, RecExtElectrode
     >>>
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
@@ -572,7 +572,7 @@ class RecExtElectrode(LinearModel):
     >>> synapse.set_spike_times(np.array([10., 15., 20., 25.]))
     >>>
     >>> N = np.empty((16, 3))
-    >>> for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal vec. of contacts
+    >>> for i in range(N.shape[0]): N[i,] = [1, 0, 0] #normal vec. of contacts
     >>> electrodeParameters = {         # parameters for RecExtElectrode class
     >>>     'sigma' : 0.3,              # Extracellular potential
     >>>     'x' : np.zeros(16)+25,      # Coordinates of electrode contacts
@@ -582,8 +582,14 @@ class RecExtElectrode(LinearModel):
     >>>     'r' : 10,
     >>>     'N' : N,
     >>> }
-    >>> electrode = LFPy.RecExtElectrode(cell, **electrodeParameters)
-    >>> cell.simulate(dotprodcoeffs=[electrode.get_response_matrix()])
+    >>> cell_geometry = CellGeometry(
+    >>>     x=np.c_[cell.xstart, cell.xend],
+    >>>     y=np.c_[cell.ystart, cell.yend],
+    >>>     z=np.c_[cell.zstart, cell.zend],
+    >>>     d=cell.diam)
+    >>> electrode = RecExtElectrode(cell_geometry, **electrodeParameters)
+    >>> M = electrode.get_response_matrix()
+    >>> cell.simulate(dotprodcoeffs=[M])
     >>> V_ex = cell.dotprodresults[0]
     >>> plt.matshow(V_ex)
     >>> plt.colorbar()
@@ -596,7 +602,7 @@ class RecExtElectrode(LinearModel):
     >>> import matplotlib.pyplot as plt
     >>> import MEAutility as mu
     >>> import LFPy
-    >>> from lfpy_forward_models import RecExtElectrode
+    >>> from lfpy_forward_models import CellGeometry, RecExtElectrode
     >>>
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
@@ -626,7 +632,12 @@ class RecExtElectrode(LinearModel):
     >>> cell.simulate(rec_imem=True)
     >>>
     >>> probe = mu.return_mea('Neuropixels-128')
-    >>> electrode = RecExtElectrode(cell, probe=probe)
+    >>> cell_geometry = CellGeometry(
+    >>>     x=np.c_[cell.xstart, cell.xend],
+    >>>     y=np.c_[cell.ystart, cell.yend],
+    >>>     z=np.c_[cell.zstart, cell.zend],
+    >>>     d=cell.diam)
+    >>> electrode = RecExtElectrode(cell_geometry, probe=probe)
     >>> V_ex = electrode.get_response_matrix() @ cell.imem
     >>> mu.plot_mea_recording(V_ex, probe)
     >>> plt.axis('tight')
