@@ -222,11 +222,13 @@ class PointSourcePotential(LinearModel):
         try:
             assert(x.shape == y.shape == z.shape)
         except AssertionError:
-            raise AssertionError('x, y and z must contain the same number of elements')
+            raise AssertionError(
+                'x, y and z must contain the same number of elements')
         try:
             assert(isinstance(sigma, float) and sigma > 0)
         except AssertionError:
-            raise AssertionError('sigma must be a float number greater than zero')
+            raise AssertionError(
+                'sigma must be a float number greater than zero')
 
         # set attributes
         self.x = x
@@ -366,11 +368,13 @@ class LineSourcePotential(LinearModel):
         try:
             assert(x.shape == y.shape == z.shape)
         except AssertionError:
-            raise AssertionError('x, y and z must contain the same number of elements')
+            raise AssertionError(
+                'x, y and z must contain the same number of elements')
         try:
             assert(isinstance(sigma, float) and sigma > 0)
         except AssertionError:
-            raise AssertionError('sigma must be a float number greater than zero')
+            raise AssertionError(
+                'sigma must be a float number greater than zero')
 
         # set attributes
         self.x = x
@@ -669,7 +673,8 @@ class RecExtElectrode(LinearModel):
                 assert ((self.x.size == self.y.size) and
                         (self.x.size == self.z.size))
             except AssertionError:
-                raise AssertionError("The number of elements in [x, y, z] must be equal")
+                raise AssertionError(
+                    "The number of elements in [x, y, z] must be equal")
 
             if N is not None:
                 if not isinstance(N, np.array):
@@ -843,6 +848,7 @@ class RecExtElectrode(LinearModel):
 
         return M
 
+
 class RecMEAElectrode(RecExtElectrode):
     r"""class RecMEAElectrode
 
@@ -969,6 +975,7 @@ class RecMEAElectrode(RecExtElectrode):
     >>> plt.axis('tight')
     >>> plt.show()
     """
+
     def __init__(self, cell, sigma_T=0.3, sigma_S=1.5, sigma_G=0.0,
                  h=300., z_shift=0., steps=20, probe=None,
                  x=np.array([0]), y=np.array([0]), z=np.array([0]),
