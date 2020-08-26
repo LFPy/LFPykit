@@ -55,6 +55,13 @@ class :class:`LineSourcePotential`
     :show-inheritance:
     :undoc-members:
 
+class :class:`RecExtElectrode`
+==============================
+.. autoclass:: lfpy_forward_models.RecExtElectrode
+    :members:
+    :show-inheritance:
+    :undoc-members:
+
 Indices and tables
 ==================
 

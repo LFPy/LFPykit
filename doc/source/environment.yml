@@ -3,7 +3,9 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.7
+  - python=3
+  - numpy
+  - meautility
   - sphinx_rtd_theme
   - numpydoc
   - m2r2

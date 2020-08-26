@@ -406,35 +406,35 @@ class RecExtElectrode(LinearModel):
 
     Parameters
     ----------
-    cell : object
+    cell: object
         CellGeometry or similar instance.
-    sigma : float or list/ndarray of floats
+    sigma: float or list/ndarray of floats
         extracellular conductivity in units of [S/m]. A scalar value implies an
         isotropic extracellular conductivity. If a length 3 list or array of
         floats is provided, these values corresponds to an anisotropic
         conductor with conductivities [sigma_x, sigma_y, sigma_z] accordingly.
-    probe : MEAutility MEA object or None
+    probe: MEAutility MEA object or None
         MEAutility probe object
-    x, y, z : ndarray
+    x, y, z: ndarray
         coordinates or same length arrays of coordinates in units of [um].
-    N : None or list of lists
+    N: None or list of lists
         Normal vectors [x, y, z] of each circular electrode contact surface,
         default None
-    r : float
+    r: float
         radius of each contact surface, default None [um]
-    n : int
+    n: int
         if N is not None and r > 0, the number of discrete points used to
         compute the n-point average potential on each circular contact point.
-    contact_shape : str
+    contact_shape: str
         'circle'/'square' (default 'circle') defines the contact point shape
         If 'circle' r is the radius, if 'square' r is the side length
-    method : str
+    method: str
         switch between the assumption of 'linesource', 'pointsource',
         'root_as_point' to represent each compartment when computing
         extracellular potentials
-    verbose : bool
+    verbose: bool
         Flag for verbose output, i.e., print more information
-    seedvalue : int
+    seedvalue: int
         random seed when finding random position on contact with r > 0
 
     Examples
@@ -650,7 +650,6 @@ class RecExtElectrode(LinearModel):
             self.anisotropic = False
 
         if probe is None:
-
             assert np.all([arg is not None] for arg in [x, y, z]), \
                 "instance requires either 'probe' or 'x', 'y', and 'z'"
 
