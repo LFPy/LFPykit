@@ -278,11 +278,14 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         fs = make_class_object(rz1, r_el)
         P_tan = np.array([[0., 1., 0.], [1., 0., 0.], [0., 0., 0.]])
         phi = fs.calc_phi(P_tan)
-        np.testing.assert_almost_equal(phi, np.array([[np.pi / 2, np.pi, 0.],
-                                                      [-3 * np.pi / 4, -np.pi / 4, 0.],
-                                                      [np.pi / 4, 3 * np.pi / 4, 0.],
-                                                      [0., 0., 0.],
-                                                      [0., 0., 0.]]))
+        np.testing.assert_almost_equal(phi,
+                                       np.array([[np.pi / 2, np.pi, 0.],
+                                                 [-3 * np.pi / 4,
+                                                  -np.pi / 4, 0.],
+                                                 [np.pi / 4,
+                                                  3 * np.pi / 4, 0.],
+                                                 [0., 0., 0.],
+                                                 [0., 0., 0.]]))
 
     def test_calc_phi02(self):
         '''Test phi: azimuthal angle between rx and rxy,
@@ -322,23 +325,22 @@ class testFourSphereVolumeConductor(unittest.TestCase):
 
     def test_calc_vn(self):
         '''test that calc_vn gives correct values'''
-        n = 1
         fs = make_simple_class_object()
-        v1 = fs._calc_vn(1)
+        v1 = fs._calc_vn(n)
         np.testing.assert_almost_equal(v1, -4.75)
 
     def test_calc_yn(self):
         '''test that calc_yn gives correct values'''
         n = 1
         fs = make_simple_class_object()
-        y1 = fs._calc_yn(1)
+        y1 = fs._calc_yn(n)
         np.testing.assert_almost_equal(y1, -2.3875)
 
     def test_calc_zn(self):
         '''test that calc_zn gives correct values'''
         n = 1
         fs = make_simple_class_object()
-        z1 = fs._calc_zn(1)
+        z1 = fs._calc_zn(n)
         np.testing.assert_almost_equal(z1, -2.16574585635359)
 
     def test_calc_potential(self):
