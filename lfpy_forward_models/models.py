@@ -1001,7 +1001,7 @@ class RecMEAElectrode(RecExtElectrode):
     >>>     'z' : np.zeros(16),
     >>>     "method": "pointsource",
     >>>     "h": 300,
-    >>>     "squeeze_cell_factor": 0.3,
+    >>>     "squeeze_cell_factor": 0.5,
     >>> }
     >>> lfpy_cell.simulate(rec_imem=True)
     >>>
