@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 '''
 Example utilizing the LFPy forward models module for predictions of
-current dipole moment from a dendritic stick model set up in NEURON.
+current dipole moment from a dendritic stick model set up in LFPy.
 The passive stick receives sinusoid synaptic current input at its terminal
-end.
+segment.
 
 Execution:
 
     $ nrnivmodl
-    $ python example_NEURON.py
+    $ python example_LFPy.py
 
 '''
 
@@ -42,7 +42,9 @@ for seg in sec:
     seg.pas.e = -65     # leak reversal potential [mV]
 morphology.append(sec)
 
+###############################################################################
 # Create LFPy.Cell object
+###############################################################################
 lfpy_cell = LFPy.Cell(morphology=morphology,
                       passive=False,
                       cm=1.,     # membrane capacitance [uF/cm2]
