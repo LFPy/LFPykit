@@ -103,7 +103,7 @@ class OneSphereVolumeConductor(object):
     def calc_potential(self, rs, current, min_distance=1., n_max=1000):
         """
         Return the electric potential at observation points for source current
-        with magnitude I as function of time.
+        as function of time.
 
         Parameters
         ----------
@@ -113,9 +113,14 @@ class OneSphereVolumeConductor(object):
             float or shape (n_tsteps, ) array containing source current [nA]
         min_distance: None or float
             minimum distance between source location and observation point [µm]
-            (in order to avoid singular values)
+            (in order to avoid singularities)
         n_max: int
-            Number of elements in polynomial expansion to sum over (see [1]).
+            Number of elements in polynomial expansion to sum over (see [1]_).
+
+        References
+        ----------
+        .. [1] Shaozhong Deng (2008), Journal of Electrostatics 66:549-560.
+            DOI: 10.1016/j.elstat.2008.06.003
 
         Returns
         -------
@@ -204,20 +209,26 @@ class OneSphereVolumeConductor(object):
                                      'ndarray with float values')
             return current / (4. * np.pi * self.sigma_i) * (phi_i + phi_o)
 
-    def calc_mapping(self, cell, n_max=1000):
+    def get_response_matrix(self, cell, n_max=1000):
         """
-        Compute linear mapping between transmembrane currents of LFPy.Cell like
-        object instantiation and extracellular potential in and outside of
+        Compute linear mapping between transmembrane currents of CellGeometry
+        like object instantiation and extracellular potential in and outside of
         sphere. Cell position must be set in space, using the method
         ``Cell.set_pos(**kwargs)``.
 
         Parameters
         ----------
-        cell: LFPy.Cell like instance
-            Instantiation of class LFPy.Cell, TemplateCell or NetworkCell.
+        cell: object
+            CellGeometry instance or similar.
         n_max: int
             Number of elements in polynomial expansion to sum over
-            (see Deng 2008).
+            (see [1]_).
+
+        References
+        ----------
+        .. [1] Shaozhong Deng (2008), Journal of Electrostatics 66:549-560.
+            DOI: 10.1016/j.elstat.2008.06.003
+
 
         Examples
         --------
@@ -251,7 +262,7 @@ class OneSphereVolumeConductor(object):
         >>> # and electric potential in space
         >>> sphere = LFPy.OneSphereVolumeConductor(r=r, R=10000.,
         >>>                                        sigma_i=0.3, sigma_o=0.03)
-        >>> mapping = sphere.calc_mapping(cell, n_max=1000)
+        >>> mapping = sphere.get_response_matrix(cell, n_max=1000)
         >>> # pick out some time index for the potential and compute potential
         >>> ind = cell.tvec==2.
         >>> Phi = np.dot(mapping, cell.imem)[:, ind].reshape(X.shape)

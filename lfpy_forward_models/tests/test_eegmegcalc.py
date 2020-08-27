@@ -688,15 +688,15 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         # predict potential
         sphere = lfpy_forward_models.OneSphereVolumeConductor(
             r=r, R=R, sigma_i=sigma, sigma_o=sigma)
-        mapping = sphere.calc_mapping(cell=get_cell_geometry_from_lfpy(cell),
-                                      n_max=100)
+        M = sphere.get_response_matrix(cell=get_cell_geometry_from_lfpy(cell),
+                                       n_max=100)
 
         # ground truth and tests
         for i, x in enumerate(cell.xmid):
             dist = radius - x
             dist[abs(dist) < cell.diam[i]] = cell.diam[i]
             phi_gt = current / (4 * np.pi * sigma * abs(dist))
-            np.testing.assert_almost_equal(mapping[:, i], phi_gt)
+            np.testing.assert_almost_equal(M[:, i], phi_gt)
 
 
 '''

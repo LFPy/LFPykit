@@ -35,7 +35,7 @@ class LinearModel(object):
     Parameters
     ----------
     cell: object
-        CellGeometry or similar instance.
+        CellGeometry instance or similar.
     '''
 
     def __init__(self, cell):
@@ -74,7 +74,7 @@ class CurrentDipoleMoment(LinearModel):
     Parameters
     ----------
     cell: object
-        CellGeometry or similar instance.
+        CellGeometry instance or similar.
 
     Examples
     --------
@@ -149,7 +149,7 @@ class PointSourcePotential(LinearModel):
     Parameters
     ----------
     cell: object
-        CellGeometry or similar instance.
+        CellGeometry instance or similar.
     x: ndarray of floats
         x-position of measurement sites [um]
     y: ndarray of floats
@@ -295,7 +295,7 @@ class LineSourcePotential(LinearModel):
     Parameters
     ----------
     cell: object
-        CellGeometry or similar instance.
+        CellGeometry instance or similar.
     x: ndarray of floats
         x-position of measurement sites [um]
     y: ndarray of floats
@@ -409,7 +409,7 @@ class RecExtElectrode(LinearModel):
     Parameters
     ----------
     cell: object
-        CellGeometry or similar instance.
+        CellGeometry instance or similar.
     sigma: float or list/ndarray of floats
         extracellular conductivity in units of [S/m]. A scalar value implies an
         isotropic extracellular conductivity. If a length 3 list or array of
