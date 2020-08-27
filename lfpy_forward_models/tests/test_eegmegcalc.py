@@ -325,6 +325,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
 
     def test_calc_vn(self):
         '''test that calc_vn gives correct values'''
+        n = 1
         fs = make_simple_class_object()
         v1 = fs._calc_vn(n)
         np.testing.assert_almost_equal(v1, -4.75)

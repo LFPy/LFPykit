@@ -1525,7 +1525,6 @@ class MEG(object):
             for i_, d_, r_ in zip(i_axial, d_vectors, pos_vectors):
                 r_rel = R_ - r_
                 H[i, :, :] += np.dot(i_.reshape((-1, 1)),
-                                     np.cross(d_, r_rel).reshape((1, -1))
-                                     ) / (
-                                     4 * np.pi * np.sqrt((r_rel**2).sum())**3)
+                                     np.cross(d_, r_rel).reshape((1, -1))) \
+                    / (4 * np.pi * np.sqrt((r_rel**2).sum())**3)
         return H
