@@ -11,8 +11,6 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 """
-
-
 from scipy.special import lpmv
 import numpy as np
 from warnings import warn
@@ -27,9 +25,8 @@ class OneSphereVolumeConductor(object):
     current source(s) must be located within the radius R.
 
     The implementation is based on the description of electric potentials of
-    point charge in an dielectric sphere embedded in dielectric media, which is
-    mathematically equivalent to a current source in conductive media, as
-    published by Deng (2008), Journal of Electrostatics 66:549-560
+    point charge in an dielectric sphere embedded in dielectric media [1]_,
+    which is mathematically equivalent to a current source in conductive media.
 
     Parameters
     ----------
@@ -37,11 +34,16 @@ class OneSphereVolumeConductor(object):
         shape(3, n_points) observation points in space in spherical coordinates
         (radius, theta, phi) relative to the center of the sphere.
     R: float
-        sphere radius (µm)
+        sphere radius [µm]
     sigma_i: float
-        electric conductivity for radius r <= R (S/m)
+        electric conductivity for radius r <= R [S/m]
     sigma_o: float
-        electric conductivity for radius r > R (S/m)
+        electric conductivity for radius r > R [S/m]
+
+    References
+    ----------
+    .. [1] Shaozhong Deng (2008), Journal of Electrostatics 66:549-560.
+        DOI: 10.1016/j.elstat.2008.06.003
 
     Examples
     --------
@@ -98,7 +100,7 @@ class OneSphereVolumeConductor(object):
         self.sigma_i = sigma_i
         self.sigma_o = sigma_o
 
-    def calc_potential(self, rs, I, min_distance=1., n_max=1000):
+    def calc_potential(self, rs, current, min_distance=1., n_max=1000):
         """
         Return the electric potential at observation points for source current
         with magnitude I as function of time.
@@ -106,29 +108,29 @@ class OneSphereVolumeConductor(object):
         Parameters
         ----------
         rs: float
-            monopole source location along the horizontal x-axis (µm)
-        I: float or ndarray, dtype float
-            float or shape (n_tsteps, ) array containing source current (nA)
+            monopole source location along the horizontal x-axis [µm]
+        current: float or ndarray, dtype float
+            float or shape (n_tsteps, ) array containing source current [nA]
         min_distance: None or float
-            minimum distance between source location and observation point (µm)
+            minimum distance between source location and observation point [µm]
             (in order to avoid singular values)
         n_max: int
-            Number of elements in polynomial expansion to sum over
-            (see Deng 2008).
+            Number of elements in polynomial expansion to sum over (see [1]).
 
         Returns
         -------
         Phi: ndarray
             shape (n-points, ) ndarray of floats if I is float like. If I is
             an 1D ndarray, and shape (n-points, I.size) ndarray is returned.
-            Unit (mV).
+            Unit [mV].
         """
         try:
             assert(type(rs) in [int, float, np.float64])
             assert(abs(rs) < self.R)
         except AssertionError:
             raise AssertionError(
-                'source location rs must be a float value and |rs| must be less than sphere radius R')
+                'source location rs must be a float value and |rs| '
+                'must be less than sphere radius R')
         try:
             assert((min_distance is None) or (
                 type(min_distance) in [float, int, np.float64]))
@@ -148,7 +150,8 @@ class OneSphereVolumeConductor(object):
             coeffs_i = np.zeros(n_max)
             for n in range(n_max):
                 coeffs_i[n] = ((self.sigma_i - self.sigma_o) * (n + 1)) / (
-                    self.sigma_i * n + self.sigma_o * (n + 1)) * ((r_i * rs) / self.R**2)**n
+                    self.sigma_i * n + self.sigma_o * (n + 1)) * (
+                    (r_i * rs) / self.R**2)**n
             poly_i = np.polynomial.legendre.Legendre(coeffs_i)
             phi_i[np.where(inds_i)[0][j]] = poly_i(np.cos(theta_i))
         phi_i[inds_i] *= 1. / self.R
@@ -166,8 +169,9 @@ class OneSphereVolumeConductor(object):
 
         # potential in homogeneous media
         if min_distance is None:
-            phi_i[inds_i] += 1. / np.sqrt(r[r <= self.R]**2 + \
-                                          rs**2 - 2 * r[inds_i] * rs * np.cos(theta[inds_i]))
+            phi_i[inds_i] += 1. / \
+                np.sqrt(r[r <= self.R]**2 + rs**2 -
+                        2 * r[inds_i] * rs * np.cos(theta[inds_i]))
         else:
             denom = np.sqrt(
                 r[inds_i]**2 +
@@ -180,24 +184,25 @@ class OneSphereVolumeConductor(object):
             denom[denom < min_distance] = min_distance
             phi_i[inds_i] += 1. / denom
 
-        if isinstance(I, np.ndarray):
+        if isinstance(current, np.ndarray):
             try:
-                assert(np.all(np.isfinite(I)))
-                assert(np.all(np.isreal(I)))
-                assert(I.ndim == 1)
+                assert(np.all(np.isfinite(current)))
+                assert(np.all(np.isreal(current)))
+                assert(current.ndim == 1)
             except AssertionError:
-                raise AssertionError(
-                    'input argument I must be float or 1D ndarray with float values')
+                raise AssertionError('input argument current must be float or '
+                                     '1D ndarray with float values')
 
             return np.dot((phi_i + phi_o).reshape((1, -1)).T,
-                          I.reshape((1, -1))) / (4. * np.pi * self.sigma_i)
+                          current.reshape((1, -1))
+                          ) / (4. * np.pi * self.sigma_i)
         else:
             try:
-                assert(np.isfinite(I)) and (np.shape(I) == ())
+                assert(np.isfinite(current)) and (np.shape(current) == ())
             except AssertionError:
-                raise AssertionError(
-                    'input argument I must be float or 1D ndarray with float values')
-            return I / (4. * np.pi * self.sigma_i) * (phi_i + phi_o)
+                raise AssertionError('input argument I must be float or 1D '
+                                     'ndarray with float values')
+            return current / (4. * np.pi * self.sigma_i) * (phi_i + phi_o)
 
     def calc_mapping(self, cell, n_max=1000):
         """
@@ -226,11 +231,13 @@ class OneSphereVolumeConductor(object):
         >>> import matplotlib.pyplot as plt
         >>> from matplotlib.collections import PolyCollection
         >>> # create cell
-        >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc'),
+        >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
+        >>>                                          'ball_and_sticks.hoc'),
         >>>                  tstop=10.)
         >>> cell.set_pos(z=9800.)
         >>> # stimulus
-        >>> syn = LFPy.Synapse(cell, idx=cell.totnsegs-1, syntype='Exp2Syn', weight=0.01)
+        >>> syn = LFPy.Synapse(cell, idx=cell.totnsegs-1, syntype='Exp2Syn',
+        >>>                    weight=0.01)
         >>> syn.set_spike_times(np.array([1.]))
         >>> # simulate
         >>> cell.simulate(rec_imem=True)
@@ -282,17 +289,19 @@ class OneSphereVolumeConductor(object):
 
         """
         # midpoint position of compartments in spherical coordinates
-        radius = np.sqrt(cell.xmid**2 + cell.ymid**2 + cell.zmid**2)
-        theta = np.arccos(cell.zmid / radius)
-        phi = np.arctan2(cell.ymid, cell.xmid)
-        diam = cell.diam
+        radius = np.sqrt(cell.x.mean(axis=-1)**2
+                         + cell.y.mean(axis=-1)**2
+                         + cell.z.mean(axis=-1)**2)
+        theta = np.arccos(cell.z.mean(axis=-1) / radius)
+        phi = np.arctan2(cell.y.mean(axis=-1), cell.x.mean(axis=-1))
+        diam = cell.d
 
         # since the sources must be located on the x-axis, we keep a copy
         # of the unrotated coordinate system for the contact points:
         r_orig = np.copy(self.r)
 
         # unit current amplitude
-        I = 1.
+        current = 1.
 
         # initialize mapping array
         mapping = np.zeros((self.r.shape[1], radius.size))
@@ -303,9 +312,9 @@ class OneSphereVolumeConductor(object):
             self.r = np.array([r_orig[0],  # radius unchanged
                                r_orig[1] - theta_i,
                                # rotate relative to source location
-                               r_orig[2]])  # phi unchanged (don't enter equations)
+                               r_orig[2]])  # phi unchanged
             mapping[:, i] = self.calc_potential(
-                radius_i, I=I, min_distance=diam_i, n_max=n_max)
+                radius_i, current=current, min_distance=diam_i, n_max=n_max)
 
         # reset measurement locations
         self.r = r_orig
@@ -322,20 +331,32 @@ class FourSphereVolumeConductor(object):
     (frequency independent) conductivity within the inner sphere and outer
     shells. The conductance outside the outer shell is 0 (air).
 
+    This class implements the corrected 4-sphere model described in [1]_, [2]_
+
+    References
+    ----------
+    .. [1] Næss S, Chintaluri C, Ness TV, Dale AM, Einevoll GT and Wójcik DK
+        (2017) Corrected Four-sphere Head Model for EEG Signals. Front. Hum.
+        Neurosci. 11:490. doi: 10.3389/fnhum.2017.00490
+    .. [2] Hagen E, Næss S, Ness TV and Einevoll GT (2018) Multimodal Modeling
+        of Neural Network Activity: Computing LFP, ECoG, EEG, and MEG Signals
+        With LFPy 2.0. Front. Neuroinform. 12:92. doi: 10.3389/fninf.2018.00092
+
+
     Parameters
     ----------
     r_electrodes: ndarray, dtype=float
         Shape (n_contacts, 3) array containing n_contacts electrode locations
-        in cartesian coordinates in units of (µm).
+        in cartesian coordinates in units of [µm].
         All ``r_el`` in ``r_electrodes`` must be less than or equal to scalp
         radius and larger than the distance between dipole and sphere
         center: ``|rz| < r_el <= radii[3]``.
     radii: list, dtype=float
-        Len 4 list with the outer radii in units of (µm) for the 4
+        Len 4 list with the outer radii in units of [µm] for the 4
         concentric shells in the four-sphere model: brain, csf, skull and
         scalp, respectively.
     sigmas: list, dtype=float
-        Len 4 list with the electrical conductivity in units of (S/m) of
+        Len 4 list with the electrical conductivity in units of [S/m] of
         the four shells in the four-sphere model: brain, csf, skull and
         scalp, respectively.
     iter_factor: float
@@ -352,7 +373,8 @@ class FourSphereVolumeConductor(object):
     >>> sigmas = [0.3, 1.5, 0.015, 0.3]
     >>> r_electrodes = np.array([[0., 0., 90000.], [0., 85000., 0.]])
     >>> rz = np.array([0., 0., 78000.])
-    >>> sphere_model = LFPy.FourSphereVolumeConductor(r_electrodes, radii, sigmas)
+    >>> sphere_model = LFPy.FourSphereVolumeConductor(r_electrodes, radii,
+    >>>                                               sigmas)
     >>> # current dipole moment
     >>> p = np.array([[10., 10., 10.]]*10) # 10 timesteps
     >>> # compute potential
@@ -423,8 +445,8 @@ class FourSphereVolumeConductor(object):
         self._rz = np.sqrt(np.sum(rz ** 2))
         self._z = self._rzloc / self._rz
         if self._rz == 0:
-            raise RuntimeError(
-                'Placing dipole in center of head model causes division by zero.')
+            raise RuntimeError('Placing dipole in center of head model '
+                               'causes division by zero.')
 
         self._rz1 = self._rz / self.r1
 
@@ -434,12 +456,13 @@ class FourSphereVolumeConductor(object):
 
         elif self._rz1 > 0.99999:
             warn(
-                'Dipole should be placed minimum ~1µm away from brain surface, '
-                'to avoid extremely slow convergence.')
+                'Dipole should be placed minimum ~1µm away from brain surface,'
+                ' to avoid extremely slow convergence.')
 
         elif self._rz1 > 0.9999:
             warn('Computation time might be long due to slow convergence. '
-                 'Can be avoided by placing dipole further away from brain surface.')
+                 'Can be avoided by placing dipole further away from '
+                 'brain surface.')
 
         if any(r < self._rz for r in self.r):
             raise RuntimeError('Electrode must be farther away from '
@@ -460,14 +483,14 @@ class FourSphereVolumeConductor(object):
             current dipole moment in units of (nA*µm) for all timesteps.
         rz: ndarray, dtype=float
             Shape (3, ) array containing the position of the current dipole in
-            cartesian coordinates. Units of (µm).
+            cartesian coordinates. Units of [µm].
 
         Returns
         -------
         potential: ndarray, dtype=float
             Shape (n_contacts, n_timesteps) array containing the electric
             potential at contact point(s) FourSphereVolumeConductor.r in units
-            of (mV) for all timesteps of current dipole moment p.
+            of [mV] for all timesteps of current dipole moment p.
 
         """
 
@@ -514,7 +537,7 @@ class FourSphereVolumeConductor(object):
         potential: ndarray, dtype=float
             Shape (n_contacts, n_timesteps) array containing the electric
             potential at contact point(s) electrode_locs in units
-            of (mV) for all timesteps of neuron simulation.
+            of [mV] for all timesteps of neuron simulation.
 
         Examples
         --------
@@ -563,7 +586,8 @@ class FourSphereVolumeConductor(object):
         Returns:
         -------
         p_rad: ndarray, dtype=float
-            Shape (n_timesteps, 3) array, radial part of p, parallel to self._rz
+            Shape (n_timesteps, 3) array, radial part of p,
+            parallel to self._rz
         p_tan: ndarray, dtype=float
             Shape (n_timesteps, 3) array, tangential part of p,
             orthogonal to self._rz
@@ -587,8 +611,9 @@ class FourSphereVolumeConductor(object):
         -------
         potential: ndarray, dtype=float
             Shape (n_contacts, n_timesteps) array containing the extracecllular
-            potential at n_contacts contact point(s) FourSphereVolumeConductor.r
-            in units of (mV) for all timesteps of p_rad
+            potential at n_contacts contact point(s)
+            FourSphereVolumeConductor.r in units of [mV] for all timesteps
+            of p_rad
         """
 
         p_tot = np.linalg.norm(p_rad, axis=1)
@@ -628,8 +653,9 @@ class FourSphereVolumeConductor(object):
         _______
         potential: ndarray, dtype=float
             Shape (n_contacts, n_timesteps) array containing the extracecllular
-            potential at n_contacts contact point(s) FourSphereVolumeConductor.r
-            in units of (mV) for all timesteps of p_tan
+            potential at n_contacts contact point(s)
+            FourSphereVolumeConductor.r in units of [mV] for all timesteps
+            of p_tan
         """
         phi = self.calc_phi(p_tan)
         p_tot = np.linalg.norm(p_tan, axis=1)
@@ -639,8 +665,9 @@ class FourSphereVolumeConductor(object):
         for el_point in range(len(self.r)):
             r_point = self.r[el_point]
             theta_point = self._theta[el_point]
-            # if r_electrode is orthogonal to p_tan, i.e. theta = 0 or theta = pi,
-            # there is no contribution to electric potential from p_tan
+            # if r_electrode is orthogonal to p_tan, i.e. theta = 0 or
+            # theta = pi,  there is no contribution to electric potential
+            # from p_tan
             if (theta_point == 0.) or (theta_point == np.pi):
                 n_terms[el_point] = 0
             elif r_point <= self.r1:
@@ -671,9 +698,8 @@ class FourSphereVolumeConductor(object):
             point location vector(s) in FourSphereVolumeConductor.rxyz
             z-axis is defined in the direction of rzloc and the radial dipole.
         """
-        cos_theta = np.dot(self.rxyz,
-                           self._rzloc) / (np.linalg.norm(self.rxyz,
-                                                          axis=1) * np.linalg.norm(self._rzloc))
+        cos_theta = np.dot(self.rxyz, self._rzloc) / (
+            np.linalg.norm(self.rxyz, axis=1) * np.linalg.norm(self._rzloc))
         theta = np.arccos(cos_theta)
         return theta
 
@@ -709,13 +735,15 @@ class FourSphereVolumeConductor(object):
         # create masks to avoid computing phi when phi is not defined
         mask = np.ones(phi.shape, dtype=bool)
         # phi is not defined when theta= 0,pi or |p_tan| = 0
-        mask[(self._theta == 0) | (self._theta == np.pi)] = np.zeros(len(p_tan))
+        mask[(self._theta == 0) | (self._theta == np.pi)] = np.zeros(len(p_tan)
+                                                                     )
         mask[:, np.abs(np.linalg.norm(p_tan, axis=1)) == 0] = 0
 
         cos_phi = np.zeros(phi.shape)
         # compute cos_phi using mask to avoid zerodivision
         cos_phi[mask] = np.dot(rxy, x.T)[
-            mask] / np.outer(np.linalg.norm(rxy, axis=1), np.linalg.norm(x, axis=1))[mask]
+            mask] / np.outer(np.linalg.norm(rxy, axis=1),
+                             np.linalg.norm(x, axis=1))[mask]
 
         # compute phi in [0, pi]
         phi[mask] = np.arccos(cos_phi[mask])
@@ -755,7 +783,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         r: float
-            Distance from origin to brain electrode location in units of (µm)
+            Distance from origin to brain electrode location in units of [µm]
         theta: float
             Polar angle between brain electrode location and
             dipole location vector rzloc in units of (radians)
@@ -788,7 +816,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         r: float
-            Distance from origin to CSF electrode location in units of (µm)
+            Distance from origin to CSF electrode location in units of [µm]
         theta: float
             Polar angle between CSF electrode location and
             dipole location vector rzloc in units of (radians)
@@ -823,7 +851,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         r: float
-            Distance from origin to skull electrode location in units of (µm)
+            Distance from origin to skull electrode location in units of [µm]
         theta: float
             Polar angle between skull electrode location and
             dipole location vector rzloc in units of (radians)
@@ -859,7 +887,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         r: float
-            Distance from origin to scalp electrode location in units of (µm)
+            Distance from origin to scalp electrode location in units of [µm]
         theta: float
             Polar angle between scalp electrode location and
             dipole location vector rzloc in units of (radians)
@@ -895,7 +923,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         r: float
-            Distance from origin to brain electrode location in units of (µm)
+            Distance from origin to brain electrode location in units of [µm]
         theta: float
             Polar angle between brain electrode location and
             dipole location vector rzloc in units of (radians)
@@ -927,7 +955,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         r: float
-            Distance from origin to CSF electrode location in units of (µm)
+            Distance from origin to CSF electrode location in units of [µm]
         theta: float
             Polar angle between CSF electrode location and
             dipole location vector rzloc in units of (radians)
@@ -960,7 +988,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         r: float
-            Distance from origin to skull electrode location in units of (µm)
+            Distance from origin to skull electrode location in units of [µm]
         theta: float
             Polar angle between skull electrode location and
             dipole location vector rzloc in units of (radians)
@@ -993,7 +1021,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         r: float
-            Distance from origin to scalp electrode location in units of (µm)
+            Distance from origin to scalp electrode location in units of [µm]
         theta: float
             Polar angle between scalp electrode location and
             dipole location vector rzloc in units of (radians)
@@ -1090,8 +1118,8 @@ class FourSphereVolumeConductor(object):
     def _calc_csf_term1(self, n, r):
         yn = self._calc_yn(n)
         c1 = self._calc_c1n(n)
-        term1 = ((c1 + self._rz1 ** (n + 1)) * self.r12 * ((self.r1 * \
-                 r) / (self.r2 ** 2)) ** n / (self.r12**(2 * n + 1) + yn))
+        term1 = ((c1 + self._rz1 ** (n + 1)) * self.r12 * ((self.r1 * r) /
+                 (self.r2 ** 2)) ** n / (self.r12**(2 * n + 1) + yn))
         return term1
 
     def _calc_csf_term2(self, n, r):
@@ -1149,7 +1177,7 @@ class InfiniteVolumeConductor(object):
         potential: ndarray, dtype=float
             Shape (n_contacts, n_timesteps) array containing the electric
             potential at contact point(s) FourSphereVolumeConductor.r in units
-            of (mV) for all timesteps of current dipole moment p
+            of [mV] for all timesteps of current dipole moment p
 
         """
         dotprod = np.dot(r, p.T)
@@ -1174,7 +1202,7 @@ class InfiniteVolumeConductor(object):
         cell: Cell object from LFPy
         electrode_locs: ndarray, dtype=float
             Shape (n_contacts, 3) array containing n_contacts electrode
-            locations in cartesian coordinates in units of (µm).
+            locations in cartesian coordinates in units of [µm].
             All ``r_el`` in electrode_locs must be placed so that ``|r_el|`` is
             less than or equal to scalp radius and larger than
             the distance between dipole and sphere
@@ -1189,7 +1217,7 @@ class InfiniteVolumeConductor(object):
         potential: ndarray, dtype=float
             Shape (n_contacts, n_timesteps) array containing the electric
             potential at contact point(s) electrode_locs in units
-            of (mV) for all timesteps of neuron simulation
+            of [mV] for all timesteps of neuron simulation
 
         Examples
         --------
@@ -1241,7 +1269,7 @@ def get_current_dipole_moment(dist, current):
         dist is the length of each axial current.
         When current is an array of transmembrane
         currents, dist is the position vector of each
-        compartment middle. Unit is (µm).
+        compartment middle. Unit is [µm].
 
     Returns
     -------
@@ -1291,9 +1319,9 @@ def get_current_dipole_moment(dist, current):
 class MEG(object):
     """
     Basic class for computing magnetic field from current dipole moment.
-    For this purpose we use the Biot-Savart law derived from Maxwell's equations
-    under the assumption of negligible magnetic induction effects (Nunez and
-    Srinivasan, Oxford University Press, 2006):
+    For this purpose we use the Biot-Savart law derived from Maxwell's
+    equations under the assumption of negligible magnetic induction
+    effects [1]_:
 
     .. math:: \\mathbf{H} = \\frac{\\mathbf{p} \\times \\mathbf{R}}{4 \\pi R^3}
 
@@ -1302,7 +1330,10 @@ class MEG(object):
     :math:`R=|\\mathbf{R}|`
 
     Note that the magnetic field :math:`\\mathbf{H}` is related to the magnetic
-    field :math:`\\mathbf{B}` as :math:`\\mu_0 \\mathbf{H} = \\mathbf{B}-\\mathbf{M}`
+    field :math:`\\mathbf{B}` as
+
+    .. math:: \\mu_0 \\mathbf{H} = \\mathbf{B}-\\mathbf{M}
+
     where :math:`\\mu_0` is the permeability of free space (very close to
     permebility of biological tissues). :math:`\\mathbf{M}` denotes material
     magnetization (also ignored)
@@ -1313,28 +1344,37 @@ class MEG(object):
     sensor_locations: ndarray, dtype=float
         shape (n_locations x 3) array with x,y,z-locations of measurement
         devices where magnetic field of current dipole moments is calculated.
-        In unit of (µm)
+        In unit of [µm]
     mu: float
-        Permeability. Default is permeability of vacuum (:math:`\\mu_0 = 4*\\pi*10^{-7}` T*m/A)
+        Permeability. Default is permeability of vacuum
+        (:math:`\\mu_0 = 4*\\pi*10^{-7}` T*m/A)
 
+    References
+    ----------
+    .. [1] Nunez and Srinivasan, Oxford University Press, 2006
 
     Examples
     --------
     Define cell object, create synapse, compute current dipole moment:
 
     >>> import LFPy, os, numpy as np, matplotlib.pyplot as plt
-    >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc'),
+    >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
+    >>>                                          'ball_and_sticks.hoc'),
     >>>                  passive=True)
     >>> cell.set_pos(0., 0., 0.)
-    >>> syn = LFPy.Synapse(cell, idx=0, syntype='ExpSyn', weight=0.01, record_current=True)
+    >>> syn = LFPy.Synapse(cell, idx=0, syntype='ExpSyn', weight=0.01,
+    >>>                    record_current=True)
     >>> syn.set_spike_times_w_netstim()
     >>> cell.simulate(rec_current_dipole_moment=True)
 
-    Compute the dipole location as an average of segment locations weighted by membrane area:
+    Compute the dipole location as an average of segment locations weighted
+    by membrane area:
 
-    >>> dipole_location = (cell.area * np.c_[cell.xmid, cell.ymid, cell.zmid].T / cell.area.sum()).sum(axis=1)
+    >>> dipole_location = (cell.area * np.c_[cell.xmid, cell.ymid, cell.zmid].T
+    >>>                    / cell.area.sum()).sum(axis=1)
 
-    Instantiate the LFPy.MEG object, compute and plot the magnetic signal in a sensor location:
+    Instantiate the LFPy.MEG object, compute and plot the magnetic signal in a
+    sensor location:
 
     >>> sensor_locations = np.array([[1E4, 0, 0]])
     >>> meg = LFPy.MEG(sensor_locations)
@@ -1380,7 +1420,7 @@ class MEG(object):
             shape (n_timesteps x 3) array with x,y,z-components of current-
             dipole moment time series data in units of (nA µm)
         dipole_location: ndarray, dtype=float
-            shape (3, ) array with x,y,z-location of dipole in units of (µm)
+            shape (3, ) array with x,y,z-location of dipole in units of [µm]
 
         Returns
         -------
@@ -1416,7 +1456,7 @@ class MEG(object):
             R = r - dipole_location
             assert(R.ndim == 1 and R.size == 3)
             try:
-                assert(np.allclose(R, np.zeros(3)) == False)
+                assert(not np.allclose(R, np.zeros(3)))
             except AssertionError:
                 raise AssertionError('Identical dipole and sensor location.')
             H[i, ] = np.cross(current_dipole_moment,
@@ -1449,14 +1489,17 @@ class MEG(object):
         Define cell object, create synapse, compute current dipole moment:
 
         >>> import LFPy, os, numpy as np, matplotlib.pyplot as plt
-        >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test', 'ball_and_sticks.hoc'),
+        >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
+        >>>                                          'ball_and_sticks.hoc'),
         >>>                  passive=True)
         >>> cell.set_pos(0., 0., 0.)
-        >>> syn = LFPy.Synapse(cell, idx=0, syntype='ExpSyn', weight=0.01, record_current=True)
+        >>> syn = LFPy.Synapse(cell, idx=0, syntype='ExpSyn', weight=0.01,
+        >>>                    record_current=True)
         >>> syn.set_spike_times_w_netstim()
         >>> cell.simulate(rec_vmem=True)
 
-        Instantiate the LFPy.MEG object, compute and plot the magnetic signal in a sensor location:
+        Instantiate the LFPy.MEG object, compute and plot the magnetic signal
+        in a sensor location:
 
         >>> sensor_locations = np.array([[1E4, 0, 0]])
         >>> meg = LFPy.MEG(sensor_locations)
@@ -1483,5 +1526,6 @@ class MEG(object):
                 r_rel = R_ - r_
                 H[i, :, :] += np.dot(i_.reshape((-1, 1)),
                                      np.cross(d_, r_rel).reshape((1, -1))
-                                     ) / (4 * np.pi * np.sqrt((r_rel**2).sum())**3)
+                                     ) / (
+                                     4 * np.pi * np.sqrt((r_rel**2).sum())**3)
         return H

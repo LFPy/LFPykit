@@ -599,7 +599,7 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         infinite homogeneous media
         """
         # current magnitude
-        I = 1.
+        current = 1.
         # conductivity
         sigma = 0.3
         # sphere radius
@@ -615,10 +615,10 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         # predict potential
         sphere = lfpy_forward_models.OneSphereVolumeConductor(
             r=r, R=R, sigma_i=sigma, sigma_o=sigma)
-        phi = sphere.calc_potential(rs=rs, I=I)
+        phi = sphere.calc_potential(rs=rs, current=current)
 
         # ground truth
-        phi_gt = I / (4 * np.pi * sigma * abs(radius - rs))
+        phi_gt = current / (4 * np.pi * sigma * abs(radius - rs))
 
         # test
         np.testing.assert_almost_equal(phi, phi_gt)
@@ -629,7 +629,7 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         infinite homogeneous media
         """
         # current magnitude
-        I = np.ones(10)
+        current = np.ones(10)
         # conductivity
         sigma = 0.3
         # sphere radius
@@ -645,13 +645,14 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         # predict potential
         sphere = lfpy_forward_models.OneSphereVolumeConductor(
             r=r, R=R, sigma_i=sigma, sigma_o=sigma)
-        phi = sphere.calc_potential(rs=rs, I=I)
+        phi = sphere.calc_potential(rs=rs, current=current)
 
         # ground truth
-        phi_gt = I[0] / (4 * np.pi * sigma * abs(radius - rs))
+        phi_gt = current[0] / (4 * np.pi * sigma * abs(radius - rs))
 
         # test
-        np.testing.assert_almost_equal(phi, np.array([phi_gt] * I.size).T)
+        np.testing.assert_almost_equal(phi,
+                                       np.array([phi_gt] * current.size).T)
 
     @unittest.skipUnless(LFPy_imported, "skipping: LFPy not installed")
     def test_OneSphereVolumeConductor_02(self):
@@ -660,7 +661,7 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         infinite homogeneous media
         """
         # current magnitude
-        I = 1.
+        current = 1.
         # conductivity
         sigma = 0.3
         # sphere radius
@@ -684,17 +685,21 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         # predict potential
         sphere = lfpy_forward_models.OneSphereVolumeConductor(
             r=r, R=R, sigma_i=sigma, sigma_o=sigma)
-        mapping = sphere.calc_mapping(cell=cell, n_max=100)
+        mapping = sphere.calc_mapping(cell=get_cell_geometry_from_lfpy(cell),
+                                      n_max=100)
 
         # ground truth and tests
         for i, x in enumerate(cell.xmid):
             dist = radius - x
             dist[abs(dist) < cell.diam[i]] = cell.diam[i]
-            phi_gt = I / (4 * np.pi * sigma * abs(dist))
+            phi_gt = current / (4 * np.pi * sigma * abs(dist))
             np.testing.assert_almost_equal(mapping[:, i], phi_gt)
 
 
-######## Functions used by tests: ########################################
+'''
+Functions used by tests:
+'''
+
 
 def make_class_object(rz, r_el):
     '''Return class object fs'''
@@ -795,3 +800,24 @@ def cell_w_synapse_from_sections_w_electrode(morphology, electrode_locs):
         rec_current_dipole_moment=True,
         rec_vmem=True)
     return cell, electrode
+
+
+def get_cell_geometry_from_lfpy(cell):
+    '''
+    Get CellGeometry object from LFPy.Cell object
+
+    Parameters
+    ----------
+    cell: object
+        LFPy.Cell like object
+
+    Returns
+    -------
+    CellGeometry object
+    '''
+    cell_geometry = lfpy_forward_models.CellGeometry(
+        x=np.c_[cell.xstart, cell.xend],
+        y=np.c_[cell.ystart, cell.yend],
+        z=np.c_[cell.zstart, cell.zend],
+        d=cell.diam)
+    return cell_geometry

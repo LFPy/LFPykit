@@ -62,6 +62,35 @@ class :class:`RecExtElectrode`
     :show-inheritance:
     :undoc-members:
 
+class :class:`OneSphereVolumeConductor`
+=======================================
+.. autoclass:: lfpy_forward_models.OneSphereVolumeConductor
+    :members:
+    :show-inheritance:
+    :undoc-members:
+
+class :class:`FourSphereVolumeConductor`
+========================================
+.. autoclass:: lfpy_forward_models.FourSphereVolumeConductor
+    :members:
+    :show-inheritance:
+    :undoc-members:
+
+class :class:`InfiniteVolumeConductor`
+======================================
+.. autoclass:: lfpy_forward_models.InfiniteVolumeConductor
+    :members:
+    :show-inheritance:
+    :undoc-members:
+
+class :class:`MEG`
+==================
+.. autoclass:: lfpy_forward_models.MEG
+    :members:
+    :show-inheritance:
+    :undoc-members:
+
+
 Indices and tables
 ==================
 
