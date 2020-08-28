@@ -44,7 +44,10 @@ setuptools.setup(
     python_requires='>=3.7',
     install_requires=[
         'numpy>=1.18',
+        'scipy',
+        'meautility'
         ],
+    package_data={'lfpy_forward_models': [os.path.join('tests', '*.npz')]},
     extras_require={'tests': ['pytest'],
                     'docs': ['sphinx', 'numpydoc', 'sphinx_rtd_theme',
                              'recommonmark'],
