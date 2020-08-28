@@ -64,9 +64,10 @@ class CurrentDipoleMoment(LinearModel):
     .. math:: \\mathbf{P} = \\mathbf{M} \\mathbf{I}
 
 
-    The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps) with
-    unit [nA], and the rows of :math:`\\mathbf{P}` represent the
-    `x`-, `y`- and `z`-components of the current diple moment for every time step.
+    The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps)
+    with unit [nA], and the rows of :math:`\\mathbf{P}` represent the
+    `x`-, `y`- and `z`-components of the current diple moment for every time
+    step.
 
     The current dipole moment can be used to compute distal measures of
     neural activity such as the EEG and MEG using

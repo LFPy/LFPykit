@@ -1202,8 +1202,8 @@ class MEG(object):
 
         References
         ----------
-        .. [1] Blagoev et al. (2007) Modelling the magnetic signature of neuronal
-            tissue. NeuroImage 37 (2007) 137–148
+        .. [1] Blagoev et al. (2007) Modelling the magnetic signature of
+            neuronal tissue. NeuroImage 37 (2007) 137–148
             DOI: 10.1016/j.neuroimage.2007.04.033
 
         Examples
