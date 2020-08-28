@@ -22,11 +22,12 @@ import MEAutility as mu
 
 class LinearModel(object):
     '''
-    Base LinearModel class skeleton that defines a 2D linear response
-    matrix :math:`M` between transmembrane currents :math:`I` [nA] of a
-    multicompartment neuron model and some measurement :math:`Y` as
+    Base class that defines a 2D linear response matrix :math:`\\mathbf{M}`
+    between transmembrane currents
+    :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and some
+    measurement :math:`\\mathbf{Y}` as
 
-    .. math:: Y = MI
+    .. math:: \\mathbf{Y} = \\mathbf{M} \\mathbf{I}
 
     LinearModel only creates a mapping that returns the currents themselves.
     The class is suitable as a base class for other linear model
@@ -35,7 +36,7 @@ class LinearModel(object):
     Parameters
     ----------
     cell: object
-        CellGeometry instance or similar.
+        ``lfpy_forward_models.CellGeometry`` instance or similar.
     '''
 
     def __init__(self, cell):
@@ -55,26 +56,33 @@ class LinearModel(object):
 
 class CurrentDipoleMoment(LinearModel):
     '''
-    LinearModel subclass that defines a 2D linear response matrix :math:`M`
-    between transmembrane current array :math:`I` [nA] of a multicompartment
-    neuron model and the corresponding current dipole moment :math:`P` [nA um]
-    as
+    `LinearModel` subclass that defines a 2D linear response matrix
+    :math:`\\mathbf{M}` between transmembrane current array
+    :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
+    corresponding current dipole moment :math:`\\mathbf{P}` [nA um] as
 
-    .. math:: P = MI
+    .. math:: \\mathbf{P} = \\mathbf{M} \\mathbf{I}
 
 
-    The current :math:`I` is an ndarray of shape (n_seg, n_tsteps) with
-    unit [nA], and the rows of :math:`P` represent the x-, y- and z-components
-    of the current diple moment for every time step.
+    The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps) with
+    unit [nA], and the rows of :math:`\\mathbf{P}` represent the
+    `x`-, `y`- and `z`-components of the current diple moment for every time step.
 
     The current dipole moment can be used to compute distal measures of
     neural activity such as the EEG and MEG using
-    LFPy.FourSphereVolumeConductor or LFPy.MEG, respectively
+    `lfpy_forward_models.eegmegcalc.FourSphereVolumeConductor` or
+    `lfpy_forward_models.eegmegcalc.MEG`, respectively
 
     Parameters
     ----------
     cell: object
         CellGeometry instance or similar.
+
+    See also
+    --------
+    LinearModel
+    eegmegcalc.FourSphereVolumeConductor
+    eegmegcalc.MEG
 
     Examples
     --------
@@ -119,32 +127,38 @@ class CurrentDipoleMoment(LinearModel):
 
 class PointSourcePotential(LinearModel):
     '''
-    LinearModel subclass that defines a 2D linear response matrix :math:`M`
-    between transmembrane current array :math:`I` [nA] of a multicompartment
-    neuron model and the corresponding extracellular electric potential
-    :math:`V_{ex}` [mV] as
+    `LinearModel` subclass that defines a 2D linear response matrix
+    :math:`\\mathbf{M}` between transmembrane current array
+    :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
+    corresponding extracellular electric potential
+    :math:`\\mathbf{V}_{ex}` [mV] as
 
-    .. math:: V_{ex} = MI
+    .. math:: \\mathbf{V}_{ex} = \\mathbf{M} \\mathbf{I}
 
-    The current :math:`I` is an ndarray of shape (n_seg, n_tsteps) with
-    unit [nA], and each row indexed by :math:`j` of :math:`V_{ex}` represents
-    the electric potential at each measurement site for every time step.
-    The elements of :math:`M` are computed as
+    The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps)
+    with unit [nA], and each row indexed by :math:`j` of
+    :math:`\\mathbf{V}_{ex}` represents the electric potential at each
+    measurement site for every time step.
 
-    .. math:: M_{ji} = 1 / (4 \\pi \\sigma |r_i - r_j|)
+    The elements of :math:`\\mathbf{M}` are computed as
+
+    .. math:: M_{ji} = 1 / (4 \\pi \\sigma |\\mathbf{r}_i - \\mathbf{r}_j|)
 
     where :math:`\\sigma` is the electric conductivity of the extracellular
-    medium, :math:`r_i` the midpoint coordinate of segment :math:`i`
-    and :math:`r_j` the coordinate of measurement site :math:`j` [1]_, [2]_.
+    medium, :math:`\\mathbf{r}_i` the midpoint coordinate of segment :math:`i`
+    and :math:`\\mathbf{r}_j` the coordinate of measurement
+    site :math:`j` [1]_, [2]_.
 
     Assumptions:
+
         - the extracellular conductivity :math:`\\sigma` is infinite,
-          homogeneous, frequency independent (linear) and isotropic
+          homogeneous, frequency independent (linear) and isotropic.
         - each segment is treated as a point source located at the midpoint
-          between its start and end point coordinate
-        - each measurement site :math:`r_j = (x_j, y_j, z_j)` is treated
-          as a point
-        - :math:`|r_i - r_j| >= d_i / 2`, where `d_i` is the segment diameter.
+          between its start and end point coordinate.
+        - each measurement site :math:`\\mathbf{r}_j = (x_j, y_j, z_j)` is
+          treated as a point.
+        - :math:`|\\mathbf{r}_i - \\mathbf{r}_j| >= d_i / 2`, where
+          :math:`d_i` is the segment diameter.
 
     Parameters
     ----------
@@ -158,6 +172,12 @@ class PointSourcePotential(LinearModel):
         z-position of measurement sites [um]
     sigma: float > 0
         scalar extracellular conductivity [S/m]
+
+    See also
+    --------
+    LinearModel
+    LineSourcePotential
+    RecExtElectrode
 
     Examples
     --------
@@ -257,17 +277,20 @@ class PointSourcePotential(LinearModel):
 
 class LineSourcePotential(LinearModel):
     '''
-    LinearModel subclass that defines a 2D linear response matrix :math:`M`
-    between transmembrane current array :math:`I` [nA] of a multicompartment
-    neuron model and the corresponding extracellular electric potential
-    :math:`V_ex` [mV] as
+    `LinearModel` subclass that defines a 2D linear response matrix
+    :math:`\\mathbf{M}` between transmembrane current array
+    :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
+    corresponding extracellular electric potential
+    :math:`\\mathbf{V}_{ex}` [mV] as
 
-    .. math:: V_{ex} = MI
+    .. math:: \\mathbf{V}_{ex} = \\mathbf{M} \\mathbf{I}
 
-    The current :math:`I` is an ndarray of shape (n_seg, n_tsteps) with
-    unit [nA], and each row indexed by :math:`j` of :math:`V_{ex}` represents
-    the electric potential at each measurement site for every time step.
-    The elements of :math:`M` are computed as
+    The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps)
+    with unit [nA], and each row indexed by :math:`j` of
+    :math:`\\mathbf{V}_{ex}` represents the electric potential at each
+    measurement site for every time step.
+
+    The elements of :math:`\\mathbf{M}` are computed as
 
     .. math:: M_{ji} = \\frac{1}{ 4 \\pi \\sigma L_i } \\log
         \\left|
@@ -284,12 +307,13 @@ class LineSourcePotential(LinearModel):
     end of the segment is denoted :math:`l_{ji}= L_i + h_{ji}` [1]_, [2]_.
 
     Assumptions:
+
         - the extracellular conductivity :math:`\\sigma` is infinite,
           homogeneous, frequency independent (linear) and isotropic
         - each segment is treated as a straigh line source with homogeneous
           current density between its start and end point coordinate
-        - each measurement site :math:`r_j = (x_j, y_j, z_j)` is treated
-          as a point
+        - each measurement site :math:`\\mathbf{r}_j = (x_j, y_j, z_j)` is
+          treated as a point
         - The minimum distance to a line source is set equal to segment radius.
 
     Parameters
@@ -304,6 +328,12 @@ class LineSourcePotential(LinearModel):
         z-position of measurement sites [um]
     sigma: float > 0
         scalar extracellular conductivity [S/m]
+
+    See also
+    --------
+    LinearModel
+    PointSourcePotential
+    RecExtElectrode
 
     Examples
     --------
@@ -406,15 +436,44 @@ class RecExtElectrode(LinearModel):
     Main class that represents an extracellular electric recording devices such
     as a laminar probe.
 
+    This class is a `LinearModel` subclass that defines a 2D linear response
+    matrix :math:`\\mathbf{M}` between transmembrane current array
+    :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
+    corresponding extracellular electric potential
+    :math:`\\mathbf{V}_{ex}` [mV] as
+
+    .. math:: \\mathbf{V}_{ex} = \\mathbf{M} \\mathbf{I}
+
+    The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps)
+    with unit [nA], and each row indexed by :math:`j` of
+    :math:`\\mathbf{V}_{ex}` represents the electric potential at each
+    measurement site for every time step.
+
+    The class differ from `PointSourcePotential` and `LineSourcePotential` by:
+
+        - supporting anisotropic volume conductors [1]_
+        - supporting probe geometry specifications using the `MEAutility`
+          (https://meautility.readthedocs.io/en/latest/,
+          https://github.com/alejoe91/MEAutility).
+        - supporting electrode contact points with finite extents [2]_, [3]_
+        - switching between point- and linesources, and a combined method that
+          assumes that the root element at segment index 0 is spherical.
+
+    See also
+    --------
+    LinearModel
+    PointSourcePotential
+    LineSourcePotential
+
     Parameters
     ----------
     cell: object
-        CellGeometry instance or similar.
+        `CellGeometry` instance or similar.
     sigma: float or list/ndarray of floats
         extracellular conductivity in units of [S/m]. A scalar value implies an
         isotropic extracellular conductivity. If a length 3 list or array of
         floats is provided, these values corresponds to an anisotropic
-        conductor with conductivities [sigma_x, sigma_y, sigma_z] accordingly.
+        conductor with conductivities :math:`[\\sigma_x,\\sigma_y,\\sigma_z]`.
     probe: MEAutility MEA object or None
         MEAutility probe object
     x, y, z: ndarray
@@ -644,6 +703,21 @@ class RecExtElectrode(LinearModel):
     >>> mu.plot_mea_recording(V_ex, probe)
     >>> plt.axis('tight')
     >>> plt.show()
+
+    References
+    ----------
+    .. [1] Ness, T. V., Chintaluri, C., Potworowski, J., Leski, S., Glabska,
+       H., Wójcik, D. K., et al. (2015). Modelling and analysis of electrical
+       potentials recorded in microelectrode arrays (MEAs).
+       Neuroinformatics 13:403–426. doi: 10.1007/s12021-015-9265-6
+    .. [2] Linden H, Hagen E, Leski S, Norheim ES, Pettersen KH, Einevoll GT
+       (2014) LFPy: a tool for biophysical simulation of extracellular
+       potentials generated by detailed model neurons. Front.
+       Neuroinform. 7:41. doi: 10.3389/fninf.2013.00041
+    .. [3] Hagen E, Næss S, Ness TV and Einevoll GT (2018) Multimodal Modeling
+       of Neural Network Activity: Computing LFP, ECoG, EEG, and MEG
+       Signals With LFPy 2.0. Front. Neuroinform. 12:92.
+       doi: 10.3389/fninf.2018.00092
     """
 
     def __init__(self, cell, sigma=0.3, probe=None,
@@ -874,10 +948,24 @@ class OneSphereVolumeConductor(LinearModel):
     point charge in an dielectric sphere embedded in dielectric media [1]_,
     which is mathematically equivalent to a current source in conductive media.
 
+
+    This class is a `LinearModel` subclass that defines a 2D linear response
+    matrix :math:`\\mathbf{M}` between transmembrane current array
+    :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
+    corresponding extracellular electric potential
+    :math:`\\mathbf{V}_{ex}` [mV] as
+
+    .. math:: \\mathbf{V}_{ex} = \\mathbf{M} \\mathbf{I}
+
+    The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps)
+    with unit [nA], and each row indexed by :math:`j` of
+    :math:`\\mathbf{V}_{ex}` represents the electric potential at each
+    measurement site for every time step.
+
     Parameters
     ----------
     cell: object or None
-        CellGeometry instance or similar. If cell==None
+        `CellGeometry` instance or similar.
     r: ndarray, dtype=float
         shape(3, n_points) observation points in space in spherical coordinates
         (radius, theta, phi) relative to the center of the sphere.
@@ -1076,6 +1164,10 @@ class OneSphereVolumeConductor(LinearModel):
         .. [1] Shaozhong Deng (2008), Journal of Electrostatics 66:549-560.
             DOI: 10.1016/j.elstat.2008.06.003
 
+        Raises
+        ------
+        Exception
+            if `cell is None`
 
         Examples
         --------
