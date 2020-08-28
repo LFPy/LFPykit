@@ -274,6 +274,7 @@ class FourSphereVolumeConductor(object):
         Ni, Nt, Nd = multi_p.shape
         potential = np.zeros((N_elec, Nt))
         for i in range(Ni):
+            # p = multi_p[i].T  # QUICKFIX !!!!!!!!!!!!!!!!!!!!!!!!
             pot = self.calc_potential(multi_p[i], multi_p_locs[i])
             potential += pot
         return potential
@@ -884,7 +885,7 @@ class InfiniteVolumeConductor(object):
         Parameters
         ----------
         p: ndarray, dtype=float
-            Shape (n_timesteps, 3) array containing the x,y,z components of the
+            Shape (3, n_timesteps) array containing the x,y,z components of the
             current dipole moment in units of (nA*µm) for all timesteps
         r: ndarray, dtype=float
             Shape (n_contacts, 3) array contaning the displacement vectors
@@ -898,9 +899,8 @@ class InfiniteVolumeConductor(object):
             of [mV] for all timesteps of current dipole moment p
 
         """
-        dotprod = np.dot(r, p.T)
-        r_factor = np.linalg.norm(r, axis=1)**3
-        phi = 1. / (4 * np.pi * self.sigma) * (dotprod.T / r_factor).T
+        phi = (r @ p) / (4 * np.pi * self.sigma *
+                         np.linalg.norm(r, axis=-1, keepdims=True)**3)
         return phi
 
     def get_multi_dipole_potential(
@@ -966,7 +966,7 @@ class InfiniteVolumeConductor(object):
         Ni, Nt, Nd = multi_p.shape
         potentials = np.zeros((N_elec, Nt))
         for i in range(Ni):
-            p = multi_p[i]
+            p = multi_p[i].T  # QUICKFIX!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             r = electrode_locs - multi_p_locs[i]
             pot = self.get_dipole_potential(p, r)
             potentials += pot

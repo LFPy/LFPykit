@@ -352,7 +352,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         sigmas = [0.3, 0.3, 0.3 + 1e-16, 0.3]
         radii = [10., 20 * 1e6, 30. * 1e6, 40. * 1e6]
         rz = np.array([0., 0., 3.])
-        p = np.array([[0., 0., 100.], [50., 50., 0.]])
+        p = np.array([[0., 0., 100.], [50., 50., 0.]]).T
         r_elec = np.array([[0., 0., 9.],
                            [0., 0., 15.],
                            [0., 0., 25.],
@@ -363,7 +363,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                            [0., 40., 0.]])
         four_s = eegmegcalc.FourSphereVolumeConductor(
             r_elec, radii, sigmas)
-        pots_4s = four_s.calc_potential(p, rz)
+        pots_4s = four_s.calc_potential(p.T, rz)
         inf_s = eegmegcalc.InfiniteVolumeConductor(0.3)
         pots_inf = inf_s.get_dipole_potential(p, r_elec - rz)
 
@@ -523,7 +523,7 @@ class testInfiniteVolumeConductor(unittest.TestCase):
     def test_get_dipole_potential(self):
         sigma = 0.3
         r = np.array([[0., 0., 1.], [0., 1., 0.]])
-        p = np.array([[0., 0., 4 * np.pi * 0.3], [0., 4 * np.pi * 0.3, 0.]])
+        p = np.array([[0., 0., 4 * np.pi * 0.3], [0., 4 * np.pi * 0.3, 0.]]).T
         inf_model = eegmegcalc.InfiniteVolumeConductor(sigma)
         phi = inf_model.get_dipole_potential(p, r)
         np.testing.assert_allclose(phi, np.array([[1., 0.], [0., 1.]]))
