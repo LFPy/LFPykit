@@ -53,8 +53,7 @@ GNU General Public License for more details.
 
 from .version import version as __version__
 
-from .cell import CellGeometry
+from .cellgeometry import CellGeometry
 from .models import LinearModel, CurrentDipoleMoment, PointSourcePotential, \
     LineSourcePotential, RecExtElectrode
-from .eegmegcalc import MEG, InfiniteVolumeConductor, \
-    OneSphereVolumeConductor, FourSphereVolumeConductor
+from . import eegmegcalc

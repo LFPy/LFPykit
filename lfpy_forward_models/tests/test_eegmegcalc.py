@@ -29,15 +29,16 @@ try:
 except ImportError:
     neuron_imported = False
 import lfpy_forward_models
+from lfpy_forward_models import CellGeometry, eegmegcalc
 
 
 class testMEG(unittest.TestCase):
     """
-    test class lfpy_forward_models.MEG
+    test class eegmegcalc.MEG
     """
 
     def test_MEG_00(self):
-        '''test lfpy_forward_models.MEG.calculate_H()'''
+        '''test eegmegcalc.MEG.calculate_H()'''
         current_dipole_moment = np.zeros((11, 3))
         current_dipole_moment[:, 0] += 1.
         dipole_location = np.zeros(3)
@@ -50,12 +51,12 @@ class testMEG(unittest.TestCase):
         gt[4, :, 2] = -1. / 4 / np.pi
         gt[5, :, 1] = 1. / 4 / np.pi
 
-        meg = lfpy_forward_models.MEG(sensor_locations)
+        meg = eegmegcalc.MEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
 
     def test_MEG_01(self):
-        '''test lfpy_forward_models.MEG.calculate_H()'''
+        '''test eegmegcalc.MEG.calculate_H()'''
         current_dipole_moment = np.zeros((11, 3))
         current_dipole_moment[:, 1] += 1.
         dipole_location = np.zeros(3)
@@ -68,12 +69,12 @@ class testMEG(unittest.TestCase):
         gt[3, :, 2] = 1. / 4 / np.pi
         gt[5, :, 0] = -1. / 4 / np.pi
 
-        meg = lfpy_forward_models.MEG(sensor_locations)
+        meg = eegmegcalc.MEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
 
     def test_MEG_02(self):
-        '''test lfpy_forward_models.MEG.calculate_H()'''
+        '''test eegmegcalc.MEG.calculate_H()'''
         current_dipole_moment = np.zeros((11, 3))
         current_dipole_moment[:, 2] += 1.
         dipole_location = np.zeros(3)
@@ -87,12 +88,12 @@ class testMEG(unittest.TestCase):
         gt[3, :, 1] = -1. / 4 / np.pi
         gt[4, :, 0] = 1. / 4 / np.pi
 
-        meg = lfpy_forward_models.MEG(sensor_locations)
+        meg = eegmegcalc.MEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
 
     def test_MEG_03(self):
-        '''test lfpy_forward_models.MEG.calculate_H()'''
+        '''test eegmegcalc.MEG.calculate_H()'''
         current_dipole_moment = np.zeros((1, 3))
         current_dipole_moment[:, 0] += 1.
         dipole_location = np.zeros(3)
@@ -105,12 +106,12 @@ class testMEG(unittest.TestCase):
         gt[4, :, 2] = -1. / 4 / np.pi
         gt[5, :, 1] = 1. / 4 / np.pi
 
-        meg = lfpy_forward_models.MEG(sensor_locations)
+        meg = eegmegcalc.MEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
 
     def test_MEG_04(self):
-        '''test lfpy_forward_models.MEG.calculate_H()'''
+        '''test eegmegcalc.MEG.calculate_H()'''
         current_dipole_moment = np.zeros((1, 3))
         current_dipole_moment[:, 1] += 1.
         dipole_location = np.zeros(3)
@@ -123,12 +124,12 @@ class testMEG(unittest.TestCase):
         gt[3, :, 2] = 1. / 4 / np.pi
         gt[5, :, 0] = -1. / 4 / np.pi
 
-        meg = lfpy_forward_models.MEG(sensor_locations)
+        meg = eegmegcalc.MEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
 
     def test_MEG_05(self):
-        '''test lfpy_forward_models.MEG.calculate_H()'''
+        '''test eegmegcalc.MEG.calculate_H()'''
         current_dipole_moment = np.zeros((1, 3))
         current_dipole_moment[:, 2] += 1.
         dipole_location = np.zeros(3)
@@ -141,23 +142,23 @@ class testMEG(unittest.TestCase):
         gt[3, :, 1] = -1. / 4 / np.pi
         gt[4, :, 0] = 1. / 4 / np.pi
 
-        meg = lfpy_forward_models.MEG(sensor_locations)
+        meg = eegmegcalc.MEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
 
 
 class testFourSphereVolumeConductor(unittest.TestCase):
     """
-    test class lfpy_forward_models.FourSphereVolumeConductor
+    test class eegmegcalc.FourSphereVolumeConductor
     """
 
     def test_rz_params(self):
         radii = [1., 2., 4., 8.]
         sigmas = [1., 2., 4., 8.]
         r_el = np.array([[1., 0., 7.]])
-        fs = lfpy_forward_models.FourSphereVolumeConductor(r_electrodes=r_el,
-                                                           radii=radii,
-                                                           sigmas=sigmas)
+        fs = eegmegcalc.FourSphereVolumeConductor(r_electrodes=r_el,
+                                                  radii=radii,
+                                                  sigmas=sigmas)
 
         rz1 = np.array([0., 0., 0.])
         with np.testing.assert_raises(RuntimeError):
@@ -178,13 +179,13 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         sigmas = [1., 2., 4., 8.]
         r_el = np.array([[0., 0., 1.5]])
         with np.testing.assert_raises(RuntimeError):
-            lfpy_forward_models.FourSphereVolumeConductor(r_el, radii1, sigmas)
+            eegmegcalc.FourSphereVolumeConductor(r_el, radii1, sigmas)
         with np.testing.assert_raises(RuntimeError):
-            lfpy_forward_models.FourSphereVolumeConductor(r_el, radii2, sigmas)
+            eegmegcalc.FourSphereVolumeConductor(r_el, radii2, sigmas)
         with np.testing.assert_raises(RuntimeError):
-            lfpy_forward_models.FourSphereVolumeConductor(r_el, radii3, sigmas)
+            eegmegcalc.FourSphereVolumeConductor(r_el, radii3, sigmas)
         with np.testing.assert_raises(RuntimeError):
-            lfpy_forward_models.FourSphereVolumeConductor(r_el, radii4, sigmas)
+            eegmegcalc.FourSphereVolumeConductor(r_el, radii4, sigmas)
 
     def test_check_params01(self):
         '''Test that Error is raised if invalid entries in sigmas'''
@@ -195,13 +196,13 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         sigmas4 = [1., 2., 4., -8.]
         r_el = np.array([[0., 0., 1.5]])
         with np.testing.assert_raises(ValueError):
-            lfpy_forward_models.FourSphereVolumeConductor(r_el, radii, sigmas1)
+            eegmegcalc.FourSphereVolumeConductor(r_el, radii, sigmas1)
         with np.testing.assert_raises(RuntimeError):
-            lfpy_forward_models.FourSphereVolumeConductor(r_el, radii, sigmas2)
+            eegmegcalc.FourSphereVolumeConductor(r_el, radii, sigmas2)
         with np.testing.assert_raises(RuntimeError):
-            lfpy_forward_models.FourSphereVolumeConductor(r_el, radii, sigmas3)
+            eegmegcalc.FourSphereVolumeConductor(r_el, radii, sigmas3)
         with np.testing.assert_raises(RuntimeError):
-            lfpy_forward_models.FourSphereVolumeConductor(r_el, radii, sigmas4)
+            eegmegcalc.FourSphereVolumeConductor(r_el, radii, sigmas4)
 
     def test_check_params02(self):
         '''Test that ValueError is raised if electrode outside head'''
@@ -210,9 +211,9 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         r_el1 = np.array([[0., 0., 15.]])
         r_el2 = np.array([[0., 0., 1.5], [12., 0., 0.]])
         with np.testing.assert_raises(ValueError):
-            lfpy_forward_models.FourSphereVolumeConductor(r_el1, radii, sigmas)
+            eegmegcalc.FourSphereVolumeConductor(r_el1, radii, sigmas)
         with np.testing.assert_raises(ValueError):
-            lfpy_forward_models.FourSphereVolumeConductor(r_el2, radii, sigmas)
+            eegmegcalc.FourSphereVolumeConductor(r_el2, radii, sigmas)
 
     def test_decompose_dipole01(self):
         '''Test radial and tangential parts of dipole sums to dipole'''
@@ -241,7 +242,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                            [80000., 2000., 3000.],
                            [-2000., -80000., -3000.]])
         el_locs = np.array([[90000., 5000., -5000.]])
-        fs = lfpy_forward_models.FourSphereVolumeConductor(
+        fs = eegmegcalc.FourSphereVolumeConductor(
             el_locs, radii, sigmas)
         for p_loc in p_locs:
             fs._rz_params(p_loc)
@@ -266,7 +267,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         r_el = np.array([[0., 0., 90.], [0., 0., -90.],
                          [0., 70., 0.], [0., -70., 0.], [0., 10., 10.]])
         fs = make_class_object(rz1, r_el)
-        theta = fs.calc_theta()
+        theta = fs._calc_theta()
         np.testing.assert_almost_equal(theta, np.array(
             [0., np.pi, np.pi / 2, np.pi / 2, np.pi / 4]))
 
@@ -277,7 +278,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                          [1., 1., 4.], [0., 0., 89.], [0., 0., -80.]])
         fs = make_class_object(rz1, r_el)
         P_tan = np.array([[0., 1., 0.], [1., 0., 0.], [0., 0., 0.]])
-        phi = fs.calc_phi(P_tan)
+        phi = fs._calc_phi(P_tan)
         np.testing.assert_almost_equal(phi,
                                        np.array([[np.pi / 2, np.pi, 0.],
                                                  [-3 * np.pi / 4,
@@ -298,7 +299,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                          [-5.59822325e3, -9.69640709e3, -9.93712111e4],
                          [99990., 0., 0.001]])
 
-        fs = lfpy_forward_models.FourSphereVolumeConductor(r_el, radii, sigmas)
+        fs = eegmegcalc.FourSphereVolumeConductor(r_el, radii, sigmas)
         fs._rz_params(rz)
 
         P1 = np.array([[0., 0., 123456789.],
@@ -310,7 +311,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                        [1e-11, 1e-12, 1000.],
                        [1e-15, 0, 1000.]])
         p_rad, p_tan = fs._decompose_dipole(P1)
-        phi = fs.calc_phi(p_tan)
+        phi = fs._calc_phi(p_tan)
 
         np.testing.assert_equal(np.isnan(phi).any(), False)
 
@@ -360,10 +361,10 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                            [0., 15., 0.],
                            [0., 25., 0.],
                            [0., 40., 0.]])
-        four_s = lfpy_forward_models.FourSphereVolumeConductor(
+        four_s = eegmegcalc.FourSphereVolumeConductor(
             r_elec, radii, sigmas)
         pots_4s = four_s.calc_potential(p, rz)
-        inf_s = lfpy_forward_models.InfiniteVolumeConductor(0.3)
+        inf_s = eegmegcalc.InfiniteVolumeConductor(0.3)
         pots_inf = inf_s.get_dipole_potential(p, r_elec - rz)
 
         np.testing.assert_allclose(pots_4s, pots_inf, rtol=1e-6)
@@ -383,7 +384,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         sigmas = fem_sim['sigmas']  # [S/cm]
         ele_coords = fem_sim['ele_coords']  # [µm]
 
-        fs = lfpy_forward_models.FourSphereVolumeConductor(
+        fs = eegmegcalc.FourSphereVolumeConductor(
             ele_coords, radii, sigmas)
         k_mV_to_muV = 1e3
         pot_analytical = fs.calc_potential(
@@ -421,7 +422,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                             [[0., 0., -99000.]]])
 
         for i in range(len(p_locs)):
-            fs = lfpy_forward_models.FourSphereVolumeConductor(
+            fs = eegmegcalc.FourSphereVolumeConductor(
                 el_locs[i], radii, sigmas)
             phi = fs.calc_potential(dips[i], p_locs[i])
             if i == 0:
@@ -451,7 +452,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         cell.set_pos(x=0, y=0, z=100)
         t_point = [1, 100, -1]
 
-        MD_4s = lfpy_forward_models.FourSphereVolumeConductor(
+        MD_4s = eegmegcalc.FourSphereVolumeConductor(
             electrode_locs, radii, sigmas)
         p, dipole_locs = cell.get_multi_current_dipole_moments(t_point)
         Np, Nt, Nd = p.shape
@@ -462,7 +463,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         for i in range(Np):
             dip = p[i]
             dip_loc = dipole_locs[i]
-            fs = lfpy_forward_models.FourSphereVolumeConductor(
+            fs = eegmegcalc.FourSphereVolumeConductor(
                 electrode_locs, radii, sigmas)
             pot = fs.calc_potential(dip, dip_loc)
             pot_sum += pot
@@ -494,7 +495,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         cell.set_pos(x=0, y=0, z=100)
         t_point = [1, 100, -1]
 
-        MD_4s = lfpy_forward_models.FourSphereVolumeConductor(
+        MD_4s = eegmegcalc.FourSphereVolumeConductor(
             electrode_locs, radii, sigmas)
         p, dipole_locs = cell.get_multi_current_dipole_moments(t_point)
         Np, Nt, Nd = p.shape
@@ -505,7 +506,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         for i in range(Np):
             dip = p[i]
             dip_loc = dipole_locs[i]
-            fs = lfpy_forward_models.FourSphereVolumeConductor(
+            fs = eegmegcalc.FourSphereVolumeConductor(
                 electrode_locs, radii, sigmas)
             pot = fs.calc_potential(dip, dip_loc)
             pot_sum += pot
@@ -523,7 +524,7 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         sigma = 0.3
         r = np.array([[0., 0., 1.], [0., 1., 0.]])
         p = np.array([[0., 0., 4 * np.pi * 0.3], [0., 4 * np.pi * 0.3, 0.]])
-        inf_model = lfpy_forward_models.InfiniteVolumeConductor(sigma)
+        inf_model = eegmegcalc.InfiniteVolumeConductor(sigma)
         phi = inf_model.get_dipole_potential(p, r)
         np.testing.assert_allclose(phi, np.array([[1., 0.], [0., 1.]]))
 
@@ -549,7 +550,7 @@ class testInfiniteVolumeConductor(unittest.TestCase):
             morphology, electrode_locs)
         sigma = 0.3
 
-        MD_inf = lfpy_forward_models.InfiniteVolumeConductor(sigma)
+        MD_inf = eegmegcalc.InfiniteVolumeConductor(sigma)
         pot_MD = MD_inf.get_multi_dipole_potential(cell, electrode_locs)
         pot_cb = electrode.LFP
 
@@ -565,7 +566,7 @@ class testInfiniteVolumeConductor(unittest.TestCase):
             morphology, electrode_locs)
         sigma = 0.3
 
-        MD_inf = lfpy_forward_models.InfiniteVolumeConductor(sigma)
+        MD_inf = eegmegcalc.InfiniteVolumeConductor(sigma)
         pot_MD = MD_inf.get_multi_dipole_potential(cell, electrode_locs)
         pot_cb = electrode.LFP
 
@@ -582,7 +583,7 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         sigma = 0.3
         t_point = [10, 100, 1000]
 
-        MD_inf = lfpy_forward_models.InfiniteVolumeConductor(sigma)
+        MD_inf = eegmegcalc.InfiniteVolumeConductor(sigma)
         pot_MD = MD_inf.get_multi_dipole_potential(
             cell, electrode_locs, t_point)
         pot_cb = electrode.LFP[:, t_point]
@@ -616,7 +617,7 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         r = np.array([radius, theta, phi])
 
         # predict potential
-        sphere = lfpy_forward_models.OneSphereVolumeConductor(
+        sphere = eegmegcalc.OneSphereVolumeConductor(
             r=r, R=R, sigma_i=sigma, sigma_o=sigma)
         phi = sphere.calc_potential(rs=rs, current=current)
 
@@ -646,7 +647,7 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         r = np.array([radius, theta, phi])
 
         # predict potential
-        sphere = lfpy_forward_models.OneSphereVolumeConductor(
+        sphere = eegmegcalc.OneSphereVolumeConductor(
             r=r, R=R, sigma_i=sigma, sigma_o=sigma)
         phi = sphere.calc_potential(rs=rs, current=current)
 
@@ -686,7 +687,7 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         cell.set_rotation(y=np.pi / 2)
 
         # predict potential
-        sphere = lfpy_forward_models.OneSphereVolumeConductor(
+        sphere = eegmegcalc.OneSphereVolumeConductor(
             r=r, R=R, sigma_i=sigma, sigma_o=sigma)
         M = sphere.get_response_matrix(cell=get_cell_geometry_from_lfpy(cell),
                                        n_max=100)
@@ -708,7 +709,7 @@ def make_class_object(rz, r_el):
     '''Return class object fs'''
     radii = [79., 80., 85., 90.]
     sigmas = [0.3, 0.015, 15, 0.3]
-    fs = lfpy_forward_models.FourSphereVolumeConductor(r_el, radii, sigmas)
+    fs = eegmegcalc.FourSphereVolumeConductor(r_el, radii, sigmas)
     fs._rz_params(rz)
     return fs
 
@@ -719,7 +720,7 @@ def make_simple_class_object():
     sigmas = [1., 2., 4., 8.]
     rz1 = np.array([0., 0., .9])
     r_el = np.array([[0., 0., 1.5]])
-    fs = lfpy_forward_models.FourSphereVolumeConductor(r_el, radii, sigmas)
+    fs = eegmegcalc.FourSphereVolumeConductor(r_el, radii, sigmas)
     fs._rz_params(rz1)
     return fs
 
@@ -818,7 +819,7 @@ def get_cell_geometry_from_lfpy(cell):
     -------
     CellGeometry object
     '''
-    cell_geometry = lfpy_forward_models.CellGeometry(
+    cell_geometry = CellGeometry(
         x=np.c_[cell.xstart, cell.xend],
         y=np.c_[cell.ystart, cell.yend],
         z=np.c_[cell.zstart, cell.zend],

@@ -50,7 +50,7 @@ class OneSphereVolumeConductor(object):
     Compute the potential for a single monopole along the x-axis:
 
     >>> # import modules
-    >>> from LFPy import OneSphereVolumeConductor
+    >>> from lfpy_forward_models import OneSphereVolumeConductor
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> # observation points in spherical coordinates (flattened)
@@ -61,7 +61,7 @@ class OneSphereVolumeConductor(object):
     >>> # set up class object and compute electric potential in all locations
     >>> sphere = OneSphereVolumeConductor(r, R=10000.,
     >>>                                   sigma_i=0.3, sigma_o=0.03)
-    >>> Phi = sphere.calc_potential(rs=8000, I=1.).reshape(X.shape)
+    >>> Phi = sphere.calc_potential(rs=8000, current=1.).reshape(X.shape)
     >>> # plot
     >>> fig, ax = plt.subplots(1,1)
     >>> im=ax.contourf(X, Y, Phi,
@@ -212,9 +212,8 @@ class OneSphereVolumeConductor(object):
     def get_response_matrix(self, cell, n_max=1000):
         """
         Compute linear mapping between transmembrane currents of CellGeometry
-        like object instantiation and extracellular potential in and outside of
-        sphere. Cell position must be set in space, using the method
-        ``Cell.set_pos(**kwargs)``.
+        like object instance and extracellular potential in and outside of
+        sphere.
 
         Parameters
         ----------
@@ -237,6 +236,8 @@ class OneSphereVolumeConductor(object):
 
         >>> # import modules
         >>> import LFPy
+        >>> from lfpy_forward_models import CellGeometry, \
+        >>>     OneSphereVolumeConductor
         >>> import os
         >>> import numpy as np
         >>> import matplotlib.pyplot as plt
@@ -260,22 +261,26 @@ class OneSphereVolumeConductor(object):
         >>>               np.arctan2(Y, X).flatten()])
         >>> # set up class object and compute mapping between segment currents
         >>> # and electric potential in space
-        >>> sphere = LFPy.OneSphereVolumeConductor(r=r, R=10000.,
-        >>>                                        sigma_i=0.3, sigma_o=0.03)
-        >>> mapping = sphere.get_response_matrix(cell, n_max=1000)
+        >>> sphere = OneSphereVolumeConductor(r=r, R=10000.,
+        >>>                                   sigma_i=0.3, sigma_o=0.03)
+        >>> cell_geometry = CellGeometry(x=np.c_[cell.xstart, cell.xend],
+        >>>                              y=np.c_[cell.ystart, cell.yend],
+        >>>                              z=np.c_[cell.zstart, cell.zend],
+        >>>                              d=cell.diam)
+        >>> M = sphere.get_response_matrix(cell_geometry, n_max=1000)
         >>> # pick out some time index for the potential and compute potential
         >>> ind = cell.tvec==2.
-        >>> Phi = np.dot(mapping, cell.imem)[:, ind].reshape(X.shape)
+        >>> V_ex = (M @ cell.imem)[:, ind].reshape(X.shape)
         >>> # plot potential
         >>> fig, ax = plt.subplots(1,1)
         >>> zips = []
         >>> for x, z in cell.get_idx_polygons(projection=('x', 'z')):
-        >>>     zips.append(zip(x, z))
+        >>>     zips.append(list(zip(x, z)))
         >>> polycol = PolyCollection(zips,
         >>>                          edgecolors='none',
         >>>                          facecolors='gray')
         >>> vrange = 1E-3 # limits for color contour plot
-        >>> im=ax.contour(X, Z, Phi,
+        >>> im=ax.contour(X, Z, V_ex,
         >>>              levels=np.linspace(-vrange, vrange, 41))
         >>> circle = plt.Circle(xy=(0,0), radius=sphere.R, fc='none', ec='k')
         >>> ax.add_collection(polycol)
@@ -378,19 +383,24 @@ class FourSphereVolumeConductor(object):
     Compute extracellular potential from current dipole moment in four-sphere
     head model:
 
-    >>> import LFPy
+    >>> from lfpy_forward_models import FourSphereVolumeConductor
     >>> import numpy as np
-    >>> radii = [79000., 80000., 85000., 90000.]
-    >>> sigmas = [0.3, 1.5, 0.015, 0.3]
-    >>> r_electrodes = np.array([[0., 0., 90000.], [0., 85000., 0.]])
-    >>> rz = np.array([0., 0., 78000.])
-    >>> sphere_model = LFPy.FourSphereVolumeConductor(r_electrodes, radii,
-    >>>                                               sigmas)
+    >>> radii = [79000., 80000., 85000., 90000.]  # [µm]
+    >>> sigmas = [0.3, 1.5, 0.015, 0.3]  # [S/m]
+    >>> r_electrodes = np.array([[0., 0., 90000.], [0., 85000., 0.]]) # [µm]
+    >>> rz = np.array([0., 0., 78000.])  # [µm]
+    >>> sphere_model = FourSphereVolumeConductor(r_electrodes, radii,
+    >>>                                          sigmas)
     >>> # current dipole moment
-    >>> p = np.array([[10., 10., 10.]]*10) # 10 timesteps
+    >>> p = np.array([[10., 10., 10.]]*10) # 10 timesteps [nA µm]
     >>> # compute potential
-    >>> potential = sphere_model.calc_potential(p, rz)
-
+    >>> sphere_model.calc_potential(p, rz)  # [mV]
+    array([[1.06247669e-08, 1.06247669e-08, 1.06247669e-08, 1.06247669e-08,
+            1.06247669e-08, 1.06247669e-08, 1.06247669e-08, 1.06247669e-08,
+            1.06247669e-08, 1.06247669e-08],
+           [2.39290752e-10, 2.39290752e-10, 2.39290752e-10, 2.39290752e-10,
+            2.39290752e-10, 2.39290752e-10, 2.39290752e-10, 2.39290752e-10,
+            2.39290752e-10, 2.39290752e-10]])
     """
 
     def __init__(self,
@@ -481,7 +491,7 @@ class FourSphereVolumeConductor(object):
                                'r = %s, rz = %s', self.r, self._rz)
 
         # compute theta angle between rzloc and rxyz
-        self._theta = self.calc_theta()
+        self._theta = self._calc_theta()
 
     def calc_potential(self, p, rz):
         """
@@ -558,6 +568,7 @@ class FourSphereVolumeConductor(object):
         from all axial currents in neuron simulation:
 
         >>> import LFPy
+        >>> from lfpy_forward_models import FourSphereVolumeConductor
         >>> import numpy as np
         >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
         >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,100),
@@ -568,9 +579,9 @@ class FourSphereVolumeConductor(object):
         >>> sigmas = [0.3, 1.5, 0.015, 0.3]
         >>> electrode_locs = np.array([[50., -50., 250.]])
         >>> timepoints = np.array([0,100])
-        >>> MD_4s = LFPy.FourSphereVolumeConductor(radii,
-        >>>                                        sigmas,
-        >>>                                        electrode_locs)
+        >>> MD_4s = FourSphereVolumeConductor(radii,
+        >>>                                   sigmas,
+        >>>                                   electrode_locs)
         >>> phi = MD_4s.calc_potential_from_multi_dipoles(cell,
         >>>                                               timepoints)
         """
@@ -668,7 +679,7 @@ class FourSphereVolumeConductor(object):
             FourSphereVolumeConductor.r in units of [mV] for all timesteps
             of p_tan
         """
-        phi = self.calc_phi(p_tan)
+        phi = self._calc_phi(p_tan)
         p_tot = np.linalg.norm(p_tan, axis=1)
         phi_hom = - p_tot / (4 * np.pi * self.sigma1 *
                              self._rz ** 2) * np.sin(phi)
@@ -697,7 +708,7 @@ class FourSphereVolumeConductor(object):
 
         return potential
 
-    def calc_theta(self):
+    def _calc_theta(self):
         """
         Return polar angle(s) between rzloc and contact point location(s)
 
@@ -714,7 +725,7 @@ class FourSphereVolumeConductor(object):
         theta = np.arccos(cos_theta)
         return theta
 
-    def calc_phi(self, p_tan):
+    def _calc_phi(self, p_tan):
         """
         Return azimuthal angle between x-axis and contact point locations(s)
 
@@ -1158,13 +1169,13 @@ class InfiniteVolumeConductor(object):
     Computing the potential from dipole moment valid in the far field limit.
     Theta correspond to the dipole alignment angle from the vertical z-axis:
 
-    >>> import LFPy
+    >>> from lfpy_forward_models import InfiniteVolumeConductor
     >>> import numpy as np
-    >>> inf_model = LFPy.InfiniteVolumeConductor(sigma=0.3)
-    >>> p = np.array([[10., 10., 10.]])
-    >>> r = np.array([[1000., 0., 5000.]])
-    >>> phi_p = inf_model.get_dipole_potential(p, r)
-
+    >>> inf_model = InfiniteVolumeConductor(sigma=0.3)
+    >>> p = np.array([[10., 10., 10.]])  # [nA µm]
+    >>> r = np.array([[1000., 0., 5000.]])  # [µm]
+    >>> inf_model.get_dipole_potential(p, r)  # [mV]
+    array([[1.20049432e-07]])
     """
 
     def __init__(self, sigma=0.3):
@@ -1204,9 +1215,9 @@ class InfiniteVolumeConductor(object):
         """
         Return electric potential from multiple current dipoles from cell
 
-        By multiple current dipoles we mean the dipoles computed from all
+        The multiple current dipoles corresponds to dipoles computed from all
         axial currents in a neuron simulation, typically two
-        axial currents per compartment, except for the root compartment.
+        axial currents per compartment, excluding the root compartment.
 
         Parameters
         ----------
@@ -1238,6 +1249,7 @@ class InfiniteVolumeConductor(object):
         from all axial currents in neuron simulation:
 
         >>> import LFPy
+        >>> from lfpy_forward_models import InfiniteVolumeConductor
         >>> import numpy as np
         >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
         >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,100),
@@ -1247,7 +1259,7 @@ class InfiniteVolumeConductor(object):
         >>> sigma = 0.3
         >>> timepoints = np.array([10, 20, 50, 100])
         >>> electrode_locs = np.array([[50., -50., 250.]])
-        >>> MD_INF = LFPy.InfiniteVolumeConductor(sigma)
+        >>> MD_INF = InfiniteVolumeConductor(sigma)
         >>> phi = MD_INF.get_multi_dipole_potential(cell, electrode_locs,
         >>>                                         timepoints = timepoints)
         """
@@ -1369,6 +1381,7 @@ class MEG(object):
     Define cell object, create synapse, compute current dipole moment:
 
     >>> import LFPy, os, numpy as np, matplotlib.pyplot as plt
+    >>> from lfpy_forward_models import MEG
     >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
     >>>                                          'ball_and_sticks.hoc'),
     >>>                  passive=True)
@@ -1377,16 +1390,12 @@ class MEG(object):
     >>>                    record_current=True)
     >>> syn.set_spike_times_w_netstim()
     >>> cell.simulate(rec_current_dipole_moment=True)
-
-    Compute the dipole location as an average of segment locations weighted
-    by membrane area:
-
+    >>> # Compute the dipole location as an average of segment locations
+    >>> # weighted by membrane area:
     >>> dipole_location = (cell.area * np.c_[cell.xmid, cell.ymid, cell.zmid].T
     >>>                    / cell.area.sum()).sum(axis=1)
-
-    Instantiate the LFPy.MEG object, compute and plot the magnetic signal in a
-    sensor location:
-
+    >>> # Instantiate the MEG object, compute and plot the magnetic signal in a
+    >>> # sensor location:
     >>> sensor_locations = np.array([[1E4, 0, 0]])
     >>> meg = LFPy.MEG(sensor_locations)
     >>> H = meg.calculate_H(cell.current_dipole_moment, dipole_location)
@@ -1396,6 +1405,7 @@ class MEG(object):
     >>> plt.plot(cell.tvec, syn.i)
     >>> plt.subplot(313)
     >>> plt.plot(cell.tvec, H[0])
+    >>> plt.show()
 
     Raises
     ------
