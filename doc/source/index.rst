@@ -27,6 +27,11 @@ class :class:`CellGeometry`
     :show-inheritance:
     :undoc-members:
 
+Module :mod:`lfpy_forward_models.models`
+========================================
+.. automodule:: lfpy_forward_models.models
+
+
 class :class:`LinearModel`
 ===========================
 .. autoclass:: lfpy_forward_models.LinearModel

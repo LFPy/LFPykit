@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
+Collection of classes defining forward models applicable with current dipole
+moment predictions.
+
 Copyright (C) 2017 Computational Neuroscience Group, NMBU.
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,6 +37,10 @@ class FourSphereVolumeConductor(object):
         of Neural Network Activity: Computing LFP, ECoG, EEG, and MEG Signals
         With LFPy 2.0. Front. Neuroinform. 12:92. doi: 10.3389/fninf.2018.00092
 
+    See also
+    --------
+    InfiniteVolumeConductor
+    MEG
 
     Parameters
     ----------
@@ -832,13 +839,25 @@ class FourSphereVolumeConductor(object):
 class InfiniteVolumeConductor(object):
     """
     Main class for computing extracellular potentials with current dipole
-    approximation in an infinite 3D volume conductor model that assumes
-    homogeneous, isotropic, linear (frequency independent) conductivity
+    moment :math:`\\mathbf{P}` in an infinite 3D volume conductor model that
+    assumes homogeneous, isotropic, linear (frequency independent)
+    conductivity :math:`\\sigma`. The potential :math:`V` is computed as [1]_:
+
+    .. math:: V = \\frac{\\mathbf{P} \\cdot \\mathbf{r}}{4 \\pi \\sigma r^3}
 
     Parameters
     ----------
     sigma: float
         Electrical conductivity in extracellular space in units of (S/cm)
+
+    See also
+    --------
+    FourSphereVolumeConductor
+    MEG
+
+    References
+    ----------
+    .. [1] Nunez and Srinivasan, Oxford University Press, 2006
 
     Examples
     --------
@@ -860,9 +879,10 @@ class InfiniteVolumeConductor(object):
 
     def get_dipole_potential(self, p, r):
         """
-        Return electric potential from current dipole with current dipole
-        approximation
+        Return electric potential from current dipole moment
 
+        Parameters
+        ----------
         p: ndarray, dtype=float
             Shape (n_timesteps, 3) array containing the x,y,z components of the
             current dipole moment in units of (nA*µm) for all timesteps
@@ -897,7 +917,7 @@ class InfiniteVolumeConductor(object):
 
         Parameters
         ----------
-        cell: Cell object from LFPy
+        cell: LFPy.Cell object
         electrode_locs: ndarray, dtype=float
             Shape (n_contacts, 3) array containing n_contacts electrode
             locations in cartesian coordinates in units of [µm].
@@ -1037,7 +1057,6 @@ class MEG(object):
     permebility of biological tissues). :math:`\\mathbf{M}` denotes material
     magnetization (also ignored)
 
-
     Parameters
     ----------
     sensor_locations: ndarray, dtype=float
@@ -1047,6 +1066,11 @@ class MEG(object):
     mu: float
         Permeability. Default is permeability of vacuum
         (:math:`\\mu_0 = 4*\\pi*10^{-7}` T*m/A)
+
+    See also
+    --------
+    FourSphereVolumeConductor
+    InfiniteVolumeConductor
 
     References
     ----------
@@ -1167,19 +1191,20 @@ class MEG(object):
         membrane potential values and axial resistances of multicompartment
         cells.
 
-        See:
-        Blagoev et al. (2007) Modelling the magnetic signature of neuronal
-        tissue. NeuroImage 37 (2007) 137–148
-        DOI: 10.1016/j.neuroimage.2007.04.033
-
-        for details on the biophysics governing magnetic fields from axial
-        currents.
+        See [1]_ for details on the biophysics governing magnetic fields from
+        axial currents.
 
         Parameters
         ----------
         cell: object
             LFPy.Cell-like object. Must have attribute vmem containing recorded
             membrane potentials in units of mV
+
+        References
+        ----------
+        .. [1] Blagoev et al. (2007) Modelling the magnetic signature of
+            neuronal tissue. NeuroImage 37 (2007) 137–148
+            DOI: 10.1016/j.neuroimage.2007.04.033
 
         Examples
         --------
