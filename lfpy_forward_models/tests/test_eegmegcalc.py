@@ -594,7 +594,7 @@ class testInfiniteVolumeConductor(unittest.TestCase):
 
 class testOneSphereVolumeConductor(unittest.TestCase):
     """
-    test class OneSphereVolumeConductor
+    test class lfpy_forward_models.OneSphereVolumeConductor
     """
 
     def test_OneSphereVolumeConductor_00(self):
@@ -617,7 +617,8 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         r = np.array([radius, theta, phi])
 
         # predict potential
-        sphere = eegmegcalc.OneSphereVolumeConductor(
+        sphere = lfpy_forward_models.OneSphereVolumeConductor(
+            cell=None,
             r=r, R=R, sigma_i=sigma, sigma_o=sigma)
         phi = sphere.calc_potential(rs=rs, current=current)
 
@@ -647,7 +648,8 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         r = np.array([radius, theta, phi])
 
         # predict potential
-        sphere = eegmegcalc.OneSphereVolumeConductor(
+        sphere = lfpy_forward_models.OneSphereVolumeConductor(
+            cell=None,
             r=r, R=R, sigma_i=sigma, sigma_o=sigma)
         phi = sphere.calc_potential(rs=rs, current=current)
 
@@ -687,10 +689,10 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         cell.set_rotation(y=np.pi / 2)
 
         # predict potential
-        sphere = eegmegcalc.OneSphereVolumeConductor(
+        sphere = lfpy_forward_models.OneSphereVolumeConductor(
+            cell=get_cell_geometry_from_lfpy(cell),
             r=r, R=R, sigma_i=sigma, sigma_o=sigma)
-        M = sphere.get_response_matrix(cell=get_cell_geometry_from_lfpy(cell),
-                                       n_max=100)
+        M = sphere.get_response_matrix(n_max=100)
 
         # ground truth and tests
         for i, x in enumerate(cell.xmid):

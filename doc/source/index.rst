@@ -62,18 +62,17 @@ class :class:`RecExtElectrode`
     :show-inheritance:
     :undoc-members:
 
+class :class:`OneSphereVolumeConductor`
+=======================================
+.. autoclass:: lfpy_forward_models.OneSphereVolumeConductor
+    :members:
+    :show-inheritance:
+    :undoc-members:
+
 
 Module :mod:`lfpy_forward_models.eegmegcalc`
 ============================================
 .. automodule:: lfpy_forward_models.eegmegcalc
-
-
-class :class:`eegmegcalc.OneSphereVolumeConductor`
-==================================================
-.. autoclass:: lfpy_forward_models.eegmegcalc.OneSphereVolumeConductor
-    :members:
-    :show-inheritance:
-    :undoc-members:
 
 class :class:`eegmegcalc.FourSphereVolumeConductor`
 ===================================================
