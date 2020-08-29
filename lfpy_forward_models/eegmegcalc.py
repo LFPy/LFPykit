@@ -1019,7 +1019,7 @@ class MEG(object):
     Define cell object, create synapse, compute current dipole moment:
 
     >>> import LFPy, os, numpy as np, matplotlib.pyplot as plt
-    >>> from lfpy_forward_models import MEG
+    >>> from lfpy_forward_models.eegmegcalc import MEG
     >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
     >>>                                          'ball_and_sticks.hoc'),
     >>>                  passive=True)
@@ -1035,8 +1035,8 @@ class MEG(object):
     >>> # Instantiate the MEG object, compute and plot the magnetic signal in a
     >>> # sensor location:
     >>> sensor_locations = np.array([[1E4, 0, 0]])
-    >>> meg = LFPy.MEG(sensor_locations)
-    >>> H = meg.calculate_H(cell.current_dipole_moment, dipole_location)
+    >>> meg = MEG(sensor_locations)
+    >>> H = meg.calculate_H(cell.current_dipole_moment.T, dipole_location)
     >>> plt.subplot(311)
     >>> plt.plot(cell.tvec, cell.somav)
     >>> plt.subplot(312)
@@ -1148,6 +1148,7 @@ class MEG(object):
         Define cell object, create synapse, compute current dipole moment:
 
         >>> import LFPy, os, numpy as np, matplotlib.pyplot as plt
+        >>> from lfpy_forward_models.eegmegcalc import MEG
         >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
         >>>                                          'ball_and_sticks.hoc'),
         >>>                  passive=True)
@@ -1156,12 +1157,10 @@ class MEG(object):
         >>>                    record_current=True)
         >>> syn.set_spike_times_w_netstim()
         >>> cell.simulate(rec_vmem=True)
-
-        Instantiate the LFPy.MEG object, compute and plot the magnetic signal
-        in a sensor location:
-
+        >>> # Instantiate the MEG object, compute and plot the magnetic
+        >>> # signal in a sensor location:
         >>> sensor_locations = np.array([[1E4, 0, 0]])
-        >>> meg = LFPy.MEG(sensor_locations)
+        >>> meg = MEG(sensor_locations)
         >>> H = meg.calculate_H_from_iaxial(cell)
         >>> plt.subplot(311)
         >>> plt.plot(cell.tvec, cell.somav)
@@ -1169,6 +1168,7 @@ class MEG(object):
         >>> plt.plot(cell.tvec, syn.i)
         >>> plt.subplot(313)
         >>> plt.plot(cell.tvec, H[0])
+        >>> plt.show()
 
         Returns
         -------
