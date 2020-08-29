@@ -865,10 +865,10 @@ class InfiniteVolumeConductor(object):
     Computing the potential from dipole moment valid in the far field limit.
     Theta correspond to the dipole alignment angle from the vertical z-axis:
 
-    >>> from lfpy_forward_models import InfiniteVolumeConductor
+    >>> from lfpy_forward_models.eegmegcalc import InfiniteVolumeConductor
     >>> import numpy as np
     >>> inf_model = InfiniteVolumeConductor(sigma=0.3)
-    >>> p = np.array([[10., 10., 10.]])  # [nA µm]
+    >>> p = np.array([[10.], [10.], [10.]])  # [nA µm]
     >>> r = np.array([[1000., 0., 5000.]])  # [µm]
     >>> inf_model.get_dipole_potential(p, r)  # [mV]
     array([[1.20049432e-07]])
@@ -945,7 +945,7 @@ class InfiniteVolumeConductor(object):
         from all axial currents in neuron simulation:
 
         >>> import LFPy
-        >>> from lfpy_forward_models import InfiniteVolumeConductor
+        >>> from lfpy_forward_models.eegmegcalc import InfiniteVolumeConductor
         >>> import numpy as np
         >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
         >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,100),
@@ -971,68 +971,6 @@ class InfiniteVolumeConductor(object):
             pot = self.get_dipole_potential(p, r)
             potentials += pot
         return potentials
-
-
-def get_current_dipole_moment(dist, current):
-    """
-    Return current dipole moment vector P and P_tot of cell.
-
-    Parameters
-    ----------
-    current: ndarray, dtype=float
-        Either an array containing all transmembrane currents
-        from all compartments of the cell, or an array of all
-        axial currents between compartments in cell in units of nA
-    dist: ndarray, dtype=float
-        When input current is an array of axial currents,
-        dist is the length of each axial current.
-        When current is an array of transmembrane
-        currents, dist is the position vector of each
-        compartment middle. Unit is [µm].
-
-    Returns
-    -------
-    P: ndarray, dtype=float
-        Array containing the current dipole moment for all
-        timesteps in the x-, y- and z-direction in units of (nA*µm)
-    P_tot: ndarray, dtype=float
-        Array containing the magnitude of the
-        current dipole moment vector for all timesteps in units of (nA*µm)
-
-    Examples
-    --------
-    Get current dipole moment vector and scalar moment from axial currents
-    computed from membrane potentials:
-
-    >>> import LFPy
-    >>> import numpy as np
-    >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
-    >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,1000),
-    >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
-    >>> syn.set_spike_times(np.mgrid[20:100:20])
-    >>> cell.simulate(rec_vmem=True, rec_imem=False)
-    >>> d_list, i_axial = cell.get_axial_currents()
-    >>> P_ax, P_ax_tot = LFPy.get_current_dipole_moment(d_list, i_axial)
-
-    Get current dipole moment vector and scalar moment from transmembrane
-    currents using the extracellular mechanism in NEURON:
-
-    >>> import LFPy
-    >>> import numpy as np
-    >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=True)
-    >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,1000),
-    >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
-    >>> syn.set_spike_times(np.mgrid[20:100:20])
-    >>> cell.simulate(rec_vmem=False, rec_imem=True)
-    >>> P_imem, P_imem_tot = LFPy.get_current_dipole_moment(np.c_[cell.xmid,
-    >>>                                                          cell.ymid,
-    >>>                                                          cell.zmid],
-    >>>                                                    cell.imem)
-
-    """
-    P = np.dot(current.T, dist)
-    P_tot = np.sqrt(np.sum(P**2, axis=1))
-    return P, P_tot
 
 
 class MEG(object):
