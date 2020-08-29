@@ -39,13 +39,13 @@ class testMEG(unittest.TestCase):
 
     def test_MEG_00(self):
         '''test eegmegcalc.MEG.calculate_H()'''
-        current_dipole_moment = np.zeros((11, 3))
-        current_dipole_moment[:, 0] += 1.
+        current_dipole_moment = np.zeros((3, 11))
+        current_dipole_moment[0, :] += 1.
         dipole_location = np.zeros(3)
         sensor_locations = np.r_[np.eye(3), -np.eye(3)]
 
         gt = np.zeros((sensor_locations.shape[0],
-                       current_dipole_moment.shape[0], 3))
+                       current_dipole_moment.shape[1], 3))
         gt[1, :, 2] = 1. / 4 / np.pi
         gt[2, :, 1] = -1. / 4 / np.pi
         gt[4, :, 2] = -1. / 4 / np.pi
@@ -57,13 +57,13 @@ class testMEG(unittest.TestCase):
 
     def test_MEG_01(self):
         '''test eegmegcalc.MEG.calculate_H()'''
-        current_dipole_moment = np.zeros((11, 3))
-        current_dipole_moment[:, 1] += 1.
+        current_dipole_moment = np.zeros((3, 11))
+        current_dipole_moment[1, :] += 1.
         dipole_location = np.zeros(3)
         sensor_locations = np.r_[np.eye(3), -np.eye(3)]
 
         gt = np.zeros((sensor_locations.shape[0],
-                       current_dipole_moment.shape[0], 3))
+                       current_dipole_moment.shape[1], 3))
         gt[0, :, 2] = -1. / 4 / np.pi
         gt[2, :, 0] = 1. / 4 / np.pi
         gt[3, :, 2] = 1. / 4 / np.pi
@@ -75,14 +75,14 @@ class testMEG(unittest.TestCase):
 
     def test_MEG_02(self):
         '''test eegmegcalc.MEG.calculate_H()'''
-        current_dipole_moment = np.zeros((11, 3))
-        current_dipole_moment[:, 2] += 1.
+        current_dipole_moment = np.zeros((3, 11))
+        current_dipole_moment[2, :] += 1.
         dipole_location = np.zeros(3)
         sensor_locations = np.r_[np.eye(3), -np.eye(3)]
 
         # ground truth
         gt = np.zeros((sensor_locations.shape[0],
-                       current_dipole_moment.shape[0], 3))
+                       current_dipole_moment.shape[1], 3))
         gt[0, :, 1] = 1. / 4 / np.pi
         gt[1, :, 0] = -1. / 4 / np.pi
         gt[3, :, 1] = -1. / 4 / np.pi
@@ -94,13 +94,13 @@ class testMEG(unittest.TestCase):
 
     def test_MEG_03(self):
         '''test eegmegcalc.MEG.calculate_H()'''
-        current_dipole_moment = np.zeros((1, 3))
-        current_dipole_moment[:, 0] += 1.
+        current_dipole_moment = np.zeros((3, 1))
+        current_dipole_moment[0, :] += 1.
         dipole_location = np.zeros(3)
         sensor_locations = np.r_[np.eye(3), -np.eye(3)]
 
         gt = np.zeros((sensor_locations.shape[0],
-                       current_dipole_moment.shape[0], 3))
+                       current_dipole_moment.shape[1], 3))
         gt[1, :, 2] = 1. / 4 / np.pi
         gt[2, :, 1] = -1. / 4 / np.pi
         gt[4, :, 2] = -1. / 4 / np.pi
@@ -112,13 +112,13 @@ class testMEG(unittest.TestCase):
 
     def test_MEG_04(self):
         '''test eegmegcalc.MEG.calculate_H()'''
-        current_dipole_moment = np.zeros((1, 3))
-        current_dipole_moment[:, 1] += 1.
+        current_dipole_moment = np.zeros((3, 1))
+        current_dipole_moment[1, :] += 1.
         dipole_location = np.zeros(3)
         sensor_locations = np.r_[np.eye(3), -np.eye(3)]
 
         gt = np.zeros((sensor_locations.shape[0],
-                       current_dipole_moment.shape[0], 3))
+                       current_dipole_moment.shape[1], 3))
         gt[0, :, 2] = -1. / 4 / np.pi
         gt[2, :, 0] = 1. / 4 / np.pi
         gt[3, :, 2] = 1. / 4 / np.pi
@@ -130,13 +130,13 @@ class testMEG(unittest.TestCase):
 
     def test_MEG_05(self):
         '''test eegmegcalc.MEG.calculate_H()'''
-        current_dipole_moment = np.zeros((1, 3))
-        current_dipole_moment[:, 2] += 1.
+        current_dipole_moment = np.zeros((3, 1))
+        current_dipole_moment[2, :] += 1.
         dipole_location = np.zeros(3)
         sensor_locations = np.r_[np.eye(3), -np.eye(3)]
 
         gt = np.zeros((sensor_locations.shape[0],
-                       current_dipole_moment.shape[0], 3))
+                       current_dipole_moment.shape[1], 3))
         gt[0, :, 1] = 1. / 4 / np.pi
         gt[1, :, 0] = -1. / 4 / np.pi
         gt[3, :, 1] = -1. / 4 / np.pi
