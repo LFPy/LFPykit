@@ -217,7 +217,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
 
     def test_decompose_dipole01(self):
         '''Test radial and tangential parts of dipole sums to dipole'''
-        P1 = np.array([[1., 1., 1.]])
+        P1 = np.array([[1., 1., 1.]]).T
         p_rad, p_tan = decompose_dipole(P1)
         np.testing.assert_equal(p_rad + p_tan, P1)
 
@@ -232,7 +232,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                        [0., 0., 1000.],
                        [0., 0., -1000.],
                        [10., 20., 30.],
-                       [-10., -20., -30.]])
+                       [-10., -20., -30.]]).T
         p_locs = np.array([[87000., 0., 0.],
                            [-87000., 0., 0.],
                            [0., 87000., 0.],
@@ -251,15 +251,15 @@ class testFourSphereVolumeConductor(unittest.TestCase):
 
     def test_rad_dipole(self):
         '''Test that radial part of decomposed dipole is correct'''
-        P1 = np.array([[1., 1., 1.]])
+        P1 = np.array([[1., 1., 1.]]).T
         p_rad, p_tan = decompose_dipole(P1)
-        np.testing.assert_equal(p_rad, np.array([[0., 0., 1.]]))
+        np.testing.assert_equal(p_rad, np.array([[0., 0., 1.]]).T)
 
     def test_tan_dipole(self):
         '''Test that tangential part of decomposed dipole is correct'''
-        P1 = np.array([[1., 1., 1.]])
+        P1 = np.array([[1., 1., 1.]]).T
         p_rad, p_tan = decompose_dipole(P1)
-        np.testing.assert_equal(p_tan, np.array([[1., 1., 0.]]))
+        np.testing.assert_equal(p_tan, np.array([[1., 1., 0.]]).T)
 
     def test_calc_theta(self):
         '''Test theta: angle between rz and r'''
@@ -277,7 +277,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         r_el = np.array([[0., 1., 0], [-1., -1., 1.],
                          [1., 1., 4.], [0., 0., 89.], [0., 0., -80.]])
         fs = make_class_object(rz1, r_el)
-        P_tan = np.array([[0., 1., 0.], [1., 0., 0.], [0., 0., 0.]])
+        P_tan = np.array([[0., 1., 0.], [1., 0., 0.], [0., 0., 0.]]).T
         phi = fs._calc_phi(P_tan)
         np.testing.assert_almost_equal(phi,
                                        np.array([[np.pi / 2, np.pi, 0.],
@@ -309,7 +309,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                        [0., 0., 0.05683939],
                        [0.0003, 0.001, 123456789.],
                        [1e-11, 1e-12, 1000.],
-                       [1e-15, 0, 1000.]])
+                       [1e-15, 0, 1000.]]).T
         p_rad, p_tan = fs._decompose_dipole(P1)
         phi = fs._calc_phi(p_tan)
 
@@ -320,7 +320,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         rz1 = np.array([0., 0., 70.])
         r_el = np.array([[0., 0., 90.]])
         fs = make_class_object(rz1, r_el)
-        P1 = np.array([[0., 0., 1.], [0., 0., -2.]])
+        P1 = np.array([[0., 0., 1.], [0., 0., -2.]]).T
         s_vector = fs._sign_rad_dipole(P1)
         np.testing.assert_almost_equal(s_vector, np.array([1., -1.]))
 
@@ -363,7 +363,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                            [0., 40., 0.]])
         four_s = eegmegcalc.FourSphereVolumeConductor(
             r_elec, radii, sigmas)
-        pots_4s = four_s.calc_potential(p.T, rz)
+        pots_4s = four_s.calc_potential(p, rz)
         inf_s = eegmegcalc.InfiniteVolumeConductor(0.3)
         pots_inf = inf_s.get_dipole_potential(p, r_elec - rz)
 
@@ -378,7 +378,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                 'tests',
                 'fem_mix_dip.npz'))
         pot_fem = fem_sim['pot_fem']  # [µV]
-        p = fem_sim['p']  # [nAµm]
+        p = fem_sim['p'].T  # [nA µm]
         rz = fem_sim['rz']  # [µm]
         radii = fem_sim['radii']  # [µm]
         sigmas = fem_sim['sigmas']  # [S/cm]
@@ -424,7 +424,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         for i in range(len(p_locs)):
             fs = eegmegcalc.FourSphereVolumeConductor(
                 el_locs[i], radii, sigmas)
-            phi = fs.calc_potential(dips[i], p_locs[i])
+            phi = fs.calc_potential(dips[i].T, p_locs[i])
             if i == 0:
                 phi0 = phi[0][0]
             else:

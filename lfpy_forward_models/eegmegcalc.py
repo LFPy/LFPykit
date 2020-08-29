@@ -183,7 +183,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         p: ndarray, dtype=float
-            Shape (n_timesteps, 3) array containing the x,y,z components of the
+            Shape (3, n_timesteps) array containing the x,y,z components of the
             current dipole moment in units of (nA*µm) for all timesteps.
         rz: ndarray, dtype=float
             Shape (3, ) array containing the position of the current dipole in
@@ -200,13 +200,13 @@ class FourSphereVolumeConductor(object):
 
         self._rz_params(rz)
         n_contacts = self.r.shape[0]
-        n_timesteps = p.shape[0]
+        n_timesteps = p.shape[1]
 
         if np.linalg.norm(p) != 0:
             p_rad, p_tan = self._decompose_dipole(p)
         else:
-            p_rad = np.zeros((n_timesteps, 3))
-            p_tan = np.zeros((n_timesteps, 3))
+            p_rad = np.zeros((3, n_timesteps))
+            p_tan = np.zeros((3, n_timesteps))
         if np.linalg.norm(p_rad) != 0.:
             pot_rad = self._calc_rad_potential(p_rad)
         else:
@@ -286,20 +286,20 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         p: ndarray, dtype=float
-            Shape (n_timesteps, 3) array containing the x,y,z-components of the
+            Shape (3, n_timesteps) array containing the x,y,z-components of the
             current dipole moment in units of (nA*µm) for all timesteps
 
         Returns:
         -------
         p_rad: ndarray, dtype=float
-            Shape (n_timesteps, 3) array, radial part of p,
+            Shape (3, n_timesteps) array, radial part of p,
             parallel to self._rz
         p_tan: ndarray, dtype=float
-            Shape (n_timesteps, 3) array, tangential part of p,
+            Shape (3, n_timesteps) array, tangential part of p,
             orthogonal to self._rz
         """
         z_ = np.expand_dims(self._z, -1)  # reshape z-axis vector
-        p_rad = np.dot(np.dot(p, z_), z_.T)
+        p_rad = z_ @ (z_.T @ p)
         p_tan = p - p_rad
         return p_rad, p_tan
 
@@ -310,7 +310,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         p_rad: ndarray, dtype=float
-            Shape (n_timesteps, 3) array, radial part of p
+            Shape (3, n_timesteps) array, radial part of p
             in units of (nA*µm), parallel to self._rz
 
         Returns
@@ -322,7 +322,7 @@ class FourSphereVolumeConductor(object):
             of p_rad
         """
 
-        p_tot = np.linalg.norm(p_rad, axis=1)
+        p_tot = np.linalg.norm(p_rad, axis=0)
         s_vector = self._sign_rad_dipole(p_rad)
         phi_const = s_vector * p_tot / \
             (4 * np.pi * self.sigma1 * self._rz ** 2)
@@ -352,7 +352,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         p_tan: ndarray, dtype=float
-            Shape (n_timesteps, 3) array, tangential part of p
+            Shape (3, n_timesteps) array, tangential part of p
             in units of (nA*µm), orthogonal to self._rz
 
         Returns
@@ -364,7 +364,7 @@ class FourSphereVolumeConductor(object):
             of p_tan
         """
         phi = self._calc_phi(p_tan)
-        p_tot = np.linalg.norm(p_tan, axis=1)
+        p_tot = np.linalg.norm(p_tan, axis=0)
         phi_hom = - p_tot / (4 * np.pi * self.sigma1 *
                              self._rz ** 2) * np.sin(phi)
         n_terms = np.zeros((len(self.r), 1))
@@ -404,7 +404,7 @@ class FourSphereVolumeConductor(object):
             point location vector(s) in FourSphereVolumeConductor.rxyz
             z-axis is defined in the direction of rzloc and the radial dipole.
         """
-        cos_theta = np.dot(self.rxyz, self._rzloc) / (
+        cos_theta = (self.rxyz @ self._rzloc) / (
             np.linalg.norm(self.rxyz, axis=1) * np.linalg.norm(self._rzloc))
         theta = np.arccos(cos_theta)
         return theta
@@ -416,7 +416,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         p_tan: ndarray, dtype=float
-            Shape (n_timesteps, 3) array containing
+            Shape (3, n_timesteps) array containing
             tangential component of current dipole moment in units of (nA*µm)
 
         Returns
@@ -435,28 +435,28 @@ class FourSphereVolumeConductor(object):
         # find projection of rxyz in xy-plane
         rxy = self.rxyz - proj_rxyz_rz
         # define x-axis
-        x = np.cross(p_tan, self._z)
+        x = np.cross(p_tan.T, self._z)
 
-        phi = np.zeros((len(self.rxyz), len(p_tan)))
+        phi = np.zeros((len(self.rxyz), p_tan.shape[1]))
         # create masks to avoid computing phi when phi is not defined
         mask = np.ones(phi.shape, dtype=bool)
         # phi is not defined when theta= 0,pi or |p_tan| = 0
-        mask[(self._theta == 0) | (self._theta == np.pi)] = np.zeros(len(p_tan)
-                                                                     )
-        mask[:, np.abs(np.linalg.norm(p_tan, axis=1)) == 0] = 0
+        mask[(self._theta == 0) | (self._theta == np.pi)] = np.zeros(
+            p_tan.shape[1])
+        mask[:, np.abs(np.linalg.norm(p_tan, axis=0)) == 0] = 0
 
         cos_phi = np.zeros(phi.shape)
         # compute cos_phi using mask to avoid zerodivision
-        cos_phi[mask] = np.dot(rxy, x.T)[
-            mask] / np.outer(np.linalg.norm(rxy, axis=1),
-                             np.linalg.norm(x, axis=1))[mask]
+        cos_phi[mask] = (rxy @ x.T)[mask] \
+            / np.outer(np.linalg.norm(rxy, axis=1),
+                       np.linalg.norm(x, axis=1))[mask]
 
         # compute phi in [0, pi]
         phi[mask] = np.arccos(cos_phi[mask])
 
         # nb: phi in [-pi, pi]. since p_tan defines direction of y-axis,
         # phi < 0 when rxy*p_tan < 0
-        phi[np.dot(rxy, p_tan.T) < 0] *= -1
+        phi[(rxy @ p_tan) < 0] *= -1
 
         return phi
 
@@ -467,7 +467,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         p: ndarray, dtype=float
-            Shape (n_timesteps, 3) array containing the current dipole moment
+            Shape (3, n_timesteps) array containing the current dipole moment
              in cartesian coordinates for all n_timesteps in units of (nA*µm)
 
         Returns
@@ -479,8 +479,7 @@ class FourSphereVolumeConductor(object):
             If radial part of p[i] points inwards, sign_vector[i] = -1.
 
         """
-        sign_vector = np.sign(np.dot(p, self._rzloc))
-        return sign_vector
+        return np.sign(self._rzloc @ p)
 
     def _potential_brain_rad(self, r, theta):
         """
@@ -1183,7 +1182,7 @@ class MEG(object):
         for i, R_ in enumerate(R):
             for i_, d_, r_ in zip(i_axial, d_vectors, pos_vectors):
                 r_rel = R_ - r_
-                H[i, :, :] += np.dot(i_.reshape((-1, 1)),
-                                     np.cross(d_, r_rel).reshape((1, -1))) \
+                H[i, :, :] += (i_.reshape((-1, 1))
+                               @ np.cross(d_, r_rel).reshape((1, -1))) \
                     / (4 * np.pi * np.sqrt((r_rel**2).sum())**3)
         return H
