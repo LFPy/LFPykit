@@ -220,6 +220,25 @@ class FourSphereVolumeConductor(object):
         pot_tot = pot_rad + pot_tan
         return pot_tot
 
+    def get_response_matrix(self, rz):
+        '''
+        Get linear response matrix mapping current dipole moment in [nA µm]
+        located in location `rz` to extracellular potential in [mV]
+        at recording sites `FourSphereVolumeConductor.` [µm]
+
+        parameters
+        ----------
+        rz: ndarray, dtype=float
+            Shape (3, ) array containing the position of the current dipole in
+            cartesian coordinates. Units of [µm].
+
+        Returns
+        -------
+        response_matrix: ndarray
+            shape (n_contacts, 3) ndarray
+        '''
+        return self.calc_potential(np.eye(3), rz)
+
     def calc_potential_from_multi_dipoles(self, cell, timepoints=None):
         """
         Return electric potential from multiple current dipoles from cell.
@@ -901,6 +920,24 @@ class InfiniteVolumeConductor(object):
         phi = (r @ p) / (4 * np.pi * self.sigma *
                          np.linalg.norm(r, axis=-1, keepdims=True)**3)
         return phi
+
+    def get_response_matrix(self, r):
+        '''
+        Get linear response matrix mapping current dipole moment in [nA µm]
+        to extracellular potential in [mV] at recording sites `r` [µm]
+
+        parameters
+        ----------
+        r: ndarray, dtype=float
+            Shape (n_contacts, 3) array contaning the displacement vectors
+            from dipole location to measurement location [µm]
+
+        Returns
+        -------
+        response_matrix: ndarray
+            shape (n_contacts, 3) ndarray
+        '''
+        return self.get_dipole_potential(np.eye(3), r)
 
     def get_multi_dipole_potential(
             self,
