@@ -33,46 +33,90 @@ Given the same transmembrane currents, the contributions to the magnetic field r
 The module presently incorporates different classes.
 To represent the geometry of a multicompartment neuron model we have:
 
-    * `CellGeometry`:
-          Base class representing a multicompartment neuron geometry
+* `CellGeometry`:
+  Base class representing a multicompartment neuron geometry in terms
+  of segment x-, y-, z-coordinates and diameter.
 
-Different models built to map transmembrane currents to measurement:
+Different classes built to map transmembrane currents of `CellGeometry` like instances
+to different measurement modalities:
 
-    * `LinearModel`:
-          Base class representing a generic forward model
-          for subclassing
-    * `CurrentDipoleMoment`:
-          Class for predicting current dipole moments
-    * `PointSourcePotential`:
-          Class for predicting extracellular potentials
-          assuming point sources and contacts
-    * `LineSourcePotential`:
-          Class for predicting extracellular potentials assuming
-          line sourcers and point contacts
-    * `RecExtElectrode`:
-          Class for simulations of extracellular potentials
-    * `RecMEAElectrode`:
-          Class for simulations of in vitro (slice) extracellular
-          potentials
-    * `OneSphereVolumeConductor`:
-          For computing extracellular potentials within
-          and outside a homogeneous sphere
+* `LinearModel`:
+  ase class representing a generic forward model
+  for subclassing
+* `CurrentDipoleMoment`:
+  Class for predicting current dipole moments
+* `PointSourcePotential`:
+  Class for predicting extracellular potentials
+  assuming point sources and point contacts
+* `LineSourcePotential`:
+  Class for predicting extracellular potentials assuming
+  line sourcers and point contacts
+* `RecExtElectrode`:
+  Class for simulations of extracellular potentials
+* `RecMEAElectrode`:
+  Class for simulations of in vitro (slice) extracellular
+  potentials
+* `OneSphereVolumeConductor`:
+  For computing extracellular potentials within
+  sand outside a homogeneous sphere
 
-Different models built to map current dipole moments to measurements:
+Different classes built to map current dipole moments (e.g., computed using `CurrentDipoleMoment`)
+to extracellular measurements:
 
-    * `eegmegcalc.FourSphereVolumeConductor`:
-          For computing extracellular potentials in
-          4-sphere head model (brain, CSF, skull, scalp)
-          from current dipole moment
-    * `eegmegcalc.InfiniteVolumeConductor`:
-          To compute extracellular potentials in infinite volume conductor
-          from current dipole moment
-    * `eegmegcalc.MEG`:
-          Class for computing magnetic field from current dipole moments
-
-    :LFPy classes to be implemented:
+* `eegmegcalc.FourSphereVolumeConductor`:
+  For computing extracellular potentials in
+  4-sphere head model (brain, CSF, skull, scalp)
+  from current dipole moment
+* `eegmegcalc.InfiniteVolumeConductor`:
+  To compute extracellular potentials in infinite volume conductor
+  from current dipole moment
+* `eegmegcalc.MEG`:
+  Class for computing magnetic field from current dipole moments
 
 
+Usage
+-----
+
+A basic usage example using a mock 3-segment stick like neuron,
+treating each segment as a point source,
+computing the extracellular potential in ten different locations
+alongside the cell geometry:
+
+    >>> # imports
+    >>> import numpy as np
+    >>> from lfpy_forward_models import CellGeometry, PointSourcePotential
+    >>> n_seg = 3
+    >>> # instantiate class `CellGeometry`:
+    >>> cell = CellGeometry(x=np.array([[0.] * 2] * n_seg),  # (µm)
+                            y=np.array([[0.] * 2] * n_seg),  # (µm)
+                            z=np.array([[10. * x, 10. * (x + 1)]
+                                        for x in range(n_seg)]),  # (µm)
+                            d=np.array([1.] * n_seg))  # (µm)
+    >>> # instantiate class `PointSourcePotential`:
+    >>> psp = PointSourcePotential(cell,
+                                   x=np.ones(10) * 10,
+                                   y=np.zeros(10),
+                                   z=np.arange(10) * 10,
+                                   sigma=0.3)
+    >>> # get linear response matrix mapping currents to measurements
+    >>> M = psp.get_response_matrix()
+    >>> # transmembrane currents (nA):
+    >>> imem = np.array([[-1., 1.],
+                         [0., 0.],
+                         [1., -1.]])
+    >>> # compute extracellular potentials (mV)
+    >>> V_ex = M @ imem
+    >>> V_ex
+    array([[-0.01387397,  0.01387397],
+           [-0.00901154,  0.00901154],
+           [ 0.00901154, -0.00901154],
+           [ 0.01387397, -0.01387397],
+           [ 0.00742668, -0.00742668],
+           [ 0.00409718, -0.00409718],
+           [ 0.00254212, -0.00254212],
+           [ 0.00172082, -0.00172082],
+           [ 0.00123933, -0.00123933],
+           [ 0.00093413, -0.00093413]])
 
 Documentation
 -------------
@@ -109,6 +153,6 @@ For active development, link the repository location
 
     $ python setup.py develop  # --user optional
 
-Installing from the Python package index:
+Installing from the Python Package Index (pypi.org):
 
     $ pip install lfpy_forward_models  # --user optional
