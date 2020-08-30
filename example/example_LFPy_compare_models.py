@@ -53,7 +53,7 @@ cellParameters = {
     'cm': 1.0,                             # membrane capacitance
     'Ra': 150,                             # axial resistivity
     'passive': True,                       # insert passive channels
-    'passive_parameters': {"g_pas": 1./3E4,
+    'passive_parameters': {"g_pas": 1. / 3E4,
                            "e_pas": -65},  # passive params
     'dt': 2**-4,                           # simulation time res
     'tstart': 0.,                          # start t of simulation
@@ -62,6 +62,7 @@ cellParameters = {
 
 # create LFPy.Cell instance
 cell = LFPy.Cell(**cellParameters)
+cell.set_rotation(x=4.98919, y=-4.33261, z=0.)
 
 # parameters for exponential synapse
 synapseParameters = {
@@ -90,7 +91,7 @@ cell_geometry = CellGeometry(
 # shared parameters for forward models
 ForwardModelParameters = {         # parameters for ForwardModel class
     'sigma': 0.3,              # Extracellular potential
-    'x': np.zeros(31)+25,      # Coordinates of electrode contacts
+    'x': np.zeros(31) + 25,      # Coordinates of electrode contacts
     'y': np.zeros(31),
     'z': np.linspace(-500, 1000, 31),
 }
@@ -140,7 +141,7 @@ for i, (label, Model) in enumerate(zip(labels, models)):
 
     # draw extracellular potential
     ax = fig.add_subplot(gs[2:, i])
-    im = ax.pcolormesh(np.r_[cell.tvec, cell.tvec[-1]+cell.dt],
+    im = ax.pcolormesh(np.r_[cell.tvec, cell.tvec[-1] + cell.dt],
                        np.r_[model.z, model.z[-1] + np.diff(model.z)[-1]],
                        V, vmin=-0.0003, vmax=.0003)
     ax.axis(ax.axis('tight'))
@@ -161,7 +162,7 @@ cb.set_label(r'$V_\mathrm{ex}$(mV)')
 # shared parameters for forward models
 DistalParameters = {         # parameters for ForwardModel class
     'sigma': 0.3,              # Extracellular potential
-    'x': np.zeros(31)+1000,      # Coordinates of electrode contacts
+    'x': np.zeros(31) + 1000,      # Coordinates of electrode contacts
     'y': np.zeros(31),
     'z': np.linspace(-500, 1000, 31),
 }
@@ -214,7 +215,7 @@ for i, (label, Model) in enumerate(zip(labels, models)):
 
     # image plot of extracellular potential
     ax = fig.add_subplot(gs[2:, i])
-    im = ax.pcolormesh(np.r_[cell.tvec, cell.tvec[-1]+cell.dt],
+    im = ax.pcolormesh(np.r_[cell.tvec, cell.tvec[-1] + cell.dt],
                        np.r_[model.z, model.z[-1] + np.diff(model.z)[-1]],
                        V, vmin=-3e-6, vmax=3e-6)
     ax.axis(ax.axis('tight'))
