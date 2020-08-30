@@ -6,11 +6,13 @@
 Welcome to LFPy forward models' documentation!
 ===============================================
 
-.. include:: readme.md
-
 .. toctree::
     :maxdepth: 20
     :caption: Contents:
+
+
+.. include:: readme.md
+
 
 
 Module :mod:`lfpy_forward_models`

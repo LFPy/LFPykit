@@ -78,7 +78,7 @@ Usage
 -----
 
 A basic usage example using a mock 3-segment stick like neuron,
-treating each segment as a point source,
+treating each segment as a point source in a linear, isotropic and homogeneous volume conductor,
 computing the extracellular potential in ten different locations
 alongside the cell geometry:
 
@@ -118,6 +118,51 @@ alongside the cell geometry:
            [ 0.00123933, -0.00123933],
            [ 0.00093413, -0.00093413]])
 
+
+A basic usage example using a mock 3-segment stick like neuron,
+treating each segment as a point source,
+computing the current dipole moment and computing the potential in ten different
+remote locations away from the cell geometry:
+
+    >>> # imports
+    >>> import numpy as np
+    >>> from lfpy_forward_models import CellGeometry, CurrentDipoleMoment, \
+    >>>     eegmegcalc
+    >>> n_seg = 3
+    >>> # instantiate class `CellGeometry`:
+    >>> cell = CellGeometry(x=np.array([[0.] * 2] * n_seg),  # (µm)
+                           y=np.array([[0.] * 2] * n_seg),  # (µm)
+                           z=np.array([[10. * x, 10. * (x + 1)]
+                                       for x in range(n_seg)]),  # (µm)
+                           d=np.array([1.] * n_seg))  # (µm)
+    >>> # instantiate class `CurrentDipoleMoment`:
+    >>> cdp = CurrentDipoleMoment(cell)
+    >>> M_I_to_P = cdp.get_response_matrix()
+    >>> # instantiate class `eegmegcalc.InfiniteVolumeConductor` and map dipole moment to
+    >>> # extracellular potential at measurement sites
+    >>> ivc = eegmegcalc.InfiniteVolumeConductor(sigma=0.3)
+    >>> M_P_to_V = ivc.get_response_matrix(np.c_[np.ones(10) * 1000,
+                                                np.zeros(10),
+                                                np.arange(10) * 100])
+    >>> # transmembrane currents (nA):
+    >>> imem = np.array([[-1., 1.],
+                        [0., 0.],
+                        [1., -1.]])
+    >>> # compute extracellular potentials (mV)
+    >>> V_ex = M_P_to_V @ M_I_to_P @ imem
+    >>> V_ex
+    array([[ 0.00000000e+00,  0.00000000e+00],
+          [ 5.22657054e-07, -5.22657054e-07],
+          [ 1.00041193e-06, -1.00041193e-06],
+          [ 1.39855769e-06, -1.39855769e-06],
+          [ 1.69852477e-06, -1.69852477e-06],
+          [ 1.89803345e-06, -1.89803345e-06],
+          [ 2.00697409e-06, -2.00697409e-06],
+          [ 2.04182029e-06, -2.04182029e-06],
+          [ 2.02079888e-06, -2.02079888e-06],
+          [ 1.96075587e-06, -1.96075587e-06]])
+
+
 Documentation
 -------------
 
@@ -131,7 +176,10 @@ dependencies
 `lfpy_forward_models` is implemented in Python and is written (and continuously) tested for Python >= v3.7.
 The main `lfpy_forward_models` module depends on `numpy`, `scipy` and `MEAutility` (https://github.com/alejoe91/MEAutility, https://meautility.readthedocs.io/en/latest/).
 
-Running all unit tests and example files may in addition require `py.test`, `matplotlib`, `neuron`, `arbor` and `LFPy`.
+Running all unit tests and example files may in addition require `py.test`, `matplotlib`,
+`neuron` (https://www.neuron.yale.edu),
+(`arbor` coming) and
+`LFPy` (https://github.com/LFPy/LFPy, https://LFPy.readthedocs.io).
 
 
 Installation
