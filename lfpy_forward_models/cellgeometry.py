@@ -145,18 +145,6 @@ class CellGeometry(object):
 
         # derived attributes
         self.totnsegs = self.d.size
-        # self.xstart = self.x[:, 0]
-        # self.xend = self.x[:, -1]
-        # self.xmid = self.x.mean(axis=-1)
-
-        # self.ystart = self.y[:, 0]
-        # self.yend = self.y[:, -1]
-        # self.ymid = self.y.mean(axis=-1)
-
-        # self.zstart = self.z[:, 0]
-        # self.zend = self.z[:, -1]
-        # self.zmid = self.z.mean(axis=-1)
-
         self.length = np.sqrt(np.diff(x, axis=-1)**2 +
                               np.diff(y, axis=-1)**2 +
                               np.diff(z, axis=-1)**2)
