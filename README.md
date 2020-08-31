@@ -5,12 +5,24 @@ This Python module contain freestanding implementations of electrostatic
 forward models presently incorporated in LFPy
 (https://github.com/LFPy/LFPy, https://LFPy.readthedocs.io).
 
-The aim is to provide electrostatic models in a manner that facilitates
-forward-model predictions of extracellular potentials and related measures from
-multicompartment neuron models, but without explicit dependencies on neural
-simulation software such as NEURON
-(https://neuron.yale.edu, https://github.com/neuronsimulator/nrn)
+The aim of the `lfpy_forward_models` module is to provide electrostatic models
+in a manner that facilitates forward-model predictions of extracellular
+potentials and related measures from multicompartment neuron models, but
+without explicit dependencies on neural simulation software such as
+NEURON (https://neuron.yale.edu, https://github.com/neuronsimulator/nrn)
 or Arbor (https://arbor.readthedocs.io, https://github.com/arbor-sim/arbor).
+The `lfpy_forward_models` module can then be more easily incorporated with
+these simulators, or in various projects that utilize them such as
+LFPy (https://LFPy.rtfd.io, https://github.com/LFPy/LFPy).
+BMTK (https://alleninstitute.github.io/bmtk/, https://github.com/AllenInstitute/bmtk),
+etc.
+
+Its main functionality is providing class methods that return two-dimensional
+linear response matrices **M**
+between transmembrane currents
+**I** of multicompartment neuron models and some
+measurement **Y** given by **Y**=**MI**.
+
 
 Build Status
 ------------
@@ -41,7 +53,7 @@ Different classes built to map transmembrane currents of `CellGeometry` like ins
 to different measurement modalities:
 
 * `LinearModel`:
-  ase class representing a generic forward model
+  Base class representing a generic forward model
   for subclassing
 * `CurrentDipoleMoment`:
   Class for predicting current dipole moments
@@ -60,7 +72,7 @@ to different measurement modalities:
   For computing extracellular potentials within
   sand outside a homogeneous sphere
 
-Different classes built to map current dipole moments (e.g., computed using `CurrentDipoleMoment`)
+Different classes built to map current dipole moments (i.e., computed using `CurrentDipoleMoment`)
 to extracellular measurements:
 
 * `eegmegcalc.FourSphereVolumeConductor`:
@@ -72,6 +84,10 @@ to extracellular measurements:
   from current dipole moment
 * `eegmegcalc.MEG`:
   Class for computing magnetic field from current dipole moments
+
+Each class (except `CellGeometry`) should have a public method `get_response_matrix()`
+that returns the linear map between the transmembrane currents or current dipole moment
+and corresponding measurements (see Usage below)
 
 
 Usage
@@ -165,6 +181,43 @@ remote locations away from the cell geometry:
           [ 1.96075587e-06, -1.96075587e-06]])
 
 
+Physical units
+--------------
+
+Physical units used in `lfpy_forward_models`:
+
+- There are no explicit checks for physical units
+
+- Transmembrane currents are assumed to be in units of (nA)
+
+- Spatial information is assumed to be in units of (µm)
+
+- Voltages are assumed to be in units of (mV)
+
+- Extracellular conductivities are assumed to be in units of (S/m)
+
+- current dipole moments are assumed to be in units of (nA µm)
+
+- Magnetic fields are assumed to be in units of (nA/µm)
+
+
+Dimensionality
+--------------
+
+- Transmembrane currents are represented by arrays with shape `(n_seg, n_timesteps)`
+  where `n_seg` is the number of segments of the neuron model.
+
+- Current dipole moments are represented by arrays with shape `(3, n_timesteps)`
+
+- Response matrices **M** have shape `(n_points, input.shape[0])` where `n_points` is
+  for instance the number of extracellular recording sites and `input.shape[0]`
+  the first dimension of the input; that is, the number of segments in case of
+  transmembrane currents or 3 in case of current dipole moments.
+
+- predicted signals (except magnetic fields using `eegmegcalc.MEG`) have shape
+  `(n_points, n_timesteps)`
+
+
 Documentation
 -------------
 
@@ -172,10 +225,10 @@ The online Documentation of `lfpy_forward_models` can be found here:
 https://lfpy-forward-models.readthedocs.io/en/latest
 
 
-dependencies
+Dependencies
 ------------
 
-`lfpy_forward_models` is implemented in Python and is written (and continuously) tested for Python >= v3.7.
+`lfpy_forward_models` is implemented in Python and is written (and continuously tested) for `Python >= 3.7`.
 The main `lfpy_forward_models` module depends on `numpy`, `scipy` and `MEAutility` (https://github.com/alejoe91/MEAutility, https://meautility.readthedocs.io/en/latest/).
 
 Running all unit tests and example files may in addition require `py.test`, `matplotlib`,
