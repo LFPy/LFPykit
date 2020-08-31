@@ -131,19 +131,21 @@ remote locations away from the cell geometry:
     >>> n_seg = 3
     >>> # instantiate class `CellGeometry`:
     >>> cell = CellGeometry(x=np.array([[0.] * 2] * n_seg),  # (µm)
-                           y=np.array([[0.] * 2] * n_seg),  # (µm)
-                           z=np.array([[10. * x, 10. * (x + 1)]
-                                       for x in range(n_seg)]),  # (µm)
-                           d=np.array([1.] * n_seg))  # (µm)
+                            y=np.array([[0.] * 2] * n_seg),  # (µm)
+                            z=np.array([[10. * x, 10. * (x + 1)]
+                                        for x in range(n_seg)]),  # (µm)
+                            d=np.array([1.] * n_seg))  # (µm)
     >>> # instantiate class `CurrentDipoleMoment`:
     >>> cdp = CurrentDipoleMoment(cell)
     >>> M_I_to_P = cdp.get_response_matrix()
     >>> # instantiate class `eegmegcalc.InfiniteVolumeConductor` and map dipole moment to
     >>> # extracellular potential at measurement sites
     >>> ivc = eegmegcalc.InfiniteVolumeConductor(sigma=0.3)
+    >>> # compute linear response matrix between dipole moment and
+    >>> # extracellular potential
     >>> M_P_to_V = ivc.get_response_matrix(np.c_[np.ones(10) * 1000,
-                                                np.zeros(10),
-                                                np.arange(10) * 100])
+                                                 np.zeros(10),
+                                                 np.arange(10) * 100])
     >>> # transmembrane currents (nA):
     >>> imem = np.array([[-1., 1.],
                         [0., 0.],
