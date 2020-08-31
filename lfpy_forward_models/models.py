@@ -235,20 +235,22 @@ class PointSourcePotential(LinearModel):
             assert(np.all([isinstance(x, np.ndarray),
                            isinstance(y, np.ndarray),
                            isinstance(z, np.ndarray)]))
-        except AssertionError as ae:
-            raise ae('x, y and z must be of type numpy.ndarray')
+        except AssertionError:
+            raise AssertionError('x, y and z must be of type numpy.ndarray')
         try:
             assert(x.ndim == y.ndim == z.ndim == 1)
-        except AssertionError as ae:
-            raise ae('x, y and z must be of shape (n_coords, )')
+        except AssertionError:
+            raise AssertionError('x, y and z must be of shape (n_coords, )')
         try:
             assert(x.shape == y.shape == z.shape)
-        except AssertionError as ae:
-            raise ae('x, y and z must contain the same number of elements')
+        except AssertionError:
+            raise AssertionError(
+                'x, y and z must contain the same number of elements')
         try:
             assert(isinstance(sigma, float) and sigma > 0)
-        except AssertionError as ae:
-            raise ae('sigma must be a float number greater than zero')
+        except AssertionError:
+            raise AssertionError(
+                'sigma must be a float number greater than zero')
 
         # set attributes
         self.x = x
@@ -390,20 +392,22 @@ class LineSourcePotential(LinearModel):
             assert(np.all([isinstance(x, np.ndarray),
                            isinstance(y, np.ndarray),
                            isinstance(z, np.ndarray)]))
-        except AssertionError as ae:
-            raise ae('x, y and z must be of type numpy.ndarray')
+        except AssertionError:
+            raise AssertionError('x, y and z must be of type numpy.ndarray')
         try:
             assert(x.ndim == y.ndim == z.ndim == 1)
-        except AssertionError as ae:
-            raise ae('x, y and z must be of shape (n_coords, )')
+        except AssertionError:
+            raise AssertionError('x, y and z must be of shape (n_coords, )')
         try:
             assert(x.shape == y.shape == z.shape)
-        except AssertionError as ae:
-            raise ae('x, y and z must contain the same number of elements')
+        except AssertionError:
+            raise AssertionError(
+                'x, y and z must contain the same number of elements')
         try:
             assert(isinstance(sigma, float) and sigma > 0)
-        except AssertionError as ae:
-            raise ae('sigma must be a float number greater than zero')
+        except AssertionError:
+            raise AssertionError(
+                'sigma must be a float number greater than zero')
 
         # set attributes
         self.x = x
@@ -761,8 +765,9 @@ class RecExtElectrode(LinearModel):
             try:
                 assert ((self.x.size == self.y.size) and
                         (self.x.size == self.z.size))
-            except AssertionError as ae:
-                raise ae("The number of elements in [x, y, z] must be equal")
+            except AssertionError:
+                raise AssertionError(
+                    "The number of elements in [x, y, z] must be equal")
 
             if N is not None:
                 if not isinstance(N, np.ndarray):
@@ -855,7 +860,7 @@ class RecExtElectrode(LinearModel):
         Returns
         -------
         response_matrix: ndarray
-            shape (n_coords, n_seg) ndarray
+            shape (n_contacts, n_seg) ndarray
         '''
         if self.n is not None and self.N is not None and self.r is not None:
             if self.n <= 1:
@@ -933,6 +938,411 @@ class RecExtElectrode(LinearModel):
                                          sigma=self.sigma,
                                          **kwargs)
             self.recorded_points = np.array([self.x, self.y, self.z]).T
+
+        return M
+
+
+class RecMEAElectrode(RecExtElectrode):
+    r"""class RecMEAElectrode
+
+    Electrode class that represents an extracellular in vitro slice recording
+    as a Microelectrode Array (MEA). Inherits RecExtElectrode class
+
+    Illustration:
+    ::
+
+                  Above neural tissue (Saline) -> sigma_S
+        <----------------------------------------------------> z = z_shift + h
+
+                  Neural Tissue -> sigma_T
+
+                       o -> source_pos = [x',y',z']
+
+        <-----------*----------------------------------------> z = z_shift + 0
+                     \-> elec_pos = [x,y,z]
+
+                  Below neural tissue (MEA Glass plate) -> sigma_G
+
+
+    Parameters
+    ----------
+    cell: object
+        GeometryCell instance or similar.
+    sigma_T: float
+        extracellular conductivity of neural tissue in unit (S/m)
+    sigma_S: float
+        conductivity of saline bath that the neural slice is
+        immersed in [1.5] (S/m)
+    sigma_G: float
+        conductivity of MEA glass electrode plate. Most commonly
+        assumed non-conducting [0.0] (S/m)
+    h: float, int
+        Thickness in um of neural tissue layer containing current
+        the current sources (i.e., in vitro slice or cortex)
+    z_shift: float, int
+        Height in um of neural tissue layer bottom. If e.g., top of neural
+        tissue layer should be z=0, use z_shift=-h. Defaults to z_shift = 0, so
+        that the neural tissue layer extends from z=0 to z=h.
+    squeeze_cell_factor: float or None
+        Factor to squeeze the cell in the z-direction. This is
+        needed for large cells that are thicker than the slice, since no part
+        of the cell is allowed to be outside the slice. The squeeze is done
+        after the neural simulation, and therefore does not affect neuronal
+        simulation, only calculation of extracellular potentials.
+    probe: MEAutility MEA object or None
+        MEAutility probe object
+    x, y, z: np.ndarray
+        coordinates or arrays of coordinates in units of (um).
+        Must be same length
+    N: None or list of lists
+        Normal vectors [x, y, z] of each circular electrode contact surface,
+        default None
+    r: float
+        radius of each contact surface, default None
+    n: int
+        if N is not None and r > 0, the number of discrete points used to
+        compute the n-point average potential on each circular contact point.
+    contact_shape: str
+        'circle'/'square' (default 'circle') defines the contact point shape
+        If 'circle' r is the radius, if 'square' r is the side length
+    method: str
+        switch between the assumption of 'linesource', 'pointsource',
+        'root_as_point' to represent each compartment when computing
+        extracellular potentials
+    verbose: bool
+        Flag for verbose output, i.e., print more information
+    seedvalue: int
+        random seed when finding random position on contact with r > 0
+
+    Examples
+    --------
+    Mock cell geometry and transmembrane currents:
+
+    >>> import numpy as np
+    >>> from lfpy_forward_models import CellGeometry, RecMEAElectrode
+    >>> # cell geometry with four segments [um]
+    >>> cell = CellGeometry(
+    >>>     x=np.array([[0, 10], [10, 20], [20, 30], [30, 40]]),
+    >>>     y=np.array([[0, 0], [0, 0], [0, 0], [0, 0]]),
+    >>>     z=np.array([[0, 0], [0, 0], [0, 0], [0, 0]]) + 10,
+    >>>     d=np.array([1, 1, 1, 1]))
+    >>> # transmembrane currents, three time steps [nA]
+    >>> I_m = np.array([[0.25, -1., 1.],
+    >>>                 [-1., 1., -0.25],
+    >>>                 [1., -0.25, -1.],
+    >>>                 [-0.25, 0.25, 0.25]])
+    >>> # electrode locations [um]
+    >>> r = np.stack([np.arange(10)*4 + 2, np.zeros(10), np.zeros(10)])
+    >>> # instantiate electrode, get linear response matrix
+    >>> el = RecMEAElectrode(cell=cell,
+    >>>                      sigma_T=0.3, sigma_S=1.5, sigma_G=0.0,
+    >>>                      x=r[0, ], y=r[1, ], z=r[2, ],
+    >>>                      method='pointsource')
+    >>> M = el.get_response_matrix()
+    >>> # compute extracellular potential
+    >>> M @ I_m
+    array([[-0.00233572, -0.01990957,  0.02542055],
+           [-0.00585075, -0.01520865,  0.02254483],
+           [-0.01108601, -0.00243107,  0.01108601],
+           [-0.01294584,  0.01013595, -0.00374823],
+           [-0.00599067,  0.01432711, -0.01709416],
+           [ 0.00599067,  0.01194602, -0.0266944 ],
+           [ 0.01294584,  0.00953841, -0.02904238],
+           [ 0.01108601,  0.00972426, -0.02324134],
+           [ 0.00585075,  0.01075236, -0.01511768],
+           [ 0.00233572,  0.01038382, -0.00954429]])
+
+    See also <LFPy>/examples/example_MEA.py
+
+    >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
+    >>> import LFPy
+    >>> from lfpy_forward_models import CellGeometry, RecMEAElectrode
+    >>>
+    >>> cellParameters = {
+    >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
+    >>>     'v_init' : -65,                          # initial voltage
+    >>>     'cm' : 1.0,                             # membrane capacitance
+    >>>     'Ra' : 150,                             # axial resistivity
+    >>>     'passive' : True,                        # insert passive channels
+    >>>     'passive_parameters' : {"g_pas":1./3E4,
+    >>>                             "e_pas":-65}, # passive params
+    >>>     'dt' : 2**-4,                           # simulation time res
+    >>>     'tstart' : 0.,                        # start t of simulation
+    >>>     'tstop' : 50.,                        # end t of simulation
+    >>> }
+    >>> lfpy_cell = LFPy.Cell(**cellParameters)
+    >>> lfpy_cell.set_rotation(x=np.pi/2, z=np.pi/2)
+    >>> lfpy_cell.set_pos(z=100)
+    >>> synapseParameters = {
+    >>>     'idx' : lfpy_cell.get_closest_idx(x=800, y=0, z=100), # segment
+    >>>     'e' : 0,                                # reversal potential
+    >>>     'syntype' : 'ExpSyn',                   # synapse type
+    >>>     'tau' : 2,                              # syn. time constant
+    >>>     'weight' : 0.01,                       # syn. weight
+    >>>     'record_current' : True                 # syn. current record
+    >>> }
+    >>> synapse = LFPy.Synapse(lfpy_cell, **synapseParameters)
+    >>> synapse.set_spike_times(np.array([10., 15., 20., 25.]))
+    >>>
+    >>> MEA_electrode_parameters = {
+    >>>     'sigma_T' : 0.3,      # extracellular conductivity
+    >>>     'sigma_G' : 0.0,      # MEA glass electrode plate conductivity
+    >>>     'sigma_S' : 1.5,      # Saline bath conductivity
+    >>>     'x' : np.linspace(0, 1200, 16),  # 1d vector of positions
+    >>>     'y' : np.zeros(16),
+    >>>     'z' : np.zeros(16),
+    >>>     "method": "pointsource",
+    >>>     "h": 300,
+    >>>     "squeeze_cell_factor": 0.5,
+    >>> }
+    >>> lfpy_cell.simulate(rec_imem=True)
+    >>>
+    >>> cell = CellGeometry(
+    >>>     x=np.c_[lfpy_cell.xstart, lfpy_cell.xend],
+    >>>     y=np.c_[lfpy_cell.ystart, lfpy_cell.yend],
+    >>>     z=np.c_[lfpy_cell.zstart, lfpy_cell.zend],
+    >>>     d=lfpy_cell.diam)
+    >>> MEA = RecMEAElectrode(cell, **MEA_electrode_parameters)
+    >>> V_ext = MEA.get_response_matrix() @ lfpy_cell.imem
+    >>>
+    >>> plt.matshow(V_ext)
+    >>> plt.colorbar()
+    >>> plt.axis('tight')
+    >>> plt.show()
+    """
+
+    def __init__(self, cell, sigma_T=0.3, sigma_S=1.5, sigma_G=0.0,
+                 h=300., z_shift=0., steps=20, probe=None,
+                 x=np.array([0]), y=np.array([0]), z=np.array([0]),
+                 N=None, r=None, n=None,
+                 method='linesource',
+                 verbose=False,
+                 seedvalue=None, squeeze_cell_factor=None, **kwargs):
+
+        super().__init__(cell=cell,
+                         x=x, y=y, z=z,
+                         probe=probe,
+                         N=N, r=r, n=n,
+                         method=method,
+                         verbose=verbose,
+                         seedvalue=seedvalue, **kwargs)
+
+        self.sigma_G = sigma_G
+        self.sigma_T = sigma_T
+        self.sigma_S = sigma_S
+        self.sigma = None
+        self.h = h
+        self.z_shift = z_shift
+        self.steps = steps
+        self.squeeze_cell_factor = squeeze_cell_factor
+        self.moi_param_kwargs = {"h": self.h,
+                                 "steps": self.steps,
+                                 "sigma_G": self.sigma_G,
+                                 "sigma_T": self.sigma_T,
+                                 "sigma_S": self.sigma_S,
+                                 }
+
+        if method == 'pointsource':
+            self.lfp_method = lfpcalc.calc_lfp_pointsource_moi
+        elif method == "linesource":
+            if (np.abs(z - self.z_shift) > 1e-9).any():
+                raise NotImplementedError("The method 'linesource' is only "
+                                          "supported for electrodes at the "
+                                          "z=0 plane. Use z=0 or method "
+                                          "'pointsource'.")
+            if np.abs(self.sigma_G) > 1e-9:
+                raise NotImplementedError("The method 'linesource' is only "
+                                          "supported for sigma_G=0. Use "
+                                          "sigma_G=0 or method "
+                                          "'pointsource'.")
+            self.lfp_method = lfpcalc.calc_lfp_linesource_moi
+        elif method == "root_as_point":
+            if (np.abs(z - self.z_shift) > 1e-9).any():
+                raise NotImplementedError("The method 'root_as_point' is only "
+                                          "supported for electrodes at the "
+                                          "z=0 plane. Use z=0 or method "
+                                          "'pointsource'.")
+            if np.abs(self.sigma_G) > 1e-9:
+                raise NotImplementedError("The method 'root_as_point' is only "
+                                          "supported for sigma_G=0. Use "
+                                          "sigma_G=0 or method "
+                                          "'pointsource'.")
+            self.lfp_method = lfpcalc.calc_lfp_root_as_point_moi
+        else:
+            raise ValueError("LFP method not recognized. "
+                             "Should be 'root_as_point', 'linesource' "
+                             "or 'pointsource'")
+
+    def _squeeze_cell_in_depth_direction(self):
+        """Will squeeze self.cell centered around the root segment by a scaling
+        factor, so that it fits inside the slice. If scaling factor is not big
+        enough, a RuntimeError is raised."""
+
+        self.distort_cell_geometry()
+
+        if (self.cell.z.max() > self.h + self.z_shift or
+                self.cell.z.min() < self.z_shift):
+            bad_comps, reason = self._return_comp_outside_slice()
+            msg = ("Compartments {} of cell ({}) has cell.{} slice. "
+                   "Increase squeeze_cell_factor, move or rotate cell."
+                   ).format(bad_comps, self.cell, reason)
+
+            raise RuntimeError(msg)
+
+    def _return_comp_outside_slice(self):
+        """
+        Assuming part of the cell is outside the valid region,
+        i.e, not in the slice (self.z_shift < z < self.z_shift + self.h)
+        this function check what array (cell.z[:, 0] or cell.z[:, -1]) that is
+        outside, and if it is above or below the valid region.
+
+        Raises: RuntimeError
+            If no compartment is outside valid region.
+
+        Returns: array, str
+            Numpy array with the compartments that are outside the slice,
+            and a string with additional information on the problem.
+        """
+        zstart_above = np.where(self.cell.z[:, 0] > self.z_shift + self.h)[0]
+        zend_above = np.where(self.cell.z[:, -1] > self.z_shift + self.h)[0]
+        zend_below = np.where(self.cell.z[:, -1] < self.z_shift)[0]
+        zstart_below = np.where(self.cell.z[:, 0] < self.z_shift)[0]
+
+        if len(zstart_above) > 0:
+            return zstart_above, "zstart above"
+        if len(zstart_below) > 0:
+            return zstart_below, "zstart below"
+        if len(zend_above) > 0:
+            return zend_above, "zend above"
+        if len(zend_below) > 0:
+            return zend_below, "zend below"
+        raise RuntimeError("This function should only be called if cell"
+                           "extends outside slice")
+
+    def _test_cell_extent(self):
+        """
+        Test if the cell is confined within the slice.
+        If class argument "squeeze_cell" is True, cell is squeezed to to
+        fit inside slice.
+        """
+        if self.cell is None:
+            raise RuntimeError("Does not have cell instance.")
+
+        if (self.cell.z.max() > self.z_shift + self.h or
+                self.cell.z.min() < self.z_shift):
+
+            if self.verbose:
+                print("Cell extends outside slice.")
+
+            if self.squeeze_cell_factor is not None:
+                if not self.z_shift < self.cell.z[0, ].mean() < \
+                        (self.z_shift + self.h):
+                    raise RuntimeError("Soma position is not in slice.")
+                self._squeeze_cell_in_depth_direction()
+            else:
+                bad_comps, reason = self._return_comp_outside_slice()
+                msg = ("Compartments {} of cell ({}) has cell.{} slice "
+                       "and argument squeeze_cell_factor is None."
+                       ).format(bad_comps, self.cell, reason)
+                raise RuntimeError(msg)
+        else:
+            if self.verbose:
+                print("Cell position is good.")
+            if self.squeeze_cell_factor is not None:
+                if self.verbose:
+                    print("Squeezing cell anyway.")
+                self._squeeze_cell_in_depth_direction()
+
+    def distort_cell_geometry(self, axis='z', nu=0.0):
+        """
+        Distorts cellular morphology with a relative squeeze_cell_factor along
+        a chosen axis preserving Poisson's ratio. A ratio nu=0.5 assumes
+        uncompressible and isotropic media that embeds the cell. A ratio nu=0
+        will only affect geometry along the chosen axis. A ratio nu=-1 will
+        isometrically scale the neuron geometry along each axis.
+        This method does not affect the underlying cable properties of the
+        cell, only predictions of extracellular measurements (by affecting the
+        relative locations of sources representing the compartments).
+
+        Parameters
+        ----------
+        axis : str
+            which axis to apply compression/stretching. Default is "z".
+        nu : float
+            Poisson's ratio. Ratio between axial and transversal
+            compression/stretching. Default is 0.
+        """
+        try:
+            assert(abs(self.squeeze_cell_factor) < 1.)
+        except AssertionError:
+            raise AssertionError('abs(squeeze_cell_factor) >= 1, '
+                                 + ' squeeze_cell_factor must be in <-1, 1>')
+        try:
+            assert(axis in ['x', 'y', 'z'])
+        except AssertionError:
+            raise AssertionError('axis={} not "x", "y" or "z"'.format(axis))
+
+        for pos, dir_ in zip([self.cell.x[0, ].mean(),
+                              self.cell.y[0, ].mean(),
+                              self.cell.z[0, ].mean()],
+                             'xyz'):
+            geometry = getattr(self.cell, dir_)
+            if dir_ == axis:
+                geometry -= pos
+                geometry *= (1. - self.squeeze_cell_factor)
+                geometry += pos
+            else:
+                geometry -= pos
+                geometry *= (1. + self.squeeze_cell_factor * nu)
+                geometry += pos
+            setattr(self.cell, dir_, geometry)
+
+        # recompute length of each segment
+        self.cell.length = np.sqrt(np.diff(self.cell.x, axis=-1)**2
+                                   + np.diff(self.cell.y, axis=-1)**2
+                                   + np.diff(self.cell.z, axis=-1)**2)
+        # recompute segment areas
+        self.cell.area = self.cell.length * np.pi * self.cell.d
+
+    def get_response_matrix(self):
+        '''
+        Get linear response matrix
+
+        Returns
+        -------
+        response_matrix: ndarray
+            shape (n_contacts, n_seg) ndarray
+        '''
+
+        self._test_cell_extent()
+
+        # Temporarily shift coordinate system so middle layer extends
+        # from z=0 to z=h
+        self.z = self.z - self.z_shift
+        self.cell.z = self.cell.z - self.z_shift
+
+        if self.n is not None and self.N is not None and self.r is not None:
+            if self.n <= 1:
+                raise ValueError("n = %i must be larger that 1" % self.n)
+            else:
+                pass
+
+            M = self._lfp_el_pos_calc_dist(**self.moi_param_kwargs)
+
+            if self.verbose:
+                print('calculations finished, %s, %s' % (str(self),
+                                                         str(self.cell)))
+        else:
+            M = self._loop_over_contacts(**self.moi_param_kwargs)
+            if self.verbose:
+                print('calculations finished, %s, %s' % (str(self),
+                                                         str(self.cell)))
+
+        # Shift coordinate system back so middle layer extends
+        # from z=z_shift to z=z_shift + h
+        self.z = self.z + self.z_shift
+        self.cell.z = self.cell.z + self.z_shift
 
         return M
 
@@ -1285,4 +1695,5 @@ class OneSphereVolumeConductor(LinearModel):
 
         # return mapping between segment currents and contrib in each
         # measurement location
+
         return M

@@ -67,6 +67,13 @@ class :class:`RecExtElectrode`
     :show-inheritance:
     :undoc-members:
 
+class :class:`RecMEAElectrode`
+==============================
+.. autoclass:: lfpy_forward_models.RecMEAElectrode
+    :members:
+    :show-inheritance:
+    :undoc-members:
+
 class :class:`OneSphereVolumeConductor`
 =======================================
 .. autoclass:: lfpy_forward_models.OneSphereVolumeConductor

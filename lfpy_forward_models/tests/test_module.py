@@ -32,6 +32,7 @@ class TestSuite(unittest.TestCase):
     """
     test methods and modules
     """
+
     def test_TestSuite_00(self):
         '''test TestSuite'''
         self.assertTrue(True)
@@ -353,3 +354,261 @@ class TestSuite(unittest.TestCase):
         V_gt = np.array([[0., 1., -1.]]) / (4 * np.pi * sigma_r)
 
         np.testing.assert_allclose(V_ex, V_gt)
+
+    def test_RecMEAElectrode_00(self):
+        """test RecMEAElectrode implementation,
+        method='pointsource' with same conductivity in all layers"""
+        cell = get_cell(n_seg=1)
+        sigma = 0.3
+        r = np.array([[0.],
+                      [0.],
+                      [0.]])
+        mea = lfp.RecMEAElectrode(cell=cell,
+                                  x=r[0], y=r[1, ], z=r[2, ],
+                                  sigma_T=sigma, sigma_S=sigma, sigma_G=sigma,
+                                  method='pointsource')
+        M = mea.get_response_matrix()
+
+        imem = np.array([[0., 1., -1.]]) * (4 * np.pi * sigma * cell.z.mean())
+
+        V_ex = M @ imem
+
+        V_gt = np.array([[0., 1., -1.]])
+
+        np.testing.assert_allclose(V_ex, V_gt)
+
+    def test_RecMEAElectrode_01(self):
+        '''test _test_cell_extent method w/wo. squeeze along z-axis'''
+        electrodeParams = {
+            'sigma_T': 0.3,
+            'sigma_S': 1.5,
+            'sigma_G': 0.0,
+            'h': 200,
+            'x': np.linspace(0, 1000, 11),
+            'y': np.zeros(11),
+            'z': np.zeros(11),
+            'method': "pointsource",
+            'squeeze_cell_factor': None,
+            'verbose': False
+        }
+
+        stick = lfp.CellGeometry(x=np.array([[-17.5, 17.5],
+                                             [0., 23.],
+                                             [23., 46.],
+                                             [46., 69.],
+                                             [69., 92.],
+                                             [92., 115.],
+                                             [115., 125.],
+                                             [125., 135.],
+                                             [135., 145.],
+                                             [145., 155.],
+                                             [155., 165.],
+                                             [115., 118.33333333],
+                                             [118.33333333, 121.66666667],
+                                             [121.66666667, 125.]]),
+                                 y=np.array([[0., 0.],
+                                             [0., 0.],
+                                             [0., 0.],
+                                             [0., 0.],
+                                             [0., 0.],
+                                             [0., 0.],
+                                             [0., 4.],
+                                             [4., 8.],
+                                             [8., 12.],
+                                             [12., 16.],
+                                             [16., 20.],
+                                             [0., 0.],
+                                             [0., 0.],
+                                             [0., 0.]]),
+                                 z=np.array([[0, 0],
+                                             [0, 0],
+                                             [0, 0],
+                                             [0, 0],
+                                             [0, 0],
+                                             [0, 0],
+                                             [0, 0],
+                                             [10, 20],
+                                             [20, 30],
+                                             [30, 40],
+                                             [40, 50],
+                                             [0, -10],
+                                             [-10, -20],
+                                             [-20, -30]]),
+                                 d=np.zeros(14))
+
+        stick.z = stick.z + 1
+        MEA = lfp.RecMEAElectrode(stick, **electrodeParams)
+        np.testing.assert_raises(RuntimeError, MEA._test_cell_extent)
+
+        stick.z = stick.z + 198.
+        MEA = lfp.RecMEAElectrode(stick, **electrodeParams)
+        np.testing.assert_raises(RuntimeError, MEA._test_cell_extent)
+
+        electrodeParams = {
+            'sigma_T': 0.3,
+            'sigma_S': 1.5,
+            'sigma_G': 0.0,
+            'h': 200,
+            'x': np.linspace(0, 1000, 11),
+            'y': np.zeros(11),
+            'z': np.zeros(11),
+            'method': "pointsource",
+            'squeeze_cell_factor': 0.1,
+        }
+
+        stick.z = stick.z - 200
+        MEA = lfp.RecMEAElectrode(stick, **electrodeParams)
+        np.testing.assert_raises(RuntimeError, MEA._test_cell_extent)
+
+        stick.z = np.zeros_like(stick.z) + 202
+        MEA = lfp.RecMEAElectrode(stick, **electrodeParams)
+        np.testing.assert_raises(RuntimeError, MEA._test_cell_extent)
+
+    def test_RecMEAElectrode_02(self):
+        '''test return_comp_outside_slice'''
+        electrodeParams = {
+            'sigma_T': 0.3,
+            'sigma_S': 1.5,
+            'sigma_G': 0.0,
+            'h': 200,
+            'x': np.linspace(0, 1000, 11),
+            'y': np.zeros(11),
+            'z': np.zeros(11),
+            'method': "pointsource",
+            'squeeze_cell_factor': None,
+        }
+
+        stick = lfp.CellGeometry(x=np.array([[-17.5, 17.5],
+                                             [0., 23.],
+                                             [23., 46.],
+                                             [46., 69.],
+                                             [69., 92.],
+                                             [92., 115.],
+                                             [115., 125.],
+                                             [125., 135.],
+                                             [135., 145.],
+                                             [145., 155.],
+                                             [155., 165.],
+                                             [115., 118.33333333],
+                                             [118.33333333, 121.66666667],
+                                             [121.66666667, 125.]]),
+                                 y=np.array([[0., 0.],
+                                             [0., 0.],
+                                             [0., 0.],
+                                             [0., 0.],
+                                             [0., 0.],
+                                             [0., 0.],
+                                             [0., 4.],
+                                             [4., 8.],
+                                             [8., 12.],
+                                             [12., 16.],
+                                             [16., 20.],
+                                             [0., 0.],
+                                             [0., 0.],
+                                             [0., 0.]]),
+                                 z=np.array([[0, 0],
+                                             [0, 0],
+                                             [0, 0],
+                                             [0, 0],
+                                             [0, 0],
+                                             [0, 0],
+                                             [0, 0],
+                                             [10, 20],
+                                             [20, 30],
+                                             [30, 40],
+                                             [40, 50],
+                                             [0, -10],
+                                             [-10, -20],
+                                             [-20, -30]]),
+                                 d=np.zeros(14))
+        stick.z = stick.z + 100
+        MEA = lfp.RecMEAElectrode(stick, **electrodeParams)
+        np.testing.assert_raises(RuntimeError, MEA._return_comp_outside_slice)
+        true_bad_comp = np.array([2, 3, 6])
+
+        stick.z[true_bad_comp, 0] = 1000
+        bad_comp, reason = MEA._return_comp_outside_slice()
+        np.testing.assert_equal(reason, "zstart above")
+        np.testing.assert_equal(true_bad_comp, bad_comp)
+        stick.z[true_bad_comp, 0] = 100
+
+        stick.z[true_bad_comp, 0] = -1000
+        bad_comp, reason = MEA._return_comp_outside_slice()
+        np.testing.assert_equal(reason, "zstart below")
+        np.testing.assert_equal(true_bad_comp, bad_comp)
+        stick.z[true_bad_comp, 0] = 100
+
+        stick.z[true_bad_comp, -1] = 1000
+        bad_comp, reason = MEA._return_comp_outside_slice()
+        np.testing.assert_equal(reason, "zend above")
+        np.testing.assert_equal(true_bad_comp, bad_comp)
+        stick.z[true_bad_comp, -1] = 100
+
+        stick.z[true_bad_comp, -1] = -1000
+        bad_comp, reason = MEA._return_comp_outside_slice()
+        np.testing.assert_equal(reason, "zend below")
+        np.testing.assert_equal(true_bad_comp, bad_comp)
+        stick.z[true_bad_comp, -1] = 100
+
+    def test_RecMEAElectrode_03(self):
+        '''test_position_shifted_slice'''
+        electrodeParams = {
+            'sigma_T': 0.3,
+            'sigma_S': 1.5,
+            'sigma_G': 0.0,
+            'h': 200,
+            'z_shift': -200,
+            'x': np.linspace(0, 1000, 11),
+            'y': np.zeros(11),
+            'z': np.zeros(11) - 100,
+            'method': "pointsource",
+            'squeeze_cell_factor': None,
+        }
+
+        stick = lfp.CellGeometry(x=np.array([[-17.5, 17.5],
+                                             [0., 23.],
+                                             [23., 46.],
+                                             [46., 69.],
+                                             [69., 92.],
+                                             [92., 115.],
+                                             [115., 125.],
+                                             [125., 135.],
+                                             [135., 145.],
+                                             [145., 155.],
+                                             [155., 165.],
+                                             [115., 118.33333333],
+                                             [118.33333333, 121.66666667],
+                                             [121.66666667, 125.]]),
+                                 y=np.array([[0., 0.],
+                                             [0., 0.],
+                                             [0., 0.],
+                                             [0., 0.],
+                                             [0., 0.],
+                                             [0., 0.],
+                                             [0., 4.],
+                                             [4., 8.],
+                                             [8., 12.],
+                                             [12., 16.],
+                                             [16., 20.],
+                                             [0., 0.],
+                                             [0., 0.],
+                                             [0., 0.]]),
+                                 z=np.array([[0, 0],
+                                             [0, 0],
+                                             [0, 0],
+                                             [0, 0],
+                                             [0, 0],
+                                             [0, 0],
+                                             [0, 0],
+                                             [10, 20],
+                                             [20, 30],
+                                             [30, 40],
+                                             [40, 50],
+                                             [0, -10],
+                                             [-10, -20],
+                                             [-20, -30]]),
+                                 d=np.zeros(14))
+        stick.z = stick.z - 100
+
+        MEA = lfp.RecMEAElectrode(stick, **electrodeParams)
+        MEA._test_cell_extent()
