@@ -27,6 +27,11 @@ class :class:`CellGeometry`
     :show-inheritance:
     :undoc-members:
 
+Module :mod:`lfpy_forward_models.models`
+========================================
+.. automodule:: lfpy_forward_models.models
+
+
 class :class:`LinearModel`
 ===========================
 .. autoclass:: lfpy_forward_models.LinearModel
@@ -65,6 +70,39 @@ class :class:`RecExtElectrode`
 class :class:`RecMEAElectrode`
 ==============================
 .. autoclass:: lfpy_forward_models.RecMEAElectrode
+    :members:
+    :show-inheritance:
+    :undoc-members:
+
+class :class:`OneSphereVolumeConductor`
+=======================================
+.. autoclass:: lfpy_forward_models.OneSphereVolumeConductor
+    :members:
+    :show-inheritance:
+    :undoc-members:
+
+
+Module :mod:`lfpy_forward_models.eegmegcalc`
+============================================
+.. automodule:: lfpy_forward_models.eegmegcalc
+
+class :class:`eegmegcalc.FourSphereVolumeConductor`
+===================================================
+.. autoclass:: lfpy_forward_models.eegmegcalc.FourSphereVolumeConductor
+    :members:
+    :show-inheritance:
+    :undoc-members:
+
+class :class:`eegmegcalc.InfiniteVolumeConductor`
+=================================================
+.. autoclass:: lfpy_forward_models.eegmegcalc.InfiniteVolumeConductor
+    :members:
+    :show-inheritance:
+    :undoc-members:
+
+class :class:`eegmegcalc.MEG`
+=============================
+.. autoclass:: lfpy_forward_models.eegmegcalc.MEG
     :members:
     :show-inheritance:
     :undoc-members:

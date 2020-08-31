@@ -31,28 +31,30 @@ GNU General Public License for more details.
   * RecMEAElectrode:
         Class for simulations of in vitro (slice) extracellular
         potentials
-
-:LFPy classes to be implemented:
   * OneSphereVolumeConductor:
         For computing extracellular potentials within
         and outside a homogeneous sphere
-  * FourSphereVolumeConductor:
+  * eegmegcalc.FourSphereVolumeConductor:
         For computing extracellular potentials in
-        4-sphere model (brain, CSF, skull, scalp)
-  * InfiniteVolumeConductor:
+        4-sphere model (brain, CSF, skull, scalp) from current dipole moment
+  * eegmegcalc.InfiniteVolumeConductor:
         To compute extracellular potentials with current
-        dipoles in infinite volume conductor
-  * MEG:
+        dipole moments in infinite volume conductor
+  * eegmegcalc.MEG:
         Class for computing magnetic field from current dipole moments
 
+
 :Modules:
-  * cell
+  * cellgeometry
   * models
+  * eegmegcalc
   * lfpcalc
 """
 
 from .version import version as __version__
 
-from .cell import CellGeometry
+from .cellgeometry import CellGeometry
 from .models import LinearModel, CurrentDipoleMoment, PointSourcePotential, \
-    LineSourcePotential, RecExtElectrode, RecMEAElectrode
+    LineSourcePotential, RecExtElectrode, RecMEAElectrode, \
+    OneSphereVolumeConductor
+from . import eegmegcalc

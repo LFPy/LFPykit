@@ -1,7 +1,9 @@
 include README.md
 include LICENSE
 
-recursive-include examples *.py
-recursive-include examples *.ipynb
+recursive-include example *.py
+recursive-include example *.ipynb
+
+recursive-include lfpy_forward_models *.npz
 
 recursive-include doc *

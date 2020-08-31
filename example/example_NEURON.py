@@ -4,7 +4,7 @@
 Example utilizing the LFPy forward models module for predictions of
 current dipole moment from a dendritic stick model set up in NEURON.
 The passive stick receives sinusoid synaptic current input at its terminal
-end.
+segment.
 
 Execution:
 

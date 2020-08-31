@@ -22,11 +22,12 @@ import MEAutility as mu
 
 class LinearModel(object):
     '''
-    Base LinearModel class skeleton that defines a 2D linear response
-    matrix :math:`M` between transmembrane currents :math:`I` [nA] of a
-    multicompartment neuron model and some measurement :math:`Y` as
+    Base class that defines a 2D linear response matrix :math:`\\mathbf{M}`
+    between transmembrane currents
+    :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and some
+    measurement :math:`\\mathbf{Y}` as
 
-    .. math:: Y = MI
+    .. math:: \\mathbf{Y} = \\mathbf{M} \\mathbf{I}
 
     LinearModel only creates a mapping that returns the currents themselves.
     The class is suitable as a base class for other linear model
@@ -35,7 +36,7 @@ class LinearModel(object):
     Parameters
     ----------
     cell: object
-        CellGeometry or similar instance.
+        ``lfpy_forward_models.CellGeometry`` instance or similar.
     '''
 
     def __init__(self, cell):
@@ -55,26 +56,34 @@ class LinearModel(object):
 
 class CurrentDipoleMoment(LinearModel):
     '''
-    LinearModel subclass that defines a 2D linear response matrix :math:`M`
-    between transmembrane current array :math:`I` [nA] of a multicompartment
-    neuron model and the corresponding current dipole moment :math:`P` [nA um]
-    as
+    `LinearModel` subclass that defines a 2D linear response matrix
+    :math:`\\mathbf{M}` between transmembrane current array
+    :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
+    corresponding current dipole moment :math:`\\mathbf{P}` [nA um] as
 
-    .. math:: P = MI
+    .. math:: \\mathbf{P} = \\mathbf{M} \\mathbf{I}
 
 
-    The current :math:`I` is an ndarray of shape (n_seg, n_tsteps) with
-    unit [nA], and the rows of :math:`P` represent the x-, y- and z-components
-    of the current diple moment for every time step.
+    The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps)
+    with unit [nA], and the rows of :math:`\\mathbf{P}` represent the
+    `x`-, `y`- and `z`-components of the current diple moment for every time
+    step.
 
     The current dipole moment can be used to compute distal measures of
     neural activity such as the EEG and MEG using
-    LFPy.FourSphereVolumeConductor or LFPy.MEG, respectively
+    `lfpy_forward_models.eegmegcalc.FourSphereVolumeConductor` or
+    `lfpy_forward_models.eegmegcalc.MEG`, respectively
 
     Parameters
     ----------
     cell: object
-        CellGeometry or similar instance.
+        CellGeometry instance or similar.
+
+    See also
+    --------
+    LinearModel
+    eegmegcalc.FourSphereVolumeConductor
+    eegmegcalc.MEG
 
     Examples
     --------
@@ -119,37 +128,43 @@ class CurrentDipoleMoment(LinearModel):
 
 class PointSourcePotential(LinearModel):
     '''
-    LinearModel subclass that defines a 2D linear response matrix :math:`M`
-    between transmembrane current array :math:`I` [nA] of a multicompartment
-    neuron model and the corresponding extracellular electric potential
-    :math:`V_{ex}` [mV] as
+    `LinearModel` subclass that defines a 2D linear response matrix
+    :math:`\\mathbf{M}` between transmembrane current array
+    :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
+    corresponding extracellular electric potential
+    :math:`\\mathbf{V}_{ex}` [mV] as
 
-    .. math:: V_{ex} = MI
+    .. math:: \\mathbf{V}_{ex} = \\mathbf{M} \\mathbf{I}
 
-    The current :math:`I` is an ndarray of shape (n_seg, n_tsteps) with
-    unit [nA], and each row indexed by :math:`j` of :math:`V_{ex}` represents
-    the electric potential at each measurement site for every time step.
-    The elements of :math:`M` are computed as
+    The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps)
+    with unit [nA], and each row indexed by :math:`j` of
+    :math:`\\mathbf{V}_{ex}` represents the electric potential at each
+    measurement site for every time step.
 
-    .. math:: M_{ji} = 1 / (4 \\pi \\sigma |r_i - r_j|)
+    The elements of :math:`\\mathbf{M}` are computed as
+
+    .. math:: M_{ji} = 1 / (4 \\pi \\sigma |\\mathbf{r}_i - \\mathbf{r}_j|)
 
     where :math:`\\sigma` is the electric conductivity of the extracellular
-    medium, :math:`r_i` the midpoint coordinate of segment :math:`i`
-    and :math:`r_j` the coordinate of measurement site :math:`j` [1, 2].
+    medium, :math:`\\mathbf{r}_i` the midpoint coordinate of segment :math:`i`
+    and :math:`\\mathbf{r}_j` the coordinate of measurement
+    site :math:`j` [1]_, [2]_.
 
     Assumptions:
+
         - the extracellular conductivity :math:`\\sigma` is infinite,
-          homogeneous, frequency independent (linear) and isotropic
+          homogeneous, frequency independent (linear) and isotropic.
         - each segment is treated as a point source located at the midpoint
-          between its start and end point coordinate
-        - each measurement site :math:`r_j = (x_j, y_j, z_j)` is treated
-          as a point
-        - :math:`|r_i - r_j| >= d_i / 2`, where `d_i` is the segment diameter.
+          between its start and end point coordinate.
+        - each measurement site :math:`\\mathbf{r}_j = (x_j, y_j, z_j)` is
+          treated as a point.
+        - :math:`|\\mathbf{r}_i - \\mathbf{r}_j| >= d_i / 2`, where
+          :math:`d_i` is the segment diameter.
 
     Parameters
     ----------
     cell: object
-        CellGeometry or similar instance.
+        CellGeometry instance or similar.
     x: ndarray of floats
         x-position of measurement sites [um]
     y: ndarray of floats
@@ -158,6 +173,12 @@ class PointSourcePotential(LinearModel):
         z-position of measurement sites [um]
     sigma: float > 0
         scalar extracellular conductivity [S/m]
+
+    See also
+    --------
+    LinearModel
+    LineSourcePotential
+    RecExtElectrode
 
     Examples
     --------
@@ -194,15 +215,16 @@ class PointSourcePotential(LinearModel):
            [ 0.00093413, -0.00093413]])
 
 
-    References:
-        [1] Linden H, Hagen E, Leski S, Norheim ES, Pettersen KH, Einevoll GT
-            (2014) LFPy: a tool for biophysical simulation of extracellular
-            potentials generated by detailed model neurons. Front.
-            Neuroinform. 7:41. doi: 10.3389/fninf.2013.00041
-        [2] Hagen E, Næss S, Ness TV and Einevoll GT (2018) Multimodal Modeling
-            of Neural Network Activity: Computing LFP, ECoG, EEG, and MEG
-            Signals With LFPy 2.0. Front. Neuroinform. 12:92.
-            doi: 10.3389/fninf.2018.00092
+    References
+    ----------
+    .. [1] Linden H, Hagen E, Leski S, Norheim ES, Pettersen KH, Einevoll GT
+       (2014) LFPy: a tool for biophysical simulation of extracellular
+       potentials generated by detailed model neurons. Front.
+       Neuroinform. 7:41. doi: 10.3389/fninf.2013.00041
+    .. [2] Hagen E, Næss S, Ness TV and Einevoll GT (2018) Multimodal Modeling
+       of Neural Network Activity: Computing LFP, ECoG, EEG, and MEG
+       Signals With LFPy 2.0. Front. Neuroinform. 12:92.
+       doi: 10.3389/fninf.2018.00092
     '''
 
     def __init__(self, cell, x, y, z, sigma=0.3):
@@ -258,17 +280,20 @@ class PointSourcePotential(LinearModel):
 
 class LineSourcePotential(LinearModel):
     '''
-    LinearModel subclass that defines a 2D linear response matrix :math:`M`
-    between transmembrane current array :math:`I` [nA] of a multicompartment
-    neuron model and the corresponding extracellular electric potential
-    :math:`V_ex` [mV] as
+    `LinearModel` subclass that defines a 2D linear response matrix
+    :math:`\\mathbf{M}` between transmembrane current array
+    :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
+    corresponding extracellular electric potential
+    :math:`\\mathbf{V}_{ex}` [mV] as
 
-    .. math:: V_{ex} = MI
+    .. math:: \\mathbf{V}_{ex} = \\mathbf{M} \\mathbf{I}
 
-    The current :math:`I` is an ndarray of shape (n_seg, n_tsteps) with
-    unit [nA], and each row indexed by :math:`j` of :math:`V_{ex}` represents
-    the electric potential at each measurement site for every time step.
-    The elements of :math:`M` are computed as
+    The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps)
+    with unit [nA], and each row indexed by :math:`j` of
+    :math:`\\mathbf{V}_{ex}` represents the electric potential at each
+    measurement site for every time step.
+
+    The elements of :math:`\\mathbf{M}` are computed as
 
     .. math:: M_{ji} = \\frac{1}{ 4 \\pi \\sigma L_i } \\log
         \\left|
@@ -282,21 +307,22 @@ class LineSourcePotential(LinearModel):
     electrode point contact to the axis of the line segment is denoted
     :math:`r_{ji}`, longitudinal distance measured from the start of the
     segment is denoted :math:`h_{ji}`, and longitudinal distance from the other
-    end of the segment is denoted :math:`l_{ji}= L_i + h_{ji}` [1, 2].
+    end of the segment is denoted :math:`l_{ji}= L_i + h_{ji}` [1]_, [2]_.
 
     Assumptions:
+
         - the extracellular conductivity :math:`\\sigma` is infinite,
           homogeneous, frequency independent (linear) and isotropic
         - each segment is treated as a straigh line source with homogeneous
           current density between its start and end point coordinate
-        - each measurement site :math:`r_j = (x_j, y_j, z_j)` is treated
-          as a point
+        - each measurement site :math:`\\mathbf{r}_j = (x_j, y_j, z_j)` is
+          treated as a point
         - The minimum distance to a line source is set equal to segment radius.
 
     Parameters
     ----------
     cell: object
-        CellGeometry or similar instance.
+        CellGeometry instance or similar.
     x: ndarray of floats
         x-position of measurement sites [um]
     y: ndarray of floats
@@ -305,6 +331,12 @@ class LineSourcePotential(LinearModel):
         z-position of measurement sites [um]
     sigma: float > 0
         scalar extracellular conductivity [S/m]
+
+    See also
+    --------
+    LinearModel
+    PointSourcePotential
+    RecExtElectrode
 
     Examples
     --------
@@ -340,15 +372,16 @@ class LineSourcePotential(LinearModel):
            [ 0.00124645, -0.00124645],
            [ 0.0009382 , -0.0009382 ]])
 
-    References:
-        [1] Linden H, Hagen E, Leski S, Norheim ES, Pettersen KH, Einevoll GT
-            (2014) LFPy: a tool for biophysical simulation of extracellular
-            potentials generated by detailed model neurons. Front.
-            Neuroinform. 7:41. doi: 10.3389/fninf.2013.00041
-        [2] Hagen E, Næss S, Ness TV and Einevoll GT (2018) Multimodal Modeling
-            of Neural Network Activity: Computing LFP, ECoG, EEG, and MEG
-            Signals With LFPy 2.0. Front. Neuroinform. 12:92.
-            doi: 10.3389/fninf.2018.00092
+    References
+    ----------
+    .. [1] Linden H, Hagen E, Leski S, Norheim ES, Pettersen KH, Einevoll GT
+       (2014) LFPy: a tool for biophysical simulation of extracellular
+       potentials generated by detailed model neurons. Front.
+       Neuroinform. 7:41. doi: 10.3389/fninf.2013.00041
+    .. [2] Hagen E, Næss S, Ness TV and Einevoll GT (2018) Multimodal Modeling
+       of Neural Network Activity: Computing LFP, ECoG, EEG, and MEG
+       Signals With LFPy 2.0. Front. Neuroinform. 12:92.
+       doi: 10.3389/fninf.2018.00092
     '''
 
     def __init__(self, cell, x, y, z, sigma=0.3):
@@ -408,15 +441,44 @@ class RecExtElectrode(LinearModel):
     Main class that represents an extracellular electric recording devices such
     as a laminar probe.
 
+    This class is a `LinearModel` subclass that defines a 2D linear response
+    matrix :math:`\\mathbf{M}` between transmembrane current array
+    :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
+    corresponding extracellular electric potential
+    :math:`\\mathbf{V}_{ex}` [mV] as
+
+    .. math:: \\mathbf{V}_{ex} = \\mathbf{M} \\mathbf{I}
+
+    The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps)
+    with unit [nA], and each row indexed by :math:`j` of
+    :math:`\\mathbf{V}_{ex}` represents the electric potential at each
+    measurement site for every time step.
+
+    The class differ from `PointSourcePotential` and `LineSourcePotential` by:
+
+        - supporting anisotropic volume conductors [1]_
+        - supporting probe geometry specifications using the `MEAutility`
+          (https://meautility.readthedocs.io/en/latest/,
+          https://github.com/alejoe91/MEAutility).
+        - supporting electrode contact points with finite extents [2]_, [3]_
+        - switching between point- and linesources, and a combined method that
+          assumes that the root element at segment index 0 is spherical.
+
+    See also
+    --------
+    LinearModel
+    PointSourcePotential
+    LineSourcePotential
+
     Parameters
     ----------
     cell: object
-        CellGeometry instance or similar.
+        `CellGeometry` instance or similar.
     sigma: float or list/ndarray of floats
         extracellular conductivity in units of [S/m]. A scalar value implies an
         isotropic extracellular conductivity. If a length 3 list or array of
         floats is provided, these values corresponds to an anisotropic
-        conductor with conductivities [sigma_x, sigma_y, sigma_z] accordingly.
+        conductor with conductivities :math:`[\\sigma_x,\\sigma_y,\\sigma_z]`.
     probe: MEAutility MEA object or None
         MEAutility probe object
     x, y, z: ndarray
@@ -490,7 +552,7 @@ class RecExtElectrode(LinearModel):
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> import LFPy
-    >>> from lfpy_forward_models import RecExtElectrode
+    >>> from lfpy_forward_models import CellGeometry, RecExtElectrode
     >>>
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
@@ -507,7 +569,7 @@ class RecExtElectrode(LinearModel):
     >>> cell = LFPy.Cell(**cellParameters)
     >>>
     >>> synapseParameters = {
-    >>>     'idx' : cell.get_closest_idx(x=0, y=0, z=800), # compartment
+    >>>     'idx' : cell.get_closest_idx(x=0, y=0, z=800), # segment
     >>>     'e' : 0,                                # reversal potential
     >>>     'syntype' : 'ExpSyn',                   # synapse type
     >>>     'tau' : 2,                              # syn. time constant
@@ -520,7 +582,7 @@ class RecExtElectrode(LinearModel):
     >>> cell.simulate(rec_imem=True)
     >>>
     >>> N = np.empty((16, 3))
-    >>> for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] # normal vectors
+    >>> for i in range(N.shape[0]): N[i,] = [1, 0, 0] # normal vectors
     >>> electrodeParameters = {         # parameters for RecExtElectrode class
     >>>     'sigma' : 0.3,              # Extracellular potential
     >>>     'x' : np.zeros(16)+25,      # Coordinates of electrode contacts
@@ -530,7 +592,12 @@ class RecExtElectrode(LinearModel):
     >>>     'r' : 10,
     >>>     'N' : N,
     >>> }
-    >>> electrode = RecExtElectrode(cell, **electrodeParameters)
+    >>> cell_geometry = CellGeometry(
+    >>>     x=np.c_[cell.xstart, cell.xend],
+    >>>     y=np.c_[cell.ystart, cell.yend],
+    >>>     z=np.c_[cell.zstart, cell.zend],
+    >>>     d=cell.diam)
+    >>> electrode = RecExtElectrode(cell_geometry, **electrodeParameters)
     >>> M = electrode.get_response_matrix()
     >>> V_ex = M @ cell.imem
     >>> plt.matshow(V_ex)
@@ -543,7 +610,7 @@ class RecExtElectrode(LinearModel):
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> import LFPy
-    >>> from lfpy_forward_models import RecExtElectrode
+    >>> from lfpy_forward_models import CellGeometry, RecExtElectrode
     >>>
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
@@ -571,7 +638,7 @@ class RecExtElectrode(LinearModel):
     >>> synapse.set_spike_times(np.array([10., 15., 20., 25.]))
     >>>
     >>> N = np.empty((16, 3))
-    >>> for i in xrange(N.shape[0]): N[i,] = [1, 0, 0] #normal vec. of contacts
+    >>> for i in range(N.shape[0]): N[i,] = [1, 0, 0] #normal vec. of contacts
     >>> electrodeParameters = {         # parameters for RecExtElectrode class
     >>>     'sigma' : 0.3,              # Extracellular potential
     >>>     'x' : np.zeros(16)+25,      # Coordinates of electrode contacts
@@ -581,8 +648,14 @@ class RecExtElectrode(LinearModel):
     >>>     'r' : 10,
     >>>     'N' : N,
     >>> }
-    >>> electrode = LFPy.RecExtElectrode(cell, **electrodeParameters)
-    >>> cell.simulate(dotprodcoeffs=[electrode.get_response_matrix()])
+    >>> cell_geometry = CellGeometry(
+    >>>     x=np.c_[cell.xstart, cell.xend],
+    >>>     y=np.c_[cell.ystart, cell.yend],
+    >>>     z=np.c_[cell.zstart, cell.zend],
+    >>>     d=cell.diam)
+    >>> electrode = RecExtElectrode(cell_geometry, **electrodeParameters)
+    >>> M = electrode.get_response_matrix()
+    >>> cell.simulate(dotprodcoeffs=[M])
     >>> V_ex = cell.dotprodresults[0]
     >>> plt.matshow(V_ex)
     >>> plt.colorbar()
@@ -595,7 +668,7 @@ class RecExtElectrode(LinearModel):
     >>> import matplotlib.pyplot as plt
     >>> import MEAutility as mu
     >>> import LFPy
-    >>> from lfpy_forward_models import RecExtElectrode
+    >>> from lfpy_forward_models import CellGeometry, RecExtElectrode
     >>>
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
@@ -625,11 +698,31 @@ class RecExtElectrode(LinearModel):
     >>> cell.simulate(rec_imem=True)
     >>>
     >>> probe = mu.return_mea('Neuropixels-128')
-    >>> electrode = RecExtElectrode(cell, probe=probe)
+    >>> cell_geometry = CellGeometry(
+    >>>     x=np.c_[cell.xstart, cell.xend],
+    >>>     y=np.c_[cell.ystart, cell.yend],
+    >>>     z=np.c_[cell.zstart, cell.zend],
+    >>>     d=cell.diam)
+    >>> electrode = RecExtElectrode(cell_geometry, probe=probe)
     >>> V_ex = electrode.get_response_matrix() @ cell.imem
     >>> mu.plot_mea_recording(V_ex, probe)
     >>> plt.axis('tight')
     >>> plt.show()
+
+    References
+    ----------
+    .. [1] Ness, T. V., Chintaluri, C., Potworowski, J., Leski, S., Glabska,
+       H., Wójcik, D. K., et al. (2015). Modelling and analysis of electrical
+       potentials recorded in microelectrode arrays (MEAs).
+       Neuroinformatics 13:403–426. doi: 10.1007/s12021-015-9265-6
+    .. [2] Linden H, Hagen E, Leski S, Norheim ES, Pettersen KH, Einevoll GT
+       (2014) LFPy: a tool for biophysical simulation of extracellular
+       potentials generated by detailed model neurons. Front.
+       Neuroinform. 7:41. doi: 10.3389/fninf.2013.00041
+    .. [3] Hagen E, Næss S, Ness TV and Einevoll GT (2018) Multimodal Modeling
+       of Neural Network Activity: Computing LFP, ECoG, EEG, and MEG
+       Signals With LFPy 2.0. Front. Neuroinform. 12:92.
+       doi: 10.3389/fninf.2018.00092
     """
 
     def __init__(self, cell, sigma=0.3, probe=None,
@@ -677,7 +770,7 @@ class RecExtElectrode(LinearModel):
                     "The number of elements in [x, y, z] must be equal")
 
             if N is not None:
-                if not isinstance(N, np.array):
+                if not isinstance(N, np.ndarray):
                     try:
                         N = np.array(N)
                     except TypeError as te:
@@ -931,7 +1024,7 @@ class RecMEAElectrode(RecExtElectrode):
     >>> cell = CellGeometry(
     >>>     x=np.array([[0, 10], [10, 20], [20, 30], [30, 40]]),
     >>>     y=np.array([[0, 0], [0, 0], [0, 0], [0, 0]]),
-    >>>     z=np.array([[0, 0], [0, 0], [0, 0], [0, 0]]) * 10,
+    >>>     z=np.array([[0, 0], [0, 0], [0, 0], [0, 0]]) + 10,
     >>>     d=np.array([1, 1, 1, 1]))
     >>> # transmembrane currents, three time steps [nA]
     >>> I_m = np.array([[0.25, -1., 1.],
@@ -948,16 +1041,16 @@ class RecMEAElectrode(RecExtElectrode):
     >>> M = el.get_response_matrix()
     >>> # compute extracellular potential
     >>> M @ I_m
-    array([[ 0.02244775, -0.13777683,  0.14758927],
-           [ 0.09703145, -0.47397696,  0.49243115],
-           [-0.04951479, -0.00353662,  0.04951479],
-           [-0.47386676,  0.46582868, -0.11559584],
-           [-0.09865022,  0.12488441, -0.07138681],
-           [ 0.09865022,  0.01057345, -0.15437628],
-           [ 0.47386676, -0.09492693, -0.50257376],
-           [ 0.04951479,  0.0141465 , -0.06719792],
-           [-0.09703145,  0.12752004,  0.08499705],
-           [-0.02244775,  0.04099623,  0.01371172]])
+    array([[-0.00233572, -0.01990957,  0.02542055],
+           [-0.00585075, -0.01520865,  0.02254483],
+           [-0.01108601, -0.00243107,  0.01108601],
+           [-0.01294584,  0.01013595, -0.00374823],
+           [-0.00599067,  0.01432711, -0.01709416],
+           [ 0.00599067,  0.01194602, -0.0266944 ],
+           [ 0.01294584,  0.00953841, -0.02904238],
+           [ 0.01108601,  0.00972426, -0.02324134],
+           [ 0.00585075,  0.01075236, -0.01511768],
+           [ 0.00233572,  0.01038382, -0.00954429]])
 
     See also <LFPy>/examples/example_MEA.py
 
@@ -1250,5 +1343,357 @@ class RecMEAElectrode(RecExtElectrode):
         # from z=z_shift to z=z_shift + h
         self.z = self.z + self.z_shift
         self.cell.z = self.cell.z + self.z_shift
+
+        return M
+
+
+class OneSphereVolumeConductor(LinearModel):
+    """
+    Computes extracellular potentials within and outside a spherical volume-
+    conductor model that assumes homogeneous, isotropic, linear (frequency
+    independent) conductivity in and outside the sphere with a radius R. The
+    conductivity in and outside the sphere must be greater than 0, and the
+    current source(s) must be located within the radius R.
+
+    The implementation is based on the description of electric potentials of
+    point charge in an dielectric sphere embedded in dielectric media [1]_,
+    which is mathematically equivalent to a current source in conductive media.
+
+
+    This class is a `LinearModel` subclass that defines a 2D linear response
+    matrix :math:`\\mathbf{M}` between transmembrane current array
+    :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
+    corresponding extracellular electric potential
+    :math:`\\mathbf{V}_{ex}` [mV] as
+
+    .. math:: \\mathbf{V}_{ex} = \\mathbf{M} \\mathbf{I}
+
+    The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps)
+    with unit [nA], and each row indexed by :math:`j` of
+    :math:`\\mathbf{V}_{ex}` represents the electric potential at each
+    measurement site for every time step.
+
+    Parameters
+    ----------
+    cell: object or None
+        `CellGeometry` instance or similar.
+    r: ndarray, dtype=float
+        shape(3, n_points) observation points in space in spherical coordinates
+        (radius, theta, phi) relative to the center of the sphere.
+    R: float
+        sphere radius [µm]
+    sigma_i: float
+        electric conductivity for radius r <= R [S/m]
+    sigma_o: float
+        electric conductivity for radius r > R [S/m]
+
+    References
+    ----------
+    .. [1] Shaozhong Deng (2008), Journal of Electrostatics 66:549-560.
+        DOI: 10.1016/j.elstat.2008.06.003
+
+    Examples
+    --------
+    Compute the potential for a single monopole along the x-axis:
+
+    >>> # import modules
+    >>> from lfpy_forward_models import OneSphereVolumeConductor
+    >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
+    >>> # observation points in spherical coordinates (flattened)
+    >>> X, Y = np.mgrid[-15000:15100:1000., -15000:15100:1000.]
+    >>> r = np.array([np.sqrt(X**2 + Y**2).flatten(),
+    >>>               np.arctan2(Y, X).flatten(),
+    >>>               np.zeros(X.size)])
+    >>> # set up class object and compute electric potential in all locations
+    >>> sphere = OneSphereVolumeConductor(r, R=10000.,
+    >>>                                   sigma_i=0.3, sigma_o=0.03)
+    >>> Phi = sphere.calc_potential(rs=8000, current=1.).reshape(X.shape)
+    >>> # plot
+    >>> fig, ax = plt.subplots(1,1)
+    >>> im=ax.contourf(X, Y, Phi,
+    >>>                levels=np.linspace(Phi.min(),
+    >>>                np.median(Phi[np.isfinite(Phi)]) * 4, 30))
+    >>> circle = plt.Circle(xy=(0,0), radius=sphere.R, fc='none', ec='k')
+    >>> ax.add_patch(circle)
+    >>> fig.colorbar(im, ax=ax)
+    >>> plt.show()
+    """
+
+    def __init__(self,
+                 cell,
+                 r,
+                 R=10000.,
+                 sigma_i=0.3,
+                 sigma_o=0.03):
+        """initialize class OneSphereVolumeConductor"""
+        super().__init__(cell=cell)
+        # check inputs
+        try:
+            assert(r.shape[0] == 3)
+            assert(r.ndim == 2)
+        except AssertionError:
+            raise AssertionError('r must be a shape (3, n_points) ndarray')
+        try:
+            assert((isinstance(R, float)) or (isinstance(R, int)))
+        except AssertionError:
+            raise AssertionError('sphere radius R must be a float value')
+        try:
+            assert((sigma_i > 0) & (sigma_o > 0))
+        except AssertionError:
+            raise AssertionError(
+                'sigma_i and sigma_o must both be positive values')
+
+        self.r = r
+        self.R = R
+        self.sigma_i = sigma_i
+        self.sigma_o = sigma_o
+
+    def calc_potential(self, rs, current, min_distance=1., n_max=1000):
+        """
+        Return the electric potential at observation points for source current
+        as function of time.
+
+        Parameters
+        ----------
+        rs: float
+            monopole source location along the horizontal x-axis [µm]
+        current: float or ndarray, dtype float
+            float or shape (n_tsteps, ) array containing source current [nA]
+        min_distance: None or float
+            minimum distance between source location and observation point [µm]
+            (in order to avoid singularities)
+        n_max: int
+            Number of elements in polynomial expansion to sum over (see [1]_).
+
+        References
+        ----------
+        .. [1] Shaozhong Deng (2008), Journal of Electrostatics 66:549-560.
+            DOI: 10.1016/j.elstat.2008.06.003
+
+        Returns
+        -------
+        Phi: ndarray
+            shape (n-points, ) ndarray of floats if I is float like. If I is
+            an 1D ndarray, and shape (n-points, I.size) ndarray is returned.
+            Unit [mV].
+        """
+        try:
+            assert(type(rs) in [int, float, np.float64])
+            assert(abs(rs) < self.R)
+        except AssertionError:
+            raise AssertionError(
+                'source location rs must be a float value and |rs| '
+                'must be less than sphere radius R')
+        try:
+            assert((min_distance is None) or (
+                type(min_distance) in [float, int, np.float64]))
+        except AssertionError:
+            raise AssertionError('min_distance must be None or a float')
+
+        r = self.r[0]
+        theta = self.r[1]
+
+        # add harmonical contributions due to inhomogeneous media
+        inds_i = r <= self.R
+        inds_o = r > self.R
+
+        # observation points r <= R
+        phi_i = np.zeros(r.size)
+        for j, (theta_i, r_i) in enumerate(zip(theta[inds_i], r[inds_i])):
+            coeffs_i = np.zeros(n_max)
+            for n in range(n_max):
+                coeffs_i[n] = ((self.sigma_i - self.sigma_o) * (n + 1)) / (
+                    self.sigma_i * n + self.sigma_o * (n + 1)) * (
+                    (r_i * rs) / self.R**2)**n
+            poly_i = np.polynomial.legendre.Legendre(coeffs_i)
+            phi_i[np.where(inds_i)[0][j]] = poly_i(np.cos(theta_i))
+        phi_i[inds_i] *= 1. / self.R
+
+        # observation points r > R
+        phi_o = np.zeros(r.size)
+        for j, (theta_o, r_o) in enumerate(zip(theta[inds_o], r[inds_o])):
+            coeffs_o = np.zeros(n_max)
+            for n in range(n_max):
+                coeffs_o[n] = (self.sigma_i * (2 * n + 1)) / \
+                    (self.sigma_i * n + self.sigma_o * (n + 1)) * (rs / r_o)**n
+            poly_o = np.polynomial.legendre.Legendre(coeffs_o)
+            phi_o[np.where(inds_o)[0][j]] = poly_o(np.cos(theta_o))
+        phi_o[inds_o] *= 1. / r[inds_o]
+
+        # potential in homogeneous media
+        if min_distance is None:
+            phi_i[inds_i] += 1. / \
+                np.sqrt(r[r <= self.R]**2 + rs**2 -
+                        2 * r[inds_i] * rs * np.cos(theta[inds_i]))
+        else:
+            denom = np.sqrt(
+                r[inds_i]**2 +
+                rs**2 -
+                2 *
+                r[inds_i] *
+                rs *
+                np.cos(
+                    theta[inds_i]))
+            denom[denom < min_distance] = min_distance
+            phi_i[inds_i] += 1. / denom
+
+        if isinstance(current, np.ndarray):
+            try:
+                assert(np.all(np.isfinite(current)))
+                assert(np.all(np.isreal(current)))
+                assert(current.ndim == 1)
+            except AssertionError:
+                raise AssertionError('input argument current must be float or '
+                                     '1D ndarray with float values')
+
+            return np.dot((phi_i + phi_o).reshape((1, -1)).T,
+                          current.reshape((1, -1))
+                          ) / (4. * np.pi * self.sigma_i)
+        else:
+            try:
+                assert(np.isfinite(current)) and (np.shape(current) == ())
+            except AssertionError:
+                raise AssertionError('input argument I must be float or 1D '
+                                     'ndarray with float values')
+            return current / (4. * np.pi * self.sigma_i) * (phi_i + phi_o)
+
+    def get_response_matrix(self, n_max=1000):
+        """
+        Compute linear mapping between transmembrane currents of CellGeometry
+        like object instance and extracellular potential in and outside of
+        sphere.
+
+        Parameters
+        ----------
+        n_max: int
+            Number of elements in polynomial expansion to sum over
+            (see [1]_).
+
+        References
+        ----------
+        .. [1] Shaozhong Deng (2008), Journal of Electrostatics 66:549-560.
+            DOI: 10.1016/j.elstat.2008.06.003
+
+        Raises
+        ------
+        Exception
+            if `cell is None`
+
+        Examples
+        --------
+        Compute extracellular potential in one-sphere volume conductor model
+        from LFPy.Cell object:
+
+        >>> # import modules
+        >>> import LFPy
+        >>> from lfpy_forward_models import CellGeometry, \
+        >>>     OneSphereVolumeConductor
+        >>> import os
+        >>> import numpy as np
+        >>> import matplotlib.pyplot as plt
+        >>> from matplotlib.collections import PolyCollection
+        >>> # create cell
+        >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
+        >>>                                          'ball_and_sticks.hoc'),
+        >>>                  tstop=10.)
+        >>> cell.set_pos(z=9800.)
+        >>> # stimulus
+        >>> syn = LFPy.Synapse(cell, idx=cell.totnsegs-1, syntype='Exp2Syn',
+        >>>                    weight=0.01)
+        >>> syn.set_spike_times(np.array([1.]))
+        >>> # simulate
+        >>> cell.simulate(rec_imem=True)
+        >>> # observation points in spherical coordinates (flattened)
+        >>> X, Z = np.mgrid[-500:501:10., 9500:10501:10.]
+        >>> Y = np.zeros(X.shape)
+        >>> r = np.array([np.sqrt(X**2 + Z**2).flatten(),
+        >>>               np.arccos(Z / np.sqrt(X**2 + Z**2)).flatten(),
+        >>>               np.arctan2(Y, X).flatten()])
+        >>> # instantiate CellGeometry class with cell's geometry
+        >>> cell_geometry = CellGeometry(x=np.c_[cell.xstart, cell.xend],
+        >>>                              y=np.c_[cell.ystart, cell.yend],
+        >>>                              z=np.c_[cell.zstart, cell.zend],
+        >>>                              d=cell.diam)
+        >>> # set up class object and compute mapping between segment currents
+        >>> # and electric potential in space
+        >>> sphere = OneSphereVolumeConductor(cell_geometry, r=r, R=10000.,
+        >>>                                   sigma_i=0.3, sigma_o=0.03)
+        >>> M = sphere.get_response_matrix(n_max=1000)
+        >>> # pick out some time index for the potential and compute potential
+        >>> ind = cell.tvec==2.
+        >>> V_ex = (M @ cell.imem)[:, ind].reshape(X.shape)
+        >>> # plot potential
+        >>> fig, ax = plt.subplots(1,1)
+        >>> zips = []
+        >>> for x, z in cell.get_idx_polygons(projection=('x', 'z')):
+        >>>     zips.append(list(zip(x, z)))
+        >>> polycol = PolyCollection(zips,
+        >>>                          edgecolors='none',
+        >>>                          facecolors='gray')
+        >>> vrange = 1E-3 # limits for color contour plot
+        >>> im=ax.contour(X, Z, V_ex,
+        >>>              levels=np.linspace(-vrange, vrange, 41))
+        >>> circle = plt.Circle(xy=(0,0), radius=sphere.R, fc='none', ec='k')
+        >>> ax.add_collection(polycol)
+        >>> ax.add_patch(circle)
+        >>> ax.axis(ax.axis('equal'))
+        >>> ax.set_xlim(X.min(), X.max())
+        >>> ax.set_ylim(Z.min(), Z.max())
+        >>> fig.colorbar(im, ax=ax)
+        >>> plt.show()
+
+        Returns
+        -------
+        ndarray
+            Shape (n_points, n_compartments) mapping between individual
+            segments and extracellular potential in extracellular locations
+
+        Notes
+        -----
+        Each segment is treated as a point source in space. The minimum
+        source to measurement site distance will be set to the diameter of
+        each segment
+
+        """
+        if self.cell is None:
+            # perhaps this can be solved with a decorator
+            raise Exception('OneSphereVolumeConductor was instantiated with '
+                            'cell=None: get_response_matrix() can not be used!'
+                            )
+
+        # midpoint position of compartments in spherical coordinates
+        radius = np.sqrt(self.cell.x.mean(axis=-1)**2
+                         + self.cell.y.mean(axis=-1)**2
+                         + self.cell.z.mean(axis=-1)**2)
+        theta = np.arccos(self.cell.z.mean(axis=-1) / radius)
+        phi = np.arctan2(self.cell.y.mean(axis=-1), self.cell.x.mean(axis=-1))
+        diam = self.cell.d
+
+        # since the sources must be located on the x-axis, we keep a copy
+        # of the unrotated coordinate system for the contact points:
+        r_orig = np.copy(self.r)
+
+        # unit current amplitude
+        current = 1.
+
+        # initialize mapping array
+        M = np.zeros((self.r.shape[1], radius.size))
+
+        # compute the mapping for each compartment
+        for i, (radius_i, theta_i, _, diam_i) in enumerate(
+                zip(radius, theta, phi, diam)):
+            self.r = np.array([r_orig[0],  # radius unchanged
+                               r_orig[1] - theta_i,
+                               # rotate relative to source location
+                               r_orig[2]])  # phi unchanged
+            M[:, i] = self.calc_potential(
+                radius_i, current=current, min_distance=diam_i, n_max=n_max)
+
+        # reset measurement locations
+        self.r = r_orig
+
+        # return mapping between segment currents and contrib in each
+        # measurement location
 
         return M
