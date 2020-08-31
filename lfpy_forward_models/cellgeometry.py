@@ -118,24 +118,25 @@ class CellGeometry(object):
                            type(y) is np.ndarray,
                            type(z) is np.ndarray,
                            type(d) is np.ndarray]))
-        except AssertionError as ae:
-            raise ae('x, y, z and d must be of type numpy.ndarray')
+        except AssertionError:
+            raise AssertionError('x, y, z and d must be of type numpy.ndarray')
         try:
             assert(x.ndim == y.ndim == z.ndim == 2)
-        except AssertionError as ae:
-            raise ae('x, y and z must be of shape (n_seg x 2)')
+        except AssertionError:
+            raise AssertionError('x, y and z must be of shape (n_seg x 2)')
         try:
             assert(x.shape == y.shape == z.shape)
-        except AssertionError as ae:
-            raise ae('x, y and z must all be the same shape')
+        except AssertionError:
+            raise AssertionError('x, y and z must all be the same shape')
         try:
             assert(x.shape[1] == 2)
-        except AssertionError as ae:
-            raise ae('the last axis of x, y and z must be of length 2')
+        except AssertionError:
+            raise AssertionError(
+                'the last axis of x, y and z must be of length 2')
         try:
             assert(d.ndim == 1 and d.size == x.shape[0])
-        except AssertionError as ae:
-            raise ae('d must be 1-dimensional with size == n_seg')
+        except AssertionError:
+            raise AssertionError('d must be 1-dimensional with size == n_seg')
 
         # set attributes
         self.x = x
