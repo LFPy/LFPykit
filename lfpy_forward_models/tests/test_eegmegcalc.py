@@ -430,6 +430,41 @@ class testFourSphereVolumeConductor(unittest.TestCase):
             else:
                 np.testing.assert_equal(phi0, phi[0][0])
 
+    def test_get_response_matrix_00(self):
+        '''Test radial and tangential parts of dipole sums to dipole'''
+        radii = [88000, 90000, 95000, 100000]
+        sigmas = [0.3, 1.5, 0.015, 0.3]
+
+        dips = np.array([[[1000., 0., 0.]],
+                         [[-1000., 0., 0.]],
+                         [[0., 1000., 0.]],
+                         [[0., -1000., 0.]],
+                         [[0., 0., 1000.]],
+                         [[0., 0., -1000.]]])
+
+        p_locs = np.array([[87000., 0., 0.],
+                           [-87000., 0., 0.],
+                           [0., 87000., 0.],
+                           [0., -87000., 0.],
+                           [0., 0., 87000],
+                           [0., 0., -87000]])
+
+        el_locs = np.array([[[99000., 0., 0.]],
+                            [[-99000., 0., 0.]],
+                            [[0., 99000., 0.]],
+                            [[0., -99000., 0.]],
+                            [[0., 0., 99000.]],
+                            [[0., 0., -99000.]]])
+
+        for i in range(len(p_locs)):
+            fs = eegmegcalc.FourSphereVolumeConductor(
+                el_locs[i], radii, sigmas)
+            phi = fs.calc_potential(dips[i].T, p_locs[i])
+
+            M = fs.get_response_matrix(p_locs[i])
+            np.testing.assert_allclose(M @ dips[i].T, phi)
+
+
     @unittest.skipUnless(LFPy_imported, "skipping: LFPy not installed")
     @unittest.skipUnless(neuron_imported, "skipping: NEURON not installed")
     def test_calc_potential_from_multi_dipoles00(self):
@@ -520,7 +555,7 @@ class testInfiniteVolumeConductor(unittest.TestCase):
     test class InfiniteVolumeConductor
     """
 
-    def test_get_dipole_potential(self):
+    def test_get_dipole_potential_00(self):
         sigma = 0.3
         r = np.array([[0., 0., 1.], [0., 1., 0.]])
         p = np.array([[0., 0., 4 * np.pi * 0.3], [0., 4 * np.pi * 0.3, 0.]]).T
@@ -528,7 +563,7 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         phi = inf_model.get_dipole_potential(p, r)
         np.testing.assert_allclose(phi, np.array([[1., 0.], [0., 1.]]))
 
-    def test_get_response_matrix(self):
+    def test_get_response_matrix_00(self):
         sigma = 0.3
         r = np.array([[0., 0., 1.], [0., 1., 0.]])
         p = np.array([[0., 0., 4 * np.pi * 0.3], [0., 4 * np.pi * 0.3, 0.]]).T
@@ -536,7 +571,6 @@ class testInfiniteVolumeConductor(unittest.TestCase):
 
         M = inf_model.get_response_matrix(r)
         phi = M @ p
-        #phi = inf_model.get_dipole_potential(p, r)
         np.testing.assert_allclose(phi, np.array([[1., 0.], [0., 1.]]))
 
     @unittest.skipUnless(LFPy_imported, "skipping: LFPy not installed")
