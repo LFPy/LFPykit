@@ -183,7 +183,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         p: ndarray, dtype=float
-            Shape (n_timesteps, 3) array containing the x,y,z components of the
+            Shape (3, n_timesteps) array containing the x,y,z components of the
             current dipole moment in units of (nA*µm) for all timesteps.
         rz: ndarray, dtype=float
             Shape (3, ) array containing the position of the current dipole in
@@ -200,13 +200,13 @@ class FourSphereVolumeConductor(object):
 
         self._rz_params(rz)
         n_contacts = self.r.shape[0]
-        n_timesteps = p.shape[0]
+        n_timesteps = p.shape[1]
 
         if np.linalg.norm(p) != 0:
             p_rad, p_tan = self._decompose_dipole(p)
         else:
-            p_rad = np.zeros((n_timesteps, 3))
-            p_tan = np.zeros((n_timesteps, 3))
+            p_rad = np.zeros((3, n_timesteps))
+            p_tan = np.zeros((3, n_timesteps))
         if np.linalg.norm(p_rad) != 0.:
             pot_rad = self._calc_rad_potential(p_rad)
         else:
@@ -219,6 +219,25 @@ class FourSphereVolumeConductor(object):
 
         pot_tot = pot_rad + pot_tan
         return pot_tot
+
+    def get_response_matrix(self, rz):
+        '''
+        Get linear response matrix mapping current dipole moment in [nA µm]
+        located in location `rz` to extracellular potential in [mV]
+        at recording sites `FourSphereVolumeConductor.` [µm]
+
+        parameters
+        ----------
+        rz: ndarray, dtype=float
+            Shape (3, ) array containing the position of the current dipole in
+            cartesian coordinates. Units of [µm].
+
+        Returns
+        -------
+        response_matrix: ndarray
+            shape (n_contacts, 3) ndarray
+        '''
+        return self.calc_potential(np.eye(3), rz)
 
     def calc_potential_from_multi_dipoles(self, cell, timepoints=None):
         """
@@ -286,20 +305,20 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         p: ndarray, dtype=float
-            Shape (n_timesteps, 3) array containing the x,y,z-components of the
+            Shape (3, n_timesteps) array containing the x,y,z-components of the
             current dipole moment in units of (nA*µm) for all timesteps
 
         Returns:
         -------
         p_rad: ndarray, dtype=float
-            Shape (n_timesteps, 3) array, radial part of p,
+            Shape (3, n_timesteps) array, radial part of p,
             parallel to self._rz
         p_tan: ndarray, dtype=float
-            Shape (n_timesteps, 3) array, tangential part of p,
+            Shape (3, n_timesteps) array, tangential part of p,
             orthogonal to self._rz
         """
         z_ = np.expand_dims(self._z, -1)  # reshape z-axis vector
-        p_rad = np.dot(np.dot(p, z_), z_.T)
+        p_rad = z_ @ (z_.T @ p)
         p_tan = p - p_rad
         return p_rad, p_tan
 
@@ -310,7 +329,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         p_rad: ndarray, dtype=float
-            Shape (n_timesteps, 3) array, radial part of p
+            Shape (3, n_timesteps) array, radial part of p
             in units of (nA*µm), parallel to self._rz
 
         Returns
@@ -322,7 +341,7 @@ class FourSphereVolumeConductor(object):
             of p_rad
         """
 
-        p_tot = np.linalg.norm(p_rad, axis=1)
+        p_tot = np.linalg.norm(p_rad, axis=0)
         s_vector = self._sign_rad_dipole(p_rad)
         phi_const = s_vector * p_tot / \
             (4 * np.pi * self.sigma1 * self._rz ** 2)
@@ -352,7 +371,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         p_tan: ndarray, dtype=float
-            Shape (n_timesteps, 3) array, tangential part of p
+            Shape (3, n_timesteps) array, tangential part of p
             in units of (nA*µm), orthogonal to self._rz
 
         Returns
@@ -364,7 +383,7 @@ class FourSphereVolumeConductor(object):
             of p_tan
         """
         phi = self._calc_phi(p_tan)
-        p_tot = np.linalg.norm(p_tan, axis=1)
+        p_tot = np.linalg.norm(p_tan, axis=0)
         phi_hom = - p_tot / (4 * np.pi * self.sigma1 *
                              self._rz ** 2) * np.sin(phi)
         n_terms = np.zeros((len(self.r), 1))
@@ -404,7 +423,7 @@ class FourSphereVolumeConductor(object):
             point location vector(s) in FourSphereVolumeConductor.rxyz
             z-axis is defined in the direction of rzloc and the radial dipole.
         """
-        cos_theta = np.dot(self.rxyz, self._rzloc) / (
+        cos_theta = (self.rxyz @ self._rzloc) / (
             np.linalg.norm(self.rxyz, axis=1) * np.linalg.norm(self._rzloc))
         theta = np.arccos(cos_theta)
         return theta
@@ -416,7 +435,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         p_tan: ndarray, dtype=float
-            Shape (n_timesteps, 3) array containing
+            Shape (3, n_timesteps) array containing
             tangential component of current dipole moment in units of (nA*µm)
 
         Returns
@@ -435,28 +454,28 @@ class FourSphereVolumeConductor(object):
         # find projection of rxyz in xy-plane
         rxy = self.rxyz - proj_rxyz_rz
         # define x-axis
-        x = np.cross(p_tan, self._z)
+        x = np.cross(p_tan.T, self._z)
 
-        phi = np.zeros((len(self.rxyz), len(p_tan)))
+        phi = np.zeros((len(self.rxyz), p_tan.shape[1]))
         # create masks to avoid computing phi when phi is not defined
         mask = np.ones(phi.shape, dtype=bool)
         # phi is not defined when theta= 0,pi or |p_tan| = 0
-        mask[(self._theta == 0) | (self._theta == np.pi)] = np.zeros(len(p_tan)
-                                                                     )
-        mask[:, np.abs(np.linalg.norm(p_tan, axis=1)) == 0] = 0
+        mask[(self._theta == 0) | (self._theta == np.pi)] = np.zeros(
+            p_tan.shape[1])
+        mask[:, np.abs(np.linalg.norm(p_tan, axis=0)) == 0] = 0
 
         cos_phi = np.zeros(phi.shape)
         # compute cos_phi using mask to avoid zerodivision
-        cos_phi[mask] = np.dot(rxy, x.T)[
-            mask] / np.outer(np.linalg.norm(rxy, axis=1),
-                             np.linalg.norm(x, axis=1))[mask]
+        cos_phi[mask] = (rxy @ x.T)[mask] \
+            / np.outer(np.linalg.norm(rxy, axis=1),
+                       np.linalg.norm(x, axis=1))[mask]
 
         # compute phi in [0, pi]
         phi[mask] = np.arccos(cos_phi[mask])
 
         # nb: phi in [-pi, pi]. since p_tan defines direction of y-axis,
         # phi < 0 when rxy*p_tan < 0
-        phi[np.dot(rxy, p_tan.T) < 0] *= -1
+        phi[(rxy @ p_tan) < 0] *= -1
 
         return phi
 
@@ -467,7 +486,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         p: ndarray, dtype=float
-            Shape (n_timesteps, 3) array containing the current dipole moment
+            Shape (3, n_timesteps) array containing the current dipole moment
              in cartesian coordinates for all n_timesteps in units of (nA*µm)
 
         Returns
@@ -479,8 +498,7 @@ class FourSphereVolumeConductor(object):
             If radial part of p[i] points inwards, sign_vector[i] = -1.
 
         """
-        sign_vector = np.sign(np.dot(p, self._rzloc))
-        return sign_vector
+        return np.sign(self._rzloc @ p)
 
     def _potential_brain_rad(self, r, theta):
         """
@@ -865,10 +883,10 @@ class InfiniteVolumeConductor(object):
     Computing the potential from dipole moment valid in the far field limit.
     Theta correspond to the dipole alignment angle from the vertical z-axis:
 
-    >>> from lfpy_forward_models import InfiniteVolumeConductor
+    >>> from lfpy_forward_models.eegmegcalc import InfiniteVolumeConductor
     >>> import numpy as np
     >>> inf_model = InfiniteVolumeConductor(sigma=0.3)
-    >>> p = np.array([[10., 10., 10.]])  # [nA µm]
+    >>> p = np.array([[10.], [10.], [10.]])  # [nA µm]
     >>> r = np.array([[1000., 0., 5000.]])  # [µm]
     >>> inf_model.get_dipole_potential(p, r)  # [mV]
     array([[1.20049432e-07]])
@@ -902,6 +920,24 @@ class InfiniteVolumeConductor(object):
         phi = (r @ p) / (4 * np.pi * self.sigma *
                          np.linalg.norm(r, axis=-1, keepdims=True)**3)
         return phi
+
+    def get_response_matrix(self, r):
+        '''
+        Get linear response matrix mapping current dipole moment in [nA µm]
+        to extracellular potential in [mV] at recording sites `r` [µm]
+
+        parameters
+        ----------
+        r: ndarray, dtype=float
+            Shape (n_contacts, 3) array contaning the displacement vectors
+            from dipole location to measurement location [µm]
+
+        Returns
+        -------
+        response_matrix: ndarray
+            shape (n_contacts, 3) ndarray
+        '''
+        return self.get_dipole_potential(np.eye(3), r)
 
     def get_multi_dipole_potential(
             self,
@@ -945,7 +981,7 @@ class InfiniteVolumeConductor(object):
         from all axial currents in neuron simulation:
 
         >>> import LFPy
-        >>> from lfpy_forward_models import InfiniteVolumeConductor
+        >>> from lfpy_forward_models.eegmegcalc import InfiniteVolumeConductor
         >>> import numpy as np
         >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
         >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,100),
@@ -971,68 +1007,6 @@ class InfiniteVolumeConductor(object):
             pot = self.get_dipole_potential(p, r)
             potentials += pot
         return potentials
-
-
-def get_current_dipole_moment(dist, current):
-    """
-    Return current dipole moment vector P and P_tot of cell.
-
-    Parameters
-    ----------
-    current: ndarray, dtype=float
-        Either an array containing all transmembrane currents
-        from all compartments of the cell, or an array of all
-        axial currents between compartments in cell in units of nA
-    dist: ndarray, dtype=float
-        When input current is an array of axial currents,
-        dist is the length of each axial current.
-        When current is an array of transmembrane
-        currents, dist is the position vector of each
-        compartment middle. Unit is [µm].
-
-    Returns
-    -------
-    P: ndarray, dtype=float
-        Array containing the current dipole moment for all
-        timesteps in the x-, y- and z-direction in units of (nA*µm)
-    P_tot: ndarray, dtype=float
-        Array containing the magnitude of the
-        current dipole moment vector for all timesteps in units of (nA*µm)
-
-    Examples
-    --------
-    Get current dipole moment vector and scalar moment from axial currents
-    computed from membrane potentials:
-
-    >>> import LFPy
-    >>> import numpy as np
-    >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
-    >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,1000),
-    >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
-    >>> syn.set_spike_times(np.mgrid[20:100:20])
-    >>> cell.simulate(rec_vmem=True, rec_imem=False)
-    >>> d_list, i_axial = cell.get_axial_currents()
-    >>> P_ax, P_ax_tot = LFPy.get_current_dipole_moment(d_list, i_axial)
-
-    Get current dipole moment vector and scalar moment from transmembrane
-    currents using the extracellular mechanism in NEURON:
-
-    >>> import LFPy
-    >>> import numpy as np
-    >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=True)
-    >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,1000),
-    >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
-    >>> syn.set_spike_times(np.mgrid[20:100:20])
-    >>> cell.simulate(rec_vmem=False, rec_imem=True)
-    >>> P_imem, P_imem_tot = LFPy.get_current_dipole_moment(np.c_[cell.xmid,
-    >>>                                                          cell.ymid,
-    >>>                                                          cell.zmid],
-    >>>                                                    cell.imem)
-
-    """
-    P = np.dot(current.T, dist)
-    P_tot = np.sqrt(np.sum(P**2, axis=1))
-    return P, P_tot
 
 
 class MEG(object):
@@ -1081,7 +1055,7 @@ class MEG(object):
     Define cell object, create synapse, compute current dipole moment:
 
     >>> import LFPy, os, numpy as np, matplotlib.pyplot as plt
-    >>> from lfpy_forward_models import MEG
+    >>> from lfpy_forward_models.eegmegcalc import MEG
     >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
     >>>                                          'ball_and_sticks.hoc'),
     >>>                  passive=True)
@@ -1097,8 +1071,8 @@ class MEG(object):
     >>> # Instantiate the MEG object, compute and plot the magnetic signal in a
     >>> # sensor location:
     >>> sensor_locations = np.array([[1E4, 0, 0]])
-    >>> meg = LFPy.MEG(sensor_locations)
-    >>> H = meg.calculate_H(cell.current_dipole_moment, dipole_location)
+    >>> meg = MEG(sensor_locations)
+    >>> H = meg.calculate_H(cell.current_dipole_moment.T, dipole_location)
     >>> plt.subplot(311)
     >>> plt.plot(cell.tvec, cell.somav)
     >>> plt.subplot(312)
@@ -1138,7 +1112,7 @@ class MEG(object):
         Parameters
         ----------
         current_dipole_moment: ndarray, dtype=float
-            shape (n_timesteps x 3) array with x,y,z-components of current-
+            shape (3, n_timesteps) array with x,y,z-components of current-
             dipole moment time series data in units of (nA µm)
         dipole_location: ndarray, dtype=float
             shape (3, ) array with x,y,z-location of dipole in units of [µm]
@@ -1160,7 +1134,7 @@ class MEG(object):
         except AssertionError:
             raise AssertionError('current_dipole_moment.ndim != 2')
         try:
-            assert(current_dipole_moment.shape[1] == 3)
+            assert(current_dipole_moment.shape[0] == 3)
         except AssertionError:
             raise AssertionError('current_dipole_moment.shape[1] != 3')
         try:
@@ -1170,8 +1144,7 @@ class MEG(object):
 
         # container
         H = np.empty((self.sensor_locations.shape[0],
-                      current_dipole_moment.shape[0],
-                      3))
+                      current_dipole_moment.shape[1], 3))
         # iterate over sensor locations
         for i, r in enumerate(self.sensor_locations):
             R = r - dipole_location
@@ -1180,7 +1153,7 @@ class MEG(object):
                 assert(not np.allclose(R, np.zeros(3)))
             except AssertionError:
                 raise AssertionError('Identical dipole and sensor location.')
-            H[i, ] = np.cross(current_dipole_moment,
+            H[i, ] = np.cross(current_dipole_moment.T,
                               R) / (4 * np.pi * np.sqrt((R**2).sum())**3)
 
         return H
@@ -1211,6 +1184,7 @@ class MEG(object):
         Define cell object, create synapse, compute current dipole moment:
 
         >>> import LFPy, os, numpy as np, matplotlib.pyplot as plt
+        >>> from lfpy_forward_models.eegmegcalc import MEG
         >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
         >>>                                          'ball_and_sticks.hoc'),
         >>>                  passive=True)
@@ -1219,12 +1193,10 @@ class MEG(object):
         >>>                    record_current=True)
         >>> syn.set_spike_times_w_netstim()
         >>> cell.simulate(rec_vmem=True)
-
-        Instantiate the LFPy.MEG object, compute and plot the magnetic signal
-        in a sensor location:
-
+        >>> # Instantiate the MEG object, compute and plot the magnetic
+        >>> # signal in a sensor location:
         >>> sensor_locations = np.array([[1E4, 0, 0]])
-        >>> meg = LFPy.MEG(sensor_locations)
+        >>> meg = MEG(sensor_locations)
         >>> H = meg.calculate_H_from_iaxial(cell)
         >>> plt.subplot(311)
         >>> plt.plot(cell.tvec, cell.somav)
@@ -1232,6 +1204,7 @@ class MEG(object):
         >>> plt.plot(cell.tvec, syn.i)
         >>> plt.subplot(313)
         >>> plt.plot(cell.tvec, H[0])
+        >>> plt.show()
 
         Returns
         -------
@@ -1246,7 +1219,7 @@ class MEG(object):
         for i, R_ in enumerate(R):
             for i_, d_, r_ in zip(i_axial, d_vectors, pos_vectors):
                 r_rel = R_ - r_
-                H[i, :, :] += np.dot(i_.reshape((-1, 1)),
-                                     np.cross(d_, r_rel).reshape((1, -1))) \
+                H[i, :, :] += (i_.reshape((-1, 1))
+                               @ np.cross(d_, r_rel).reshape((1, -1))) \
                     / (4 * np.pi * np.sqrt((r_rel**2).sum())**3)
         return H

@@ -963,6 +963,7 @@ class RecMEAElectrode(RecExtElectrode):
 
                   Below neural tissue (MEA Glass plate) -> sigma_G
 
+    For further details, see reference [1]_.
 
     Parameters
     ----------
@@ -1013,6 +1014,13 @@ class RecMEAElectrode(RecExtElectrode):
         Flag for verbose output, i.e., print more information
     seedvalue: int
         random seed when finding random position on contact with r > 0
+
+    References
+    ----------
+    .. [1] Ness, T. V., Chintaluri, C., Potworowski, J., Leski, S., Glabska,
+       H., Wójcik, D. K., et al. (2015). Modelling and analysis of electrical
+       potentials recorded in microelectrode arrays (MEAs).
+       Neuroinformatics 13:403–426. doi: 10.1007/s12021-015-9265-6
 
     Examples
     --------
