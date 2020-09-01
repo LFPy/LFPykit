@@ -26,7 +26,6 @@ class CellGeometry(object):
         - each segment has a constant diameter
         - the transmembrane current density is constant along the segment axis
 
-
     Parameters
     ----------
     x: ndarray of floats
@@ -44,20 +43,21 @@ class CellGeometry(object):
     For compatibility with LFPy v2.x, the following class attributes
     will be calculated and set:
 
-
     Attributes
     ----------
     totnsegs: int
         number of compartments
-    xstart, ystart, zstart: ndarray
-        arrays of length totnsegs with start (x,y,z) coordinate of segments
-        in units of um
-    xmid, ymid, zmid: ndarray
-        midpoint coordinates of segments
-    xend, yend, zend : ndarray
-        endpoint coordinateso of segments
+    x: ndarray of floats
+        shape (totnsegs x 2) array of start- and end-point coordinates of
+        each compartment along x-axis in units of [um]
+    y: ndarray
+        shape (totnsegs x 2) array of start- and end-point coordinates of
+        each compartment along y-axis in units of [um]
+    z: ndarray
+        shape (totnsegs x 2) array of start- and end-point coordinates of
+        each compartment along z-axis in units of [um]
     d: ndarray
-        array of length totnsegs with segment diameters in units of um
+        shape (totnsegs) array of compartment diameters in units of [um]
     length: ndarray
         lenght of each segment in units of um
     area : ndarray
@@ -74,7 +74,6 @@ class CellGeometry(object):
             - each segment has a constant diameter
             - the transmembrane current density is constant along the
               segment axis
-
 
         Parameters
         ----------
@@ -98,15 +97,17 @@ class CellGeometry(object):
         ----------
         totnsegs: int
             number of compartments
-        xstart, ystart, zstart: ndarray
-            arrays of length totnsegs with start (x,y,z) coordinate of segments
-            in units of um
-        xmid, ymid, zmid: ndarray
-            midpoint coordinates of segments
-        xend, yend, zend : ndarray
-            endpoint coordinateso of segments
+        x: ndarray of floats
+            shape (totnsegs x 2) array of start- and end-point coordinates of
+            each compartment along x-axis in units of [um]
+        y: ndarray
+            shape (totnsegs x 2) array of start- and end-point coordinates of
+            each compartment along y-axis in units of [um]
+        z: ndarray
+            shape (totnsegs x 2) array of start- and end-point coordinates of
+            each compartment along z-axis in units of [um]
         d: ndarray
-            array of length totnsegs with segment diameters in units of um
+            shape (totnsegs) array of compartment diameters in units of [um]
         length: ndarray
             lenght of each segment in units of um
         area : ndarray
