@@ -15,12 +15,12 @@ Execution:
 
 import numpy as np
 import neuron
-import lfpy_forward_models
+import lfpykit
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 
 
-class NeuronCell(lfpy_forward_models.CellGeometry, neuron.nrn.Section):
+class NeuronCell(lfpykit.CellGeometry, neuron.nrn.Section):
     '''
     Cell like object subclassed from CellGeometry and neuron.nrn.Section
     representing a dendritic stick with all passive parameters.
@@ -49,7 +49,7 @@ class NeuronCell(lfpy_forward_models.CellGeometry, neuron.nrn.Section):
         x, y, z, d = self.collect_geometry()
 
         # initialize  parent class CellGeometry
-        lfpy_forward_models.CellGeometry.__init__(self, x, y, z, d)
+        lfpykit.CellGeometry.__init__(self, x, y, z, d)
 
         # stimuli container (synapses, point processes etc.)
         self.synapses = []
@@ -155,7 +155,7 @@ cell.create_current_recorders()
 ###############################################################################
 # Create forward model object and get linear response matrix
 ###############################################################################
-cdm = lfpy_forward_models.CurrentDipoleMoment(cell=cell)
+cdm = lfpykit.CurrentDipoleMoment(cell=cell)
 M = cdm.get_response_matrix()
 
 ###############################################################################

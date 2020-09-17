@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-Example utilizing the LFPy forward models module for predictions of
+Example utilizing the LFPykit module for predictions of
 current dipole moment from a dendritic stick model set up in LFPy.
 The passive stick receives sinusoid synaptic current input at its terminal
 segment.
@@ -16,7 +16,7 @@ Execution:
 import numpy as np
 import neuron
 import LFPy
-import lfpy_forward_models
+import lfpykit
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 
@@ -60,7 +60,7 @@ stim = LFPy.StimIntElectrode(lfpy_cell, idx=lfpy_cell.totnsegs - 1,
                              pptype='SinSyn')
 
 # CellGeometry object
-cell = lfpy_forward_models.CellGeometry(
+cell = lfpykit.CellGeometry(
     x=np.c_[lfpy_cell.xstart, lfpy_cell.xend],
     y=np.c_[lfpy_cell.ystart, lfpy_cell.yend],
     z=np.c_[lfpy_cell.zstart, lfpy_cell.zend],
@@ -70,7 +70,7 @@ cell = lfpy_forward_models.CellGeometry(
 ###############################################################################
 # Create forward model object and get linear response matrix
 ###############################################################################
-cdm = lfpy_forward_models.CurrentDipoleMoment(cell=cell)
+cdm = lfpykit.CurrentDipoleMoment(cell=cell)
 M = cdm.get_response_matrix()
 
 ###############################################################################

@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 import unittest
 import numpy as np
-import lfpy_forward_models as lfp
+import lfpykit as lfp
 
 
 def get_cell(n_seg=4):

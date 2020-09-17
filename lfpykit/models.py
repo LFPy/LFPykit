@@ -36,7 +36,7 @@ class LinearModel(object):
     Parameters
     ----------
     cell: object
-        ``lfpy_forward_models.CellGeometry`` instance or similar.
+        ``lfpykit.CellGeometry`` instance or similar.
     '''
 
     def __init__(self, cell):
@@ -71,8 +71,8 @@ class CurrentDipoleMoment(LinearModel):
 
     The current dipole moment can be used to compute distal measures of
     neural activity such as the EEG and MEG using
-    `lfpy_forward_models.eegmegcalc.FourSphereVolumeConductor` or
-    `lfpy_forward_models.eegmegcalc.MEG`, respectively
+    `lfpykit.eegmegcalc.FourSphereVolumeConductor` or
+    `lfpykit.eegmegcalc.MEG`, respectively
 
     Parameters
     ----------
@@ -90,7 +90,7 @@ class CurrentDipoleMoment(LinearModel):
     Compute the current dipole moment of a 3-compartment neuron model:
 
     >>> import numpy as np
-    >>> from lfpy_forward_models import CellGeometry, CurrentDipoleMoment
+    >>> from lfpykit import CellGeometry, CurrentDipoleMoment
     >>> n_seg = 3
     >>> cell = CellGeometry(x=np.array([[0.]*2]*n_seg),
                             y=np.array([[0.]*2]*n_seg),
@@ -185,7 +185,7 @@ class PointSourcePotential(LinearModel):
     Compute the current dipole moment of a 3-compartment neuron model:
 
     >>> import numpy as np
-    >>> from lfpy_forward_models import CellGeometry, PointSourcePotential
+    >>> from lfpykit import CellGeometry, PointSourcePotential
     >>> n_seg = 3
     >>> cell = CellGeometry(x=np.array([[0.]*2]*n_seg),
                             y=np.array([[0.]*2]*n_seg),
@@ -343,7 +343,7 @@ class LineSourcePotential(LinearModel):
     Compute the current dipole moment of a 3-compartment neuron model:
 
     >>> import numpy as np
-    >>> from lfpy_forward_models import CellGeometry, LineSourcePotential
+    >>> from lfpykit import CellGeometry, LineSourcePotential
     >>> n_seg = 3
     >>> cell = CellGeometry(x=np.array([[0.]*2]*n_seg),
                             y=np.array([[0.]*2]*n_seg),
@@ -509,7 +509,7 @@ class RecExtElectrode(LinearModel):
     Mock cell geometry and transmembrane currents:
 
     >>> import numpy as np
-    >>> from lfpy_forward_models import CellGeometry, RecExtElectrode
+    >>> from lfpykit import CellGeometry, RecExtElectrode
     >>> # cell geometry with three segments [um]
     >>> cell = CellGeometry(x=np.array([[0, 0], [0, 0], [0, 0]]),
     >>>                     y=np.array([[0, 0], [0, 0], [0, 0]]),
@@ -552,7 +552,7 @@ class RecExtElectrode(LinearModel):
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> import LFPy
-    >>> from lfpy_forward_models import CellGeometry, RecExtElectrode
+    >>> from lfpykit import CellGeometry, RecExtElectrode
     >>>
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
@@ -610,7 +610,7 @@ class RecExtElectrode(LinearModel):
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> import LFPy
-    >>> from lfpy_forward_models import CellGeometry, RecExtElectrode
+    >>> from lfpykit import CellGeometry, RecExtElectrode
     >>>
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
@@ -668,7 +668,7 @@ class RecExtElectrode(LinearModel):
     >>> import matplotlib.pyplot as plt
     >>> import MEAutility as mu
     >>> import LFPy
-    >>> from lfpy_forward_models import CellGeometry, RecExtElectrode
+    >>> from lfpykit import CellGeometry, RecExtElectrode
     >>>
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
@@ -1027,7 +1027,7 @@ class RecMEAElectrode(RecExtElectrode):
     Mock cell geometry and transmembrane currents:
 
     >>> import numpy as np
-    >>> from lfpy_forward_models import CellGeometry, RecMEAElectrode
+    >>> from lfpykit import CellGeometry, RecMEAElectrode
     >>> # cell geometry with four segments [um]
     >>> cell = CellGeometry(
     >>>     x=np.array([[0, 10], [10, 20], [20, 30], [30, 40]]),
@@ -1065,7 +1065,7 @@ class RecMEAElectrode(RecExtElectrode):
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> import LFPy
-    >>> from lfpy_forward_models import CellGeometry, RecMEAElectrode
+    >>> from lfpykit import CellGeometry, RecMEAElectrode
     >>>
     >>> cellParameters = {
     >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
@@ -1405,7 +1405,7 @@ class OneSphereVolumeConductor(LinearModel):
     Compute the potential for a single monopole along the x-axis:
 
     >>> # import modules
-    >>> from lfpy_forward_models import OneSphereVolumeConductor
+    >>> from lfpykit import OneSphereVolumeConductor
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> # observation points in spherical coordinates (flattened)
@@ -1595,7 +1595,7 @@ class OneSphereVolumeConductor(LinearModel):
 
         >>> # import modules
         >>> import LFPy
-        >>> from lfpy_forward_models import CellGeometry, \
+        >>> from lfpykit import CellGeometry, \
         >>>     OneSphereVolumeConductor
         >>> import os
         >>> import numpy as np

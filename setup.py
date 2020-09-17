@@ -8,7 +8,7 @@ import os
 import setuptools
 
 d = {}
-exec(open(os.path.join('lfpy_forward_models', 'version.py')).read(), None, d)
+exec(open(os.path.join('lfpykit', 'version.py')).read(), None, d)
 version = d['version']
 
 
@@ -16,7 +16,7 @@ with open('README.md', 'r') as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name='lfpy_forward_models',
+    name='LFPykit',
     version=version,
     author='LFPy-team',
     author_email='lfpy@users.noreply.github.com',
@@ -24,8 +24,8 @@ setuptools.setup(
         'multicompartment neuron models'),
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/LFPy/lfpy_forward_models',
-    download_url='https://github.com/LFPy/lfpy_forward_models/'.join(
+    url='https://github.com/LFPy/lfpykit',
+    download_url='https://github.com/LFPy/lfpykit/'.join(
         'tarball/v{}'.format(version)),
     packages=setuptools.find_packages(),
     classifiers=[
@@ -47,11 +47,11 @@ setuptools.setup(
         'scipy',
         'meautility'
         ],
-    package_data={'lfpy_forward_models': [os.path.join('tests', '*.npz')]},
+    package_data={'lfpykit': [os.path.join('tests', '*.npz')]},
     extras_require={'tests': ['pytest'],
                     'docs': ['sphinx', 'numpydoc', 'sphinx_rtd_theme',
                              'recommonmark'],
                     },
     dependency_links=[],
-    provides=['lfpy_forward_models']
+    provides=['lfpykit']
 )

@@ -66,7 +66,7 @@ class FourSphereVolumeConductor(object):
     Compute extracellular potential from current dipole moment in four-sphere
     head model:
 
-    >>> from lfpy_forward_models import FourSphereVolumeConductor
+    >>> from lfpykit import FourSphereVolumeConductor
     >>> import numpy as np
     >>> radii = [79000., 80000., 85000., 90000.]  # [µm]
     >>> sigmas = [0.3, 1.5, 0.015, 0.3]  # [S/m]
@@ -270,7 +270,7 @@ class FourSphereVolumeConductor(object):
         from all axial currents in neuron simulation:
 
         >>> import LFPy
-        >>> from lfpy_forward_models import FourSphereVolumeConductor
+        >>> from lfpykit import FourSphereVolumeConductor
         >>> import numpy as np
         >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
         >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,100),
@@ -883,7 +883,7 @@ class InfiniteVolumeConductor(object):
     Computing the potential from dipole moment valid in the far field limit.
     Theta correspond to the dipole alignment angle from the vertical z-axis:
 
-    >>> from lfpy_forward_models.eegmegcalc import InfiniteVolumeConductor
+    >>> from lfpykit.eegmegcalc import InfiniteVolumeConductor
     >>> import numpy as np
     >>> inf_model = InfiniteVolumeConductor(sigma=0.3)
     >>> p = np.array([[10.], [10.], [10.]])  # [nA µm]
@@ -981,7 +981,7 @@ class InfiniteVolumeConductor(object):
         from all axial currents in neuron simulation:
 
         >>> import LFPy
-        >>> from lfpy_forward_models.eegmegcalc import InfiniteVolumeConductor
+        >>> from lfpykit.eegmegcalc import InfiniteVolumeConductor
         >>> import numpy as np
         >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
         >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,100),
@@ -1055,7 +1055,7 @@ class MEG(object):
     Define cell object, create synapse, compute current dipole moment:
 
     >>> import LFPy, os, numpy as np, matplotlib.pyplot as plt
-    >>> from lfpy_forward_models.eegmegcalc import MEG
+    >>> from lfpykit.eegmegcalc import MEG
     >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
     >>>                                          'ball_and_sticks.hoc'),
     >>>                  passive=True)
@@ -1184,7 +1184,7 @@ class MEG(object):
         Define cell object, create synapse, compute current dipole moment:
 
         >>> import LFPy, os, numpy as np, matplotlib.pyplot as plt
-        >>> from lfpy_forward_models.eegmegcalc import MEG
+        >>> from lfpykit.eegmegcalc import MEG
         >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
         >>>                                          'ball_and_sticks.hoc'),
         >>>                  passive=True)

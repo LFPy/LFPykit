@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 '''
 Example file combining set up of neuron model and simulation of membrane
-currents in LFPy, using the different `lfpy_forward_models classes
+currents in LFPy, using the different `lfpykit` classes
 `CellGeometry`, `RecExtElectrode`, `PointSourcePotential`,
 `LineSourcePotential`, `CurrentDipoleMoment` and
 `InfiniteVolumeConductor` to predict extracellular potentials.
@@ -20,9 +20,9 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
 from matplotlib.gridspec import GridSpec
 import LFPy
-from lfpy_forward_models import CellGeometry, RecExtElectrode, \
+from lfpykit import CellGeometry, RecExtElectrode, \
     PointSourcePotential, LineSourcePotential, CurrentDipoleMoment
-from lfpy_forward_models.eegmegcalc import InfiniteVolumeConductor
+from lfpykit.eegmegcalc import InfiniteVolumeConductor
 
 
 def colorbar(fig, ax, im,

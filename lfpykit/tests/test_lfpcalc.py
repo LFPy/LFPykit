@@ -16,12 +16,12 @@ GNU General Public License for more details.
 
 import unittest
 import numpy as np
-from lfpy_forward_models import lfpcalc, CellGeometry
+from lfpykit import lfpcalc, CellGeometry
 
 
 class testLfpCalc(unittest.TestCase):
     """
-    test module lfpy_forward_models.lfpcalc
+    test module lfpykit.lfpcalc
     """
 
     def test_lfpcalc_return_dist_from_segments_00(self):

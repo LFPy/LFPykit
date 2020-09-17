@@ -15,96 +15,96 @@ Welcome to LFPy forward models' documentation!
 
 
 
-Module :mod:`lfpy_forward_models`
-=================================
-.. automodule:: lfpy_forward_models
+Module :mod:`lfpykit`
+=====================
+.. automodule:: lfpykit
     :members:
     :show-inheritance:
     :undoc-members:
 
 class :class:`CellGeometry`
 ===========================
-.. autoclass:: lfpy_forward_models.CellGeometry
+.. autoclass:: lfpykit.CellGeometry
     :members:
     :show-inheritance:
     :undoc-members:
 
-Module :mod:`lfpy_forward_models.models`
-========================================
-.. automodule:: lfpy_forward_models.models
+Module :mod:`lfpykit.models`
+============================
+.. automodule:: lfpykit.models
 
 
 class :class:`LinearModel`
 ===========================
-.. autoclass:: lfpy_forward_models.LinearModel
+.. autoclass:: lfpykit.LinearModel
     :members:
     :show-inheritance:
     :undoc-members:
 
 class :class:`CurrentDipoleMoment`
 ==================================
-.. autoclass:: lfpy_forward_models.CurrentDipoleMoment
+.. autoclass:: lfpykit.CurrentDipoleMoment
     :members:
     :show-inheritance:
     :undoc-members:
 
 class :class:`PointSourcePotential`
 ===================================
-.. autoclass:: lfpy_forward_models.PointSourcePotential
+.. autoclass:: lfpykit.PointSourcePotential
     :members:
     :show-inheritance:
     :undoc-members:
 
 class :class:`LineSourcePotential`
-===================================
-.. autoclass:: lfpy_forward_models.LineSourcePotential
+==================================
+.. autoclass:: lfpykit.LineSourcePotential
     :members:
     :show-inheritance:
     :undoc-members:
 
 class :class:`RecExtElectrode`
 ==============================
-.. autoclass:: lfpy_forward_models.RecExtElectrode
+.. autoclass:: lfpykit.RecExtElectrode
     :members:
     :show-inheritance:
     :undoc-members:
 
 class :class:`RecMEAElectrode`
 ==============================
-.. autoclass:: lfpy_forward_models.RecMEAElectrode
+.. autoclass:: lfpykit.RecMEAElectrode
     :members:
     :show-inheritance:
     :undoc-members:
 
 class :class:`OneSphereVolumeConductor`
 =======================================
-.. autoclass:: lfpy_forward_models.OneSphereVolumeConductor
+.. autoclass:: lfpykit.OneSphereVolumeConductor
     :members:
     :show-inheritance:
     :undoc-members:
 
 
-Module :mod:`lfpy_forward_models.eegmegcalc`
-============================================
-.. automodule:: lfpy_forward_models.eegmegcalc
+Module :mod:`lfpykit.eegmegcalc`
+================================
+.. automodule:: lfpykit.eegmegcalc
 
 class :class:`eegmegcalc.FourSphereVolumeConductor`
 ===================================================
-.. autoclass:: lfpy_forward_models.eegmegcalc.FourSphereVolumeConductor
+.. autoclass:: lfpykit.eegmegcalc.FourSphereVolumeConductor
     :members:
     :show-inheritance:
     :undoc-members:
 
 class :class:`eegmegcalc.InfiniteVolumeConductor`
 =================================================
-.. autoclass:: lfpy_forward_models.eegmegcalc.InfiniteVolumeConductor
+.. autoclass:: lfpykit.eegmegcalc.InfiniteVolumeConductor
     :members:
     :show-inheritance:
     :undoc-members:
 
 class :class:`eegmegcalc.MEG`
 =============================
-.. autoclass:: lfpy_forward_models.eegmegcalc.MEG
+.. autoclass:: lfpykit.eegmegcalc.MEG
     :members:
     :show-inheritance:
     :undoc-members:
