@@ -1,5 +1,5 @@
 LFPykit
-===================
+=======
 
 This Python module contain freestanding implementations of electrostatic
 forward models presently incorporated in LFPy
@@ -9,8 +9,9 @@ The aim of the `LFPykit` module is to provide electrostatic models
 in a manner that facilitates forward-model predictions of extracellular
 potentials and related measures from multicompartment neuron models, but
 without explicit dependencies on neural simulation software such as
-NEURON (https://neuron.yale.edu, https://github.com/neuronsimulator/nrn)
-or Arbor (https://arbor.readthedocs.io, https://github.com/arbor-sim/arbor).
+NEURON (https://neuron.yale.edu, https://github.com/neuronsimulator/nrn),
+Arbor (https://arbor.readthedocs.io, https://github.com/arbor-sim/arbor),
+or even LFPy.
 The `LFPykit` module can then be more easily incorporated with
 these simulators, or in various projects that utilize them such as
 LFPy (https://LFPy.rtfd.io, https://github.com/LFPy/LFPy).
@@ -209,7 +210,7 @@ remote locations away from the cell geometry:
 Physical units
 --------------
 
-Physical units used in `LFPykit`:
+Notes on physical units used in `LFPykit`:
 
 - There are no explicit checks for physical units
 
