@@ -149,5 +149,5 @@ class CellGeometry(object):
         self.totnsegs = self.d.size
         self.length = np.sqrt(np.diff(x, axis=-1)**2 +
                               np.diff(y, axis=-1)**2 +
-                              np.diff(z, axis=-1)**2)
+                              np.diff(z, axis=-1)**2).flatten()
         self.area = self.length * np.pi * self.d
