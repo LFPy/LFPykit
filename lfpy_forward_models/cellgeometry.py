@@ -87,11 +87,9 @@ class CellGeometry(object):
             shape (n_seg x 2) array of start- and end-point coordinates of
             each compartment along z-axis in units of [um]
         d: ndarray
-            shape (n_seg) array of compartment diameters in units of [um]
-
-        For compatibility with LFPy v2.x, the following class attributes
-        will be calculated and set:
-
+            shape (n_seg) or shape (n_seg x 2) array of compartment
+            diameters in units of [um]. If the 2nd axis is equal to 2,
+            conical frusta is assumed.
 
         Attributes
         ----------
@@ -135,9 +133,14 @@ class CellGeometry(object):
             raise AssertionError(
                 'the last axis of x, y and z must be of length 2')
         try:
-            assert(d.ndim == 1 and d.size == x.shape[0])
+            try:
+                assert(d.shape == x.shape)
+            except AssertionError:
+                assert(d.ndim == 1 and d.size == x.shape[0])
         except AssertionError:
-            raise AssertionError('d must be 1-dimensional with size == n_seg')
+            raise AssertionError('d must either be 1-dimensional with '
+                                 'size == n_seg or 2-dimensional with '
+                                 'd.shape == x.shape')
 
         # set attributes
         self.x = x
@@ -146,8 +149,21 @@ class CellGeometry(object):
         self.d = d
 
         # derived attributes
-        self.totnsegs = self.d.size
-        self.length = np.sqrt(np.diff(x, axis=-1)**2 +
-                              np.diff(y, axis=-1)**2 +
-                              np.diff(z, axis=-1)**2).flatten()
-        self.area = self.length * np.pi * self.d
+        self.totnsegs = self.x.shape[0]
+
+        self._set_length()
+        self._set_area()
+
+    def _set_length(self):
+        self.length = np.sqrt(np.diff(self.x, axis=-1)**2 +
+                              np.diff(self.y, axis=-1)**2 +
+                              np.diff(self.z, axis=-1)**2).flatten()
+
+    def _set_area(self):
+        if self.d.ndim == 1:
+            self.area = self.length * np.pi * self.d
+        else:
+            # Surface area of conical frusta
+            # A = pi*(r1+r2)*sqrt((r1-r2)^2 + h^2)
+            self.area = np.pi * self.d.sum(axis=-1) * \
+                np.sqrt(np.diff(self.d, axis=-1)**2 + self.length**2)
