@@ -166,4 +166,4 @@ class CellGeometry(object):
             # Surface area of conical frusta
             # A = pi*(r1+r2)*sqrt((r1-r2)^2 + h^2)
             self.area = np.pi * self.d.sum(axis=-1) * \
-                        np.sqrt(np.diff(self.d, axis=-1)**2 + self.length**2)
+                np.sqrt(np.diff(self.d, axis=-1)**2 + self.length**2)
