@@ -268,13 +268,17 @@ class PointSourcePotential(LinearModel):
             shape (n_coords, n_seg) ndarray
         '''
         M = np.empty((self.x.size, self.cell.totnsegs))
+        if self.cell.d.ndim == 2:
+            r_limit = self.cell.d.mean(axis=-1) / 2
+        else:
+            r_limit = self.cell.d / 2
         for j in range(self.x.size):
             M[j, :] = lfpcalc.calc_lfp_pointsource(self.cell,
                                                    x=self.x[j],
                                                    y=self.y[j],
                                                    z=self.z[j],
                                                    sigma=self.sigma,
-                                                   r_limit=self.cell.d / 2)
+                                                   r_limit=r_limit)
         return M
 
 
@@ -425,13 +429,17 @@ class LineSourcePotential(LinearModel):
             shape (n_coords, n_seg) ndarray
         '''
         M = np.empty((self.x.size, self.cell.totnsegs))
+        if self.cell.d.ndim == 2:
+            r_limit = self.cell.d.mean(axis=-1) / 2
+        else:
+            r_limit = self.cell.d / 2
         for j in range(self.x.size):
             M[j, :] = lfpcalc.calc_lfp_linesource(self.cell,
                                                   x=self.x[j],
                                                   y=self.y[j],
                                                   z=self.z[j],
                                                   sigma=self.sigma,
-                                                  r_limit=self.cell.d / 2)
+                                                  r_limit=r_limit)
         return M
 
 
@@ -884,13 +892,17 @@ class RecExtElectrode(LinearModel):
     def _loop_over_contacts(self, **kwargs):
         """Loop over electrode contacts, and return LFPs across channels"""
         M = np.zeros((self.x.size, self.cell.x.shape[0]))
+        if self.cell.d.ndim == 2:
+            r_limit = self.cell.d.mean(axis=-1) / 2
+        else:
+            r_limit = self.cell.d / 2
         for i in range(self.x.size):
             M[i, :] = self.lfp_method(self.cell,
                                       x=self.x[i],
                                       y=self.y[i],
                                       z=self.z[i],
                                       sigma=self.sigma,
-                                      r_limit=self.cell.d / 2,
+                                      r_limit=r_limit,
                                       **kwargs)
         return M
 
@@ -905,12 +917,16 @@ class RecExtElectrode(LinearModel):
 
             # loop over points on contact
             lfp_e = 0
+            if self.cell.d.ndim == 2:
+                r_limit = self.cell.d.mean(axis=-1) / 2
+            else:
+                r_limit = self.cell.d / 2
             for j in range(self.n):
                 tmp = self.lfp_method(self.cell,
                                       x=points[j, 0],
                                       y=points[j, 1],
                                       z=points[j, 2],
-                                      r_limit=self.cell.d / 2,
+                                      r_limit=r_limit,
                                       sigma=self.sigma,
                                       **kwargs
                                       )
@@ -929,12 +945,16 @@ class RecExtElectrode(LinearModel):
                 M[i, ] = loop_over_points(p)
             self.recorded_points = points
         else:
+            if self.cell.d.ndim == 2:
+                r_limit = self.cell.d.mean(axis=-1) / 2
+            else:
+                r_limit = self.cell.d / 2
             for i, (x, y, z) in enumerate(zip(self.x, self.y, self.z)):
                 M[i, ] = self.lfp_method(self.cell,
                                          x=x,
                                          y=y,
                                          z=z,
-                                         r_limit=self.cell.d / 2,
+                                         r_limit=r_limit,
                                          sigma=self.sigma,
                                          **kwargs)
             self.recorded_points = np.array([self.x, self.y, self.z]).T
@@ -1306,12 +1326,9 @@ class RecMEAElectrode(RecExtElectrode):
                 geometry += pos
             setattr(self.cell, dir_, geometry)
 
-        # recompute length of each segment
-        self.cell.length = np.sqrt(np.diff(self.cell.x, axis=-1)**2
-                                   + np.diff(self.cell.y, axis=-1)**2
-                                   + np.diff(self.cell.z, axis=-1)**2)
-        # recompute segment areas
-        self.cell.area = self.cell.length * np.pi * self.cell.d
+        # recompute length and area of each segment
+        self.cell._set_length()
+        self.cell._set_area()
 
     def get_response_matrix(self):
         '''
@@ -1677,6 +1694,11 @@ class OneSphereVolumeConductor(LinearModel):
         theta = np.arccos(self.cell.z.mean(axis=-1) / radius)
         phi = np.arctan2(self.cell.y.mean(axis=-1), self.cell.x.mean(axis=-1))
         diam = self.cell.d
+        if self.cell.d.ndim == 2:
+            diam = self.cell.d.mean(axis=-1)
+        else:
+            diam = self.cell.d
+
 
         # since the sources must be located on the x-axis, we keep a copy
         # of the unrotated coordinate system for the contact points:
