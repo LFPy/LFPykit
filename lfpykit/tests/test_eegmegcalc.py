@@ -28,8 +28,8 @@ try:
     neuron_imported = True
 except ImportError:
     neuron_imported = False
-import lfpy_forward_models
-from lfpy_forward_models import CellGeometry, eegmegcalc
+import lfpykit
+from lfpykit import CellGeometry, eegmegcalc
 
 
 class testMEG(unittest.TestCase):
@@ -374,7 +374,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         # load data
         fem_sim = np.load(
             os.path.join(
-                lfpy_forward_models.__path__[0],
+                lfpykit.__path__[0],
                 'tests',
                 'fem_mix_dip.npz'))
         pot_fem = fem_sim['pot_fem']  # [µV]
@@ -639,7 +639,7 @@ class testInfiniteVolumeConductor(unittest.TestCase):
 
 class testOneSphereVolumeConductor(unittest.TestCase):
     """
-    test class lfpy_forward_models.OneSphereVolumeConductor
+    test class lfpykit.OneSphereVolumeConductor
     """
 
     def test_OneSphereVolumeConductor_00(self):
@@ -662,7 +662,7 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         r = np.array([radius, theta, phi])
 
         # predict potential
-        sphere = lfpy_forward_models.OneSphereVolumeConductor(
+        sphere = lfpykit.OneSphereVolumeConductor(
             cell=None,
             r=r, R=R, sigma_i=sigma, sigma_o=sigma)
         phi = sphere.calc_potential(rs=rs, current=current)
@@ -693,7 +693,7 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         r = np.array([radius, theta, phi])
 
         # predict potential
-        sphere = lfpy_forward_models.OneSphereVolumeConductor(
+        sphere = lfpykit.OneSphereVolumeConductor(
             cell=None,
             r=r, R=R, sigma_i=sigma, sigma_o=sigma)
         phi = sphere.calc_potential(rs=rs, current=current)
@@ -734,7 +734,7 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         cell.set_rotation(y=np.pi / 2)
 
         # predict potential
-        sphere = lfpy_forward_models.OneSphereVolumeConductor(
+        sphere = lfpykit.OneSphereVolumeConductor(
             cell=get_cell_geometry_from_lfpy(cell),
             r=r, R=R, sigma_i=sigma, sigma_o=sigma)
         M = sphere.get_response_matrix(n_max=100)

@@ -1,4 +1,4 @@
-name: lfpyforwardmodels
+name: lfpykit
 channels:
   - conda-forge
   - defaults

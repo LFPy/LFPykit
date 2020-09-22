@@ -4,6 +4,6 @@ include LICENSE
 recursive-include example *.py
 recursive-include example *.ipynb
 
-recursive-include lfpy_forward_models *.npz
+recursive-include lfpykit *.npz
 
 recursive-include doc *

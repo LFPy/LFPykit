@@ -21,14 +21,14 @@ sys.path.insert(0, os.path.abspath('.'))
 
 # -- Release information
 _d = {}
-exec(open(os.path.join('..', '..', 'lfpy_forward_models', 'version.py')
+exec(open(os.path.join('..', '..', 'lfpykit', 'version.py')
           ).read(), None, _d)
 _release = _d['version']
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'LFPy forward models'
+project = 'LFPykit'
 copyright = '2020, Team LFPy'
 author = 'Team LFPy'
 

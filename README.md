@@ -1,17 +1,18 @@
-lfpy_forward_models
-===================
+LFPykit
+=======
 
 This Python module contain freestanding implementations of electrostatic
 forward models presently incorporated in LFPy
 (https://github.com/LFPy/LFPy, https://LFPy.readthedocs.io).
 
-The aim of the `lfpy_forward_models` module is to provide electrostatic models
+The aim of the `LFPykit` module is to provide electrostatic models
 in a manner that facilitates forward-model predictions of extracellular
 potentials and related measures from multicompartment neuron models, but
 without explicit dependencies on neural simulation software such as
-NEURON (https://neuron.yale.edu, https://github.com/neuronsimulator/nrn)
-or Arbor (https://arbor.readthedocs.io, https://github.com/arbor-sim/arbor).
-The `lfpy_forward_models` module can then be more easily incorporated with
+NEURON (https://neuron.yale.edu, https://github.com/neuronsimulator/nrn),
+Arbor (https://arbor.readthedocs.io, https://github.com/arbor-sim/arbor),
+or even LFPy.
+The `LFPykit` module can then be more easily incorporated with
 these simulators, or in various projects that utilize them such as
 LFPy (https://LFPy.rtfd.io, https://github.com/LFPy/LFPy).
 BMTK (https://alleninstitute.github.io/bmtk/, https://github.com/AllenInstitute/bmtk),
@@ -62,7 +63,7 @@ Build Status
 Features
 --------
 
-`lfpy_forward_models` presently incorporates different electrostatic forward models for extracellular potentials
+`LFPykit` presently incorporates different electrostatic forward models for extracellular potentials
 and magnetic signals that has been derived using volume conductor theory.
 In volume-conductor theory the extracellular potentials can be calculated from a distance-weighted sum of contributions from transmembrane currents of neurons.
 Given the same transmembrane currents, the contributions to the magnetic field recorded both inside and outside the brain can also be computed.
@@ -125,7 +126,7 @@ alongside the cell geometry:
 
     >>> # imports
     >>> import numpy as np
-    >>> from lfpy_forward_models import CellGeometry, PointSourcePotential
+    >>> from lfpykit import CellGeometry, PointSourcePotential
     >>> n_seg = 3
     >>> # instantiate class `CellGeometry`:
     >>> cell = CellGeometry(x=np.array([[0.] * 2] * n_seg),  # (µm)
@@ -167,7 +168,7 @@ remote locations away from the cell geometry:
 
     >>> # imports
     >>> import numpy as np
-    >>> from lfpy_forward_models import CellGeometry, CurrentDipoleMoment, \
+    >>> from lfpykit import CellGeometry, CurrentDipoleMoment, \
     >>>     eegmegcalc
     >>> n_seg = 3
     >>> # instantiate class `CellGeometry`:
@@ -209,7 +210,7 @@ remote locations away from the cell geometry:
 Physical units
 --------------
 
-Physical units used in `lfpy_forward_models`:
+Notes on physical units used in `LFPykit`:
 
 - There are no explicit checks for physical units
 
@@ -246,15 +247,15 @@ Dimensionality
 Documentation
 -------------
 
-The online Documentation of `lfpy_forward_models` can be found here:
+The online Documentation of `LFPykit` can be found here:
 https://lfpy-forward-models.readthedocs.io/en/latest
 
 
 Dependencies
 ------------
 
-`lfpy_forward_models` is implemented in Python and is written (and continuously tested) for `Python >= 3.7`.
-The main `lfpy_forward_models` module depends on `numpy`, `scipy` and `MEAutility` (https://github.com/alejoe91/MEAutility, https://meautility.readthedocs.io/en/latest/).
+`LFPykit` is implemented in Python and is written (and continuously tested) for `Python >= 3.7`.
+The main `LFPykit` module depends on `numpy`, `scipy` and `MEAutility` (https://github.com/alejoe91/MEAutility, https://meautility.readthedocs.io/en/latest/).
 
 Running all unit tests and example files may in addition require `py.test`, `matplotlib`,
 `neuron` (https://www.neuron.yale.edu),
@@ -283,4 +284,4 @@ For active development, link the repository location
 
 Installing from the Python Package Index (pypi.org):
 
-    $ pip install lfpy_forward_models  # --user optional
+    $ pip install LFPykit  # --user optional
