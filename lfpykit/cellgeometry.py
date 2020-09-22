@@ -22,9 +22,11 @@ class CellGeometry(object):
     models.
 
     Assumptions
-        - each segment is piecewise linear between their start and endpoints
-        - each segment has a constant diameter
-        - the transmembrane current density is constant along the segment axis
+        - each compartment is piecewise linear between their start
+          and endpoints
+        - each compartment has a constant diameter
+        - the transmembrane current density is constant along the
+          compartment axis
 
     Parameters
     ----------
@@ -38,10 +40,9 @@ class CellGeometry(object):
         shape (n_seg x 2) array of start- and end-point coordinates of
         each compartment along z-axis in units of [um]
     d: ndarray
-        shape (n_seg) array of compartment diameters in units of [um]
-
-    For compatibility with LFPy v2.x, the following class attributes
-    will be calculated and set:
+        shape (n_seg) or shape (n_seg x 2) array of compartment
+        diameters in units of [um]. If the 2nd axis is equal to 2,
+        conical frusta is assumed.
 
     Attributes
     ----------
@@ -59,9 +60,9 @@ class CellGeometry(object):
     d: ndarray
         shape (totnsegs) array of compartment diameters in units of [um]
     length: ndarray
-        lenght of each segment in units of um
+        lenght of each compartment in units of um
     area : ndarray
-        array of segment surface areas in units of um^2
+        array of compartment surface areas in units of um^2
     '''
     def __init__(self, x, y, z, d):
         '''
@@ -69,11 +70,11 @@ class CellGeometry(object):
         models.
 
         Assumptions
-            - each segment is piecewise linear between their
+            - each compartment is piecewise linear between their
               start and endpoints
-            - each segment has a constant diameter
+            - each compartment has a constant diameter
             - the transmembrane current density is constant along the
-              segment axis
+              compartment axis
 
         Parameters
         ----------
@@ -105,11 +106,13 @@ class CellGeometry(object):
             shape (totnsegs x 2) array of start- and end-point coordinates of
             each compartment along z-axis in units of [um]
         d: ndarray
-            shape (totnsegs) array of compartment diameters in units of [um]
+            shape (n_seg) or shape (n_seg x 2) array of compartment
+            diameters in units of [um]. If the 2nd axis is equal to 2,
+            conical frusta is assumed.
         length: ndarray
-            lenght of each segment in units of um
+            lenght of each compartment in units of um
         area : ndarray
-            array of segment surface areas in units of um^2
+            array of compartment surface areas in units of um^2
         '''
         # check input
         try:
