@@ -1,4 +1,4 @@
-LFPykit
+lfpykitLFPykit
 =======
 
 This Python module contain freestanding implementations of electrostatic
@@ -19,7 +19,7 @@ BMTK (https://alleninstitute.github.io/bmtk/, https://github.com/AllenInstitute/
 etc.
 
 Its main functionality is providing class methods that return two-dimensional
-linear response matrices **M**
+linear transformation matrices **M**
 between transmembrane currents
 **I** of multicompartment neuron models and some
 measurement **Y** given by **Y**=**MI**.
@@ -53,12 +53,12 @@ as described in various papers and books:
 Build Status
 ------------
 
-[![Build Status](https://travis-ci.org/LFPy/lfpy_forward_models.svg?branch=master)](https://travis-ci.org/LFPy/lfpy_forward_models)
-[![Coverage Status](https://coveralls.io/repos/github/LFPy/lfpy_forward_models/badge.svg?branch=master)](https://coveralls.io/github/LFPy/lfpy_forward_models?branch=master)
-[![Documentation Status](https://readthedocs.org/projects/lfpy-forward-models/badge/?version=latest)](https://lfpy-forward-models.readthedocs.io/en/latest/?badge=latest)
-![Lintly flake8 checks](https://github.com/LFPy/lfpy_forward_models/workflows/Lintly%20flake8%20checks/badge.svg)
-![Python application](https://github.com/LFPy/lfpy_forward_models/workflows/Python%20application/badge.svg)
-![Upload Python Package](https://github.com/LFPy/lfpy_forward_models/workflows/Upload%20Python%20Package/badge.svg)
+[![Build Status](https://travis-ci.org/LFPy/LFPykit.svg?branch=master)](https://travis-ci.org/LFPy/LFPykit)
+[![Coverage Status](https://coveralls.io/repos/github/LFPy/LFPykit/badge.svg?branch=master)](https://coveralls.io/github/LFPy/LFPykit?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/lfpykit/badge/?version=latest)](https://lfpykit.readthedocs.io/en/latest/?badge=latest)
+![Lintly flake8 checks](https://github.com/LFPy/lfpykit/workflows/Lintly%20flake8%20checks/badge.svg)
+![Python application](https://github.com/LFPy/LFPykit/workflows/Python%20application/badge.svg)
+![Upload Python Package](https://github.com/LFPy/LFPykit/workflows/Upload%20Python%20Package/badge.svg)
 
 Features
 --------
@@ -270,8 +270,8 @@ First, make sure that the above dependencies are installed in the current Python
 
 Install the current development version on https://GitHub.com using `git` (https://git-scm.com):
 
-    $ git clone https://github.com/LFPy/lfpy_forward_models.git
-    $ cd lfpy_forward_models
+    $ git clone https://github.com/LFPy/LFPykit.git
+    $ cd LFPykit
     $ python setup.py install  # --user optional
 
 or using `pip`:
@@ -284,4 +284,4 @@ For active development, link the repository location
 
 Installing from the Python Package Index (pypi.org):
 
-    $ pip install LFPykit  # --user optional
+    $ pip install lfpykit  # --user optional

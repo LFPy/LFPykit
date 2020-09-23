@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''lfpy-forward-models setuptools file
+'''LFPykit setuptools file
 
 '''
 
