@@ -430,7 +430,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
             else:
                 np.testing.assert_equal(phi0, phi[0][0])
 
-    def test_get_response_matrix_00(self):
+    def test_get_transformation_matrix_00(self):
         '''Test radial and tangential parts of dipole sums to dipole'''
         radii = [88000, 90000, 95000, 100000]
         sigmas = [0.3, 1.5, 0.015, 0.3]
@@ -461,7 +461,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                 el_locs[i], radii, sigmas)
             phi = fs.calc_potential(dips[i].T, p_locs[i])
 
-            M = fs.get_response_matrix(p_locs[i])
+            M = fs.get_transformation_matrix(p_locs[i])
             np.testing.assert_allclose(M @ dips[i].T, phi)
 
 
@@ -563,13 +563,13 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         phi = inf_model.get_dipole_potential(p, r)
         np.testing.assert_allclose(phi, np.array([[1., 0.], [0., 1.]]))
 
-    def test_get_response_matrix_00(self):
+    def test_get_transformation_matrix_00(self):
         sigma = 0.3
         r = np.array([[0., 0., 1.], [0., 1., 0.]])
         p = np.array([[0., 0., 4 * np.pi * 0.3], [0., 4 * np.pi * 0.3, 0.]]).T
         inf_model = eegmegcalc.InfiniteVolumeConductor(sigma)
 
-        M = inf_model.get_response_matrix(r)
+        M = inf_model.get_transformation_matrix(r)
         phi = M @ p
         np.testing.assert_allclose(phi, np.array([[1., 0.], [0., 1.]]))
 
@@ -737,7 +737,7 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         sphere = lfpykit.OneSphereVolumeConductor(
             cell=get_cell_geometry_from_lfpy(cell),
             r=r, R=R, sigma_i=sigma, sigma_o=sigma)
-        M = sphere.get_response_matrix(n_max=100)
+        M = sphere.get_transformation_matrix(n_max=100)
 
         # ground truth and tests
         for i, x in enumerate(cell.xmid):
