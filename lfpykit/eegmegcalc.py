@@ -1104,6 +1104,24 @@ class MEG(object):
         self.sensor_locations = sensor_locations
         self.mu = mu
 
+    def get_transformation_matrix(self, dipole_location):
+        '''
+        Get linear response matrix mapping current dipole moment in [nA µm]
+        located in location `dipole_location` to magnetic field
+        :math:`\\mathbf{H}` in units of (nA/µm)
+
+        parameters
+        ----------
+        dipole_location: ndarray, dtype=float
+            shape (3, ) array with x,y,z-location of dipole in units of [µm]
+
+        Returns
+        -------
+        response_matrix: ndarray
+            shape (n_contacts, 3, 3) ndarray
+        '''
+        return self.calculate_H(np.eye(3), dipole_location)
+
     def calculate_H(self, current_dipole_moment, dipole_location):
         """
         Compute magnetic field H from single current-dipole moment localized
