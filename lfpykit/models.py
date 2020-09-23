@@ -1684,7 +1684,8 @@ class OneSphereVolumeConductor(LinearModel):
         if self.cell is None:
             # perhaps this can be solved with a decorator
             raise Exception('OneSphereVolumeConductor was instantiated with '
-                            'cell=None: get_transformation_matrix() can not be used!'
+                            'cell=None: get_transformation_matrix() '
+                            'can not be used!'
                             )
 
         # midpoint position of compartments in spherical coordinates
