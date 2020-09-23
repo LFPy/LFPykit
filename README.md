@@ -19,7 +19,7 @@ BMTK (https://alleninstitute.github.io/bmtk/, https://github.com/AllenInstitute/
 etc.
 
 Its main functionality is providing class methods that return two-dimensional
-linear response matrices **M**
+linear transformation matrices **M**
 between transmembrane currents
 **I** of multicompartment neuron models and some
 measurement **Y** given by **Y**=**MI**.
