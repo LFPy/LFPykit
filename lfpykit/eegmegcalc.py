@@ -1078,7 +1078,7 @@ class MEG(object):
     >>> plt.subplot(312)
     >>> plt.plot(cell.tvec, syn.i)
     >>> plt.subplot(313)
-    >>> plt.plot(cell.tvec, H[0])
+    >>> plt.plot(cell.tvec, H[0].T)
     >>> plt.show()
 
     Raises
