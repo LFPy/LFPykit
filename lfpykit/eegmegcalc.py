@@ -1120,7 +1120,7 @@ class MEG(object):
         Returns
         -------
         ndarray, dtype=float
-            shape (n_locations x n_timesteps x 3) array with x,y,z-components
+            shape (n_locations x 3 x n_timesteps) array with x,y,z-components
             of the magnetic field :math:`\\mathbf{H}` in units of (nA/µm)
 
         Raises
@@ -1143,8 +1143,8 @@ class MEG(object):
             raise AssertionError('dipole_location.shape != (3, )')
 
         # container
-        H = np.empty((self.sensor_locations.shape[0],
-                      current_dipole_moment.shape[1], 3))
+        H = np.empty((self.sensor_locations.shape[0], 3,
+                      current_dipole_moment.shape[1]))
         # iterate over sensor locations
         for i, r in enumerate(self.sensor_locations):
             R = r - dipole_location
@@ -1153,8 +1153,8 @@ class MEG(object):
                 assert(not np.allclose(R, np.zeros(3)))
             except AssertionError:
                 raise AssertionError('Identical dipole and sensor location.')
-            H[i, ] = np.cross(current_dipole_moment.T,
-                              R) / (4 * np.pi * np.sqrt((R**2).sum())**3)
+            H[i, ] = np.cross(current_dipole_moment.T, R).T \
+                / (4 * np.pi * np.sqrt((R**2).sum())**3)
 
         return H
 
@@ -1209,17 +1209,17 @@ class MEG(object):
         Returns
         -------
         H: ndarray, dtype=float
-            shape (n_locations x n_timesteps x 3) array with x,y,z-components
+            shape (n_locations x 3 x n_timesteps) array with x,y,z-components
             of the magnetic field :math:`\\mathbf{H}` in units of (nA/µm)
         """
         i_axial, d_vectors, pos_vectors = cell.get_axial_currents_from_vmem()
         R = self.sensor_locations
-        H = np.zeros((R.shape[0], cell.tvec.size, 3))
+        H = np.zeros((R.shape[0], 3, cell.tvec.size))
 
         for i, R_ in enumerate(R):
             for i_, d_, r_ in zip(i_axial, d_vectors, pos_vectors):
                 r_rel = R_ - r_
                 H[i, :, :] += (i_.reshape((-1, 1))
-                               @ np.cross(d_, r_rel).reshape((1, -1))) \
+                               @ np.cross(d_, r_rel).reshape((1, -1))).T \
                     / (4 * np.pi * np.sqrt((r_rel**2).sum())**3)
         return H
