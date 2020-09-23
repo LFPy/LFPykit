@@ -53,12 +53,12 @@ as described in various papers and books:
 Build Status
 ------------
 
-[![Build Status](https://travis-ci.org/LFPy/lfpykit.svg?branch=master)](https://travis-ci.org/LFPy/lfpykit)
-[![Coverage Status](https://coveralls.io/repos/github/LFPy/lfpykit/badge.svg?branch=master)](https://coveralls.io/github/LFPy/lfpykit?branch=master)
-[![Documentation Status](https://readthedocs.org/projects/lfpy-forward-models/badge/?version=latest)](https://lfpy-forward-models.readthedocs.io/en/latest/?badge=latest)
+[![Build Status](https://travis-ci.org/LFPy/LFPykit.svg?branch=master)](https://travis-ci.org/LFPy/LFPykit)
+[![Coverage Status](https://coveralls.io/repos/github/LFPy/LFPykit/badge.svg?branch=master)](https://coveralls.io/github/LFPy/LFPykit?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/lfpykit/badge/?version=latest)](https://lfpykit.readthedocs.io/en/latest/?badge=latest)
 ![Lintly flake8 checks](https://github.com/LFPy/lfpykit/workflows/Lintly%20flake8%20checks/badge.svg)
-![Python application](https://github.com/LFPy/lfpykit/workflows/Python%20application/badge.svg)
-![Upload Python Package](https://github.com/LFPy/lfpykit/workflows/Upload%20Python%20Package/badge.svg)
+![Python application](https://github.com/LFPy/LFPykit/workflows/Python%20application/badge.svg)
+![Upload Python Package](https://github.com/LFPy/LFPykit/workflows/Upload%20Python%20Package/badge.svg)
 
 Features
 --------
