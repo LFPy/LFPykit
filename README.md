@@ -111,7 +111,7 @@ to extracellular measurements:
 * `eegmegcalc.MEG`:
   Class for computing magnetic field from current dipole moments
 
-Each class (except `CellGeometry`) should have a public method `get_response_matrix()`
+Each class (except `CellGeometry`) should have a public method `get_transformation_matrix()`
 that returns the linear map between the transmembrane currents or current dipole moment
 and corresponding measurements (see Usage below)
 
@@ -141,7 +141,7 @@ alongside the cell geometry:
                                    z=np.arange(10) * 10,
                                    sigma=0.3)
     >>> # get linear response matrix mapping currents to measurements
-    >>> M = psp.get_response_matrix()
+    >>> M = psp.get_transformation_matrix()
     >>> # transmembrane currents (nA):
     >>> imem = np.array([[-1., 1.],
                          [0., 0.],
@@ -179,13 +179,13 @@ remote locations away from the cell geometry:
                             d=np.array([1.] * n_seg))  # (µm)
     >>> # instantiate class `CurrentDipoleMoment`:
     >>> cdp = CurrentDipoleMoment(cell)
-    >>> M_I_to_P = cdp.get_response_matrix()
+    >>> M_I_to_P = cdp.get_transformation_matrix()
     >>> # instantiate class `eegmegcalc.InfiniteVolumeConductor` and map dipole moment to
     >>> # extracellular potential at measurement sites
     >>> ivc = eegmegcalc.InfiniteVolumeConductor(sigma=0.3)
     >>> # compute linear response matrix between dipole moment and
     >>> # extracellular potential
-    >>> M_P_to_V = ivc.get_response_matrix(np.c_[np.ones(10) * 1000,
+    >>> M_P_to_V = ivc.get_transformation_matrix(np.c_[np.ones(10) * 1000,
                                                  np.zeros(10),
                                                  np.arange(10) * 100])
     >>> # transmembrane currents (nA):

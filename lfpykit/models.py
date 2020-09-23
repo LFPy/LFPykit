@@ -42,7 +42,7 @@ class LinearModel(object):
     def __init__(self, cell):
         self.cell = cell
 
-    def get_response_matrix(self):
+    def get_transformation_matrix(self):
         '''
         Get linear response matrix
 
@@ -98,7 +98,7 @@ class CurrentDipoleMoment(LinearModel):
                                         for x in range(n_seg)]),
                             d=np.array([1.]*n_seg))
     >>> cdm = CurrentDipoleMoment(cell)
-    >>> M = cdm.get_response_matrix()
+    >>> M = cdm.get_transformation_matrix()
     >>> imem = np.array([[-1., 1.],
                          [0., 0.],
                          [1., -1.]])
@@ -112,7 +112,7 @@ class CurrentDipoleMoment(LinearModel):
     def __init__(self, cell):
         super().__init__(cell=cell)
 
-    def get_response_matrix(self):
+    def get_transformation_matrix(self):
         '''
         Get linear response matrix
 
@@ -197,7 +197,7 @@ class PointSourcePotential(LinearModel):
                                    y=np.zeros(10),
                                    z=np.arange(10)*10,
                                    sigma=0.3)
-    >>> M = psp.get_response_matrix()
+    >>> M = psp.get_transformation_matrix()
     >>> imem = np.array([[-1., 1.],
                          [0., 0.],
                          [1., -1.]])
@@ -258,7 +258,7 @@ class PointSourcePotential(LinearModel):
         self.z = z
         self.sigma = sigma
 
-    def get_response_matrix(self):
+    def get_transformation_matrix(self):
         '''
         Get linear response matrix
 
@@ -359,7 +359,7 @@ class LineSourcePotential(LinearModel):
                                   y=np.zeros(10),
                                   z=np.arange(10)*10,
                                   sigma=0.3)
-    >>> M = lsp.get_response_matrix()
+    >>> M = lsp.get_transformation_matrix()
     >>> imem = np.array([[-1., 1.],
                          [0., 0.],
                          [1., -1.]])
@@ -419,7 +419,7 @@ class LineSourcePotential(LinearModel):
         self.z = z
         self.sigma = sigma
 
-    def get_response_matrix(self):
+    def get_transformation_matrix(self):
         '''
         Get linear response matrix
 
@@ -539,7 +539,7 @@ class RecExtElectrode(LinearModel):
     >>> el = RecExtElectrode(cell=cell, x=r[0, ], y=r[1, ], z=r[2, ],
     >>>                      sigma=0.3,
     >>>                      method='pointsource')
-    >>> M = el.get_response_matrix()
+    >>> M = el.get_transformation_matrix()
     >>> # compute extracellular potential
     >>> M @ I_m
     array([[-4.11657148e-05,  4.16621950e-04, -3.75456235e-04],
@@ -606,7 +606,7 @@ class RecExtElectrode(LinearModel):
     >>>     z=np.c_[cell.zstart, cell.zend],
     >>>     d=cell.diam)
     >>> electrode = RecExtElectrode(cell_geometry, **electrodeParameters)
-    >>> M = electrode.get_response_matrix()
+    >>> M = electrode.get_transformation_matrix()
     >>> V_ex = M @ cell.imem
     >>> plt.matshow(V_ex)
     >>> plt.colorbar()
@@ -662,7 +662,7 @@ class RecExtElectrode(LinearModel):
     >>>     z=np.c_[cell.zstart, cell.zend],
     >>>     d=cell.diam)
     >>> electrode = RecExtElectrode(cell_geometry, **electrodeParameters)
-    >>> M = electrode.get_response_matrix()
+    >>> M = electrode.get_transformation_matrix()
     >>> cell.simulate(dotprodcoeffs=[M])
     >>> V_ex = cell.dotprodresults[0]
     >>> plt.matshow(V_ex)
@@ -712,7 +712,7 @@ class RecExtElectrode(LinearModel):
     >>>     z=np.c_[cell.zstart, cell.zend],
     >>>     d=cell.diam)
     >>> electrode = RecExtElectrode(cell_geometry, probe=probe)
-    >>> V_ex = electrode.get_response_matrix() @ cell.imem
+    >>> V_ex = electrode.get_transformation_matrix() @ cell.imem
     >>> mu.plot_mea_recording(V_ex, probe)
     >>> plt.axis('tight')
     >>> plt.show()
@@ -861,7 +861,7 @@ class RecExtElectrode(LinearModel):
                              "Should be 'root_as_point', 'linesource' "
                              "or 'pointsource'")
 
-    def get_response_matrix(self):
+    def get_transformation_matrix(self):
         '''
         Get linear response matrix
 
@@ -1066,7 +1066,7 @@ class RecMEAElectrode(RecExtElectrode):
     >>>                      sigma_T=0.3, sigma_S=1.5, sigma_G=0.0,
     >>>                      x=r[0, ], y=r[1, ], z=r[2, ],
     >>>                      method='pointsource')
-    >>> M = el.get_response_matrix()
+    >>> M = el.get_transformation_matrix()
     >>> # compute extracellular potential
     >>> M @ I_m
     array([[-0.00233572, -0.01990957,  0.02542055],
@@ -1132,7 +1132,7 @@ class RecMEAElectrode(RecExtElectrode):
     >>>     z=np.c_[lfpy_cell.zstart, lfpy_cell.zend],
     >>>     d=lfpy_cell.diam)
     >>> MEA = RecMEAElectrode(cell, **MEA_electrode_parameters)
-    >>> V_ext = MEA.get_response_matrix() @ lfpy_cell.imem
+    >>> V_ext = MEA.get_transformation_matrix() @ lfpy_cell.imem
     >>>
     >>> plt.matshow(V_ext)
     >>> plt.colorbar()
@@ -1330,7 +1330,7 @@ class RecMEAElectrode(RecExtElectrode):
         self.cell._set_length()
         self.cell._set_area()
 
-    def get_response_matrix(self):
+    def get_transformation_matrix(self):
         '''
         Get linear response matrix
 
@@ -1583,7 +1583,7 @@ class OneSphereVolumeConductor(LinearModel):
                                      'ndarray with float values')
             return current / (4. * np.pi * self.sigma_i) * (phi_i + phi_o)
 
-    def get_response_matrix(self, n_max=1000):
+    def get_transformation_matrix(self, n_max=1000):
         """
         Compute linear mapping between transmembrane currents of CellGeometry
         like object instance and extracellular potential in and outside of
@@ -1644,7 +1644,7 @@ class OneSphereVolumeConductor(LinearModel):
         >>> # and electric potential in space
         >>> sphere = OneSphereVolumeConductor(cell_geometry, r=r, R=10000.,
         >>>                                   sigma_i=0.3, sigma_o=0.03)
-        >>> M = sphere.get_response_matrix(n_max=1000)
+        >>> M = sphere.get_transformation_matrix(n_max=1000)
         >>> # pick out some time index for the potential and compute potential
         >>> ind = cell.tvec==2.
         >>> V_ex = (M @ cell.imem)[:, ind].reshape(X.shape)
@@ -1684,7 +1684,7 @@ class OneSphereVolumeConductor(LinearModel):
         if self.cell is None:
             # perhaps this can be solved with a decorator
             raise Exception('OneSphereVolumeConductor was instantiated with '
-                            'cell=None: get_response_matrix() can not be used!'
+                            'cell=None: get_transformation_matrix() can not be used!'
                             )
 
         # midpoint position of compartments in spherical coordinates

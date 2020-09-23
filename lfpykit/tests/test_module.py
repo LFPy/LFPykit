@@ -41,7 +41,7 @@ class TestSuite(unittest.TestCase):
         '''test LinearModel'''
         cell = get_cell(n_seg=4)
         lm = lfp.LinearModel(cell)
-        M = lm.get_response_matrix()
+        M = lm.get_transformation_matrix()
 
         imem = np.arange(24).reshape((4, -1))
 
@@ -51,7 +51,7 @@ class TestSuite(unittest.TestCase):
         '''test CurrentDipoleMoment'''
         cell = get_cell(n_seg=3)
         cdm = lfp.CurrentDipoleMoment(cell)
-        M = cdm.get_response_matrix()
+        M = cdm.get_transformation_matrix()
 
         imem = np.array([[-1., 1.],
                          [0., 0.],
@@ -78,7 +78,7 @@ class TestSuite(unittest.TestCase):
                        35.62274778, 41.273182]])
         psp = lfp.PointSourcePotential(cell=cell, x=r[0], y=r[1, ], z=r[2, ],
                                        sigma=sigma)
-        M = psp.get_response_matrix()
+        M = psp.get_transformation_matrix()
 
         imem = np.array([[-1., 1.],
                          [0., 0.],
@@ -107,7 +107,7 @@ class TestSuite(unittest.TestCase):
                       [cell.z.mean()]])
         psp = lfp.PointSourcePotential(cell=cell, x=r[0], y=r[1, ], z=r[2, ],
                                        sigma=sigma)
-        M = psp.get_response_matrix()
+        M = psp.get_transformation_matrix()
 
         imem = np.array([[0., 1., -1.]]) * (4 * np.pi * sigma * cell.d[0] / 2)
 
@@ -128,7 +128,7 @@ class TestSuite(unittest.TestCase):
                       [cell.z.mean()]])
         psp = lfp.PointSourcePotential(cell=cell, x=r[0], y=r[1, ], z=r[2, ],
                                        sigma=sigma)
-        M = psp.get_response_matrix()
+        M = psp.get_transformation_matrix()
 
         imem = np.array([[0., 1., -1.]]) * (4 * np.pi * sigma * cell.d[0] / 2)
 
@@ -148,7 +148,7 @@ class TestSuite(unittest.TestCase):
                                       y=np.array([0.]),
                                       z=np.array([11.]),
                                       sigma=0.3)
-        M = lsp.get_response_matrix()
+        M = lsp.get_transformation_matrix()
 
         imem = np.array([[0., 1., -1.]])
 
@@ -176,7 +176,7 @@ class TestSuite(unittest.TestCase):
                                       y=np.array([0.]),
                                       z=np.array([5.]),
                                       sigma=0.3)
-        M = lsp.get_response_matrix()
+        M = lsp.get_transformation_matrix()
 
         imem = np.array([[0., 1., -1.]])
 
@@ -206,7 +206,7 @@ class TestSuite(unittest.TestCase):
                                       y=np.array([0.]),
                                       z=np.array([5.]),
                                       sigma=0.3)
-        M = lsp.get_response_matrix()
+        M = lsp.get_transformation_matrix()
 
         imem = np.array([[0., 1., -1.]])
 
@@ -235,7 +235,7 @@ class TestSuite(unittest.TestCase):
                                       y=np.array([0.]),
                                       z=np.array([-1.]),
                                       sigma=0.3)
-        M = lsp.get_response_matrix()
+        M = lsp.get_transformation_matrix()
 
         imem = np.array([[0., 1., -1.]])
 
@@ -265,7 +265,7 @@ class TestSuite(unittest.TestCase):
                                  x=r[0], y=r[1, ], z=r[2, ],
                                  sigma=sigma,
                                  method='pointsource')
-        M = el.get_response_matrix()
+        M = el.get_transformation_matrix()
 
         imem = np.array([[0., 1., -1.]]) * (4 * np.pi * sigma * cell.d[0])
 
@@ -287,7 +287,7 @@ class TestSuite(unittest.TestCase):
                                  z=np.array([5.]),
                                  sigma=0.3,
                                  method='linesource')
-        M = el.get_response_matrix()
+        M = el.get_transformation_matrix()
 
         imem = np.array([[0., 1., -1.]])
 
@@ -318,7 +318,7 @@ class TestSuite(unittest.TestCase):
                                  x=r[0], y=r[1, ], z=r[2, ],
                                  sigma=sigma,
                                  method='root_as_point')
-        M = el.get_response_matrix()
+        M = el.get_transformation_matrix()
 
         imem = np.array([[0., 1., -1.]]) * (4 * np.pi * sigma * cell.d[0])
 
@@ -342,7 +342,7 @@ class TestSuite(unittest.TestCase):
                                  x=r[0], y=r[1], z=r[2],
                                  sigma=sigma,
                                  method='pointsource')
-        M = el.get_response_matrix()
+        M = el.get_transformation_matrix()
 
         imem = np.array([[0., 1., -1.]])
 
@@ -367,7 +367,7 @@ class TestSuite(unittest.TestCase):
                                   x=r[0], y=r[1, ], z=r[2, ],
                                   sigma_T=sigma, sigma_S=sigma, sigma_G=sigma,
                                   method='pointsource')
-        M = mea.get_response_matrix()
+        M = mea.get_transformation_matrix()
 
         imem = np.array([[0., 1., -1.]]) * (4 * np.pi * sigma * cell.z.mean())
 

@@ -220,7 +220,7 @@ class FourSphereVolumeConductor(object):
         pot_tot = pot_rad + pot_tan
         return pot_tot
 
-    def get_response_matrix(self, rz):
+    def get_transformation_matrix(self, rz):
         '''
         Get linear response matrix mapping current dipole moment in [nA µm]
         located in location `rz` to extracellular potential in [mV]
@@ -921,7 +921,7 @@ class InfiniteVolumeConductor(object):
                          np.linalg.norm(r, axis=-1, keepdims=True)**3)
         return phi
 
-    def get_response_matrix(self, r):
+    def get_transformation_matrix(self, r):
         '''
         Get linear response matrix mapping current dipole moment in [nA µm]
         to extracellular potential in [mV] at recording sites `r` [µm]
