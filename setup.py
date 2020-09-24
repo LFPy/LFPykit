@@ -24,8 +24,8 @@ setuptools.setup(
         'multicompartment neuron models'),
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/LFPy/lfpykit',
-    download_url='https://github.com/LFPy/lfpykit/'.join(
+    url='https://github.com/LFPy/LFPykit',
+    download_url='https://github.com/LFPy/LFPykit/'.join(
         'tarball/v{}'.format(version)),
     packages=setuptools.find_packages(),
     classifiers=[
