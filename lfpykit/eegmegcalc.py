@@ -1056,29 +1056,40 @@ class MEG(object):
 
     >>> import LFPy, os, numpy as np, matplotlib.pyplot as plt
     >>> from lfpykit.eegmegcalc import MEG
+    >>> # create LFPy.Cell object
     >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
     >>>                                          'ball_and_sticks.hoc'),
     >>>                  passive=True)
     >>> cell.set_pos(0., 0., 0.)
-    >>> syn = LFPy.Synapse(cell, idx=0, syntype='ExpSyn', weight=0.01,
+    >>> # create single synaptic stimuli at soma (idx=0)
+    >>> syn = LFPy.Synapse(cell, idx=0, syntype='ExpSyn', weight=0.01, tau=5,
     >>>                    record_current=True)
     >>> syn.set_spike_times_w_netstim()
+    >>> # simulate, record current dipole moment
     >>> cell.simulate(rec_current_dipole_moment=True)
     >>> # Compute the dipole location as an average of segment locations
     >>> # weighted by membrane area:
     >>> dipole_location = (cell.area * np.c_[cell.xmid, cell.ymid, cell.zmid].T
     >>>                    / cell.area.sum()).sum(axis=1)
-    >>> # Instantiate the MEG object, compute and plot the magnetic signal in a
-    >>> # sensor location:
+    >>> # Define sensor site, instantiate MEG object, get transformation matrix
     >>> sensor_locations = np.array([[1E4, 0, 0]])
     >>> meg = MEG(sensor_locations)
-    >>> H = meg.calculate_H(cell.current_dipole_moment.T, dipole_location)
+    >>> M = meg.get_transformation_matrix(dipole_location)
+    >>> # compute the magnetic signal in a single sensor location:
+    >>> H = M @ cell.current_dipole_moment.T
+    >>> # plot output
+    >>> plt.figure(figsize=(12, 8), dpi=120)
     >>> plt.subplot(311)
     >>> plt.plot(cell.tvec, cell.somav)
+    >>> plt.ylabel(r'$V_{soma}$ (mV)')
     >>> plt.subplot(312)
     >>> plt.plot(cell.tvec, syn.i)
+    >>> plt.ylabel(r'$I_{syn}$ (nA)')
     >>> plt.subplot(313)
-    >>> plt.plot(cell.tvec, H[0])
+    >>> plt.plot(cell.tvec, H[0].T)
+    >>> plt.ylabel(r'$H$ (nA/um)')
+    >>> plt.xlabel('$t$ (ms)')
+    >>> plt.legend(['$H_x$', '$H_y$', '$H_z$'])
     >>> plt.show()
 
     Raises
@@ -1104,6 +1115,24 @@ class MEG(object):
         self.sensor_locations = sensor_locations
         self.mu = mu
 
+    def get_transformation_matrix(self, dipole_location):
+        '''
+        Get linear response matrix mapping current dipole moment in [nA µm]
+        located in location `dipole_location` to magnetic field
+        :math:`\\mathbf{H}` in units of (nA/µm)
+
+        parameters
+        ----------
+        dipole_location: ndarray, dtype=float
+            shape (3, ) array with x,y,z-location of dipole in units of [µm]
+
+        Returns
+        -------
+        response_matrix: ndarray
+            shape (n_contacts, 3, 3) ndarray
+        '''
+        return self.calculate_H(np.eye(3), dipole_location)
+
     def calculate_H(self, current_dipole_moment, dipole_location):
         """
         Compute magnetic field H from single current-dipole moment localized
@@ -1120,7 +1149,7 @@ class MEG(object):
         Returns
         -------
         ndarray, dtype=float
-            shape (n_locations x n_timesteps x 3) array with x,y,z-components
+            shape (n_locations x 3 x n_timesteps) array with x,y,z-components
             of the magnetic field :math:`\\mathbf{H}` in units of (nA/µm)
 
         Raises
@@ -1143,8 +1172,8 @@ class MEG(object):
             raise AssertionError('dipole_location.shape != (3, )')
 
         # container
-        H = np.empty((self.sensor_locations.shape[0],
-                      current_dipole_moment.shape[1], 3))
+        H = np.empty((self.sensor_locations.shape[0], 3,
+                      current_dipole_moment.shape[1]))
         # iterate over sensor locations
         for i, r in enumerate(self.sensor_locations):
             R = r - dipole_location
@@ -1153,8 +1182,8 @@ class MEG(object):
                 assert(not np.allclose(R, np.zeros(3)))
             except AssertionError:
                 raise AssertionError('Identical dipole and sensor location.')
-            H[i, ] = np.cross(current_dipole_moment.T,
-                              R) / (4 * np.pi * np.sqrt((R**2).sum())**3)
+            H[i, ] = np.cross(current_dipole_moment.T, R).T \
+                / (4 * np.pi * np.sqrt((R**2).sum())**3)
 
         return H
 
@@ -1209,17 +1238,17 @@ class MEG(object):
         Returns
         -------
         H: ndarray, dtype=float
-            shape (n_locations x n_timesteps x 3) array with x,y,z-components
+            shape (n_locations x 3 x n_timesteps) array with x,y,z-components
             of the magnetic field :math:`\\mathbf{H}` in units of (nA/µm)
         """
         i_axial, d_vectors, pos_vectors = cell.get_axial_currents_from_vmem()
         R = self.sensor_locations
-        H = np.zeros((R.shape[0], cell.tvec.size, 3))
+        H = np.zeros((R.shape[0], 3, cell.tvec.size))
 
         for i, R_ in enumerate(R):
             for i_, d_, r_ in zip(i_axial, d_vectors, pos_vectors):
                 r_rel = R_ - r_
                 H[i, :, :] += (i_.reshape((-1, 1))
-                               @ np.cross(d_, r_rel).reshape((1, -1))) \
+                               @ np.cross(d_, r_rel).reshape((1, -1))).T \
                     / (4 * np.pi * np.sqrt((r_rel**2).sum())**3)
         return H

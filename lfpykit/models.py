@@ -1700,7 +1700,6 @@ class OneSphereVolumeConductor(LinearModel):
         else:
             diam = self.cell.d
 
-
         # since the sources must be located on the x-axis, we keep a copy
         # of the unrotated coordinate system for the contact points:
         r_orig = np.copy(self.r)

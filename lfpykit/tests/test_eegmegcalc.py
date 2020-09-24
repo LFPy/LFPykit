@@ -44,12 +44,12 @@ class testMEG(unittest.TestCase):
         dipole_location = np.zeros(3)
         sensor_locations = np.r_[np.eye(3), -np.eye(3)]
 
-        gt = np.zeros((sensor_locations.shape[0],
-                       current_dipole_moment.shape[1], 3))
-        gt[1, :, 2] = 1. / 4 / np.pi
-        gt[2, :, 1] = -1. / 4 / np.pi
-        gt[4, :, 2] = -1. / 4 / np.pi
-        gt[5, :, 1] = 1. / 4 / np.pi
+        gt = np.zeros((sensor_locations.shape[0], 3,
+                       current_dipole_moment.shape[1]))
+        gt[1, 2, :] = 1. / 4 / np.pi
+        gt[2, 1, :] = -1. / 4 / np.pi
+        gt[4, 2, :] = -1. / 4 / np.pi
+        gt[5, 1, :] = 1. / 4 / np.pi
 
         meg = eegmegcalc.MEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
@@ -62,12 +62,12 @@ class testMEG(unittest.TestCase):
         dipole_location = np.zeros(3)
         sensor_locations = np.r_[np.eye(3), -np.eye(3)]
 
-        gt = np.zeros((sensor_locations.shape[0],
-                       current_dipole_moment.shape[1], 3))
-        gt[0, :, 2] = -1. / 4 / np.pi
-        gt[2, :, 0] = 1. / 4 / np.pi
-        gt[3, :, 2] = 1. / 4 / np.pi
-        gt[5, :, 0] = -1. / 4 / np.pi
+        gt = np.zeros((sensor_locations.shape[0], 3,
+                       current_dipole_moment.shape[1]))
+        gt[0, 2, :] = -1. / 4 / np.pi
+        gt[2, 0, :] = 1. / 4 / np.pi
+        gt[3, 2, :] = 1. / 4 / np.pi
+        gt[5, 0, :] = -1. / 4 / np.pi
 
         meg = eegmegcalc.MEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
@@ -81,12 +81,12 @@ class testMEG(unittest.TestCase):
         sensor_locations = np.r_[np.eye(3), -np.eye(3)]
 
         # ground truth
-        gt = np.zeros((sensor_locations.shape[0],
-                       current_dipole_moment.shape[1], 3))
-        gt[0, :, 1] = 1. / 4 / np.pi
-        gt[1, :, 0] = -1. / 4 / np.pi
-        gt[3, :, 1] = -1. / 4 / np.pi
-        gt[4, :, 0] = 1. / 4 / np.pi
+        gt = np.zeros((sensor_locations.shape[0], 3,
+                       current_dipole_moment.shape[1]))
+        gt[0, 1, :] = 1. / 4 / np.pi
+        gt[1, 0, :] = -1. / 4 / np.pi
+        gt[3, 1, :] = -1. / 4 / np.pi
+        gt[4, 0, :] = 1. / 4 / np.pi
 
         meg = eegmegcalc.MEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
@@ -99,12 +99,12 @@ class testMEG(unittest.TestCase):
         dipole_location = np.zeros(3)
         sensor_locations = np.r_[np.eye(3), -np.eye(3)]
 
-        gt = np.zeros((sensor_locations.shape[0],
-                       current_dipole_moment.shape[1], 3))
-        gt[1, :, 2] = 1. / 4 / np.pi
-        gt[2, :, 1] = -1. / 4 / np.pi
-        gt[4, :, 2] = -1. / 4 / np.pi
-        gt[5, :, 1] = 1. / 4 / np.pi
+        gt = np.zeros((sensor_locations.shape[0], 3,
+                       current_dipole_moment.shape[1]))
+        gt[1, 2, :] = 1. / 4 / np.pi
+        gt[2, 1, :] = -1. / 4 / np.pi
+        gt[4, 2, :] = -1. / 4 / np.pi
+        gt[5, 1, :] = 1. / 4 / np.pi
 
         meg = eegmegcalc.MEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
@@ -117,12 +117,12 @@ class testMEG(unittest.TestCase):
         dipole_location = np.zeros(3)
         sensor_locations = np.r_[np.eye(3), -np.eye(3)]
 
-        gt = np.zeros((sensor_locations.shape[0],
-                       current_dipole_moment.shape[1], 3))
-        gt[0, :, 2] = -1. / 4 / np.pi
-        gt[2, :, 0] = 1. / 4 / np.pi
-        gt[3, :, 2] = 1. / 4 / np.pi
-        gt[5, :, 0] = -1. / 4 / np.pi
+        gt = np.zeros((sensor_locations.shape[0], 3,
+                       current_dipole_moment.shape[1]))
+        gt[0, 2, :] = -1. / 4 / np.pi
+        gt[2, 0, :] = 1. / 4 / np.pi
+        gt[3, 2, :] = 1. / 4 / np.pi
+        gt[5, 0, :] = -1. / 4 / np.pi
 
         meg = eegmegcalc.MEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
@@ -135,16 +135,47 @@ class testMEG(unittest.TestCase):
         dipole_location = np.zeros(3)
         sensor_locations = np.r_[np.eye(3), -np.eye(3)]
 
-        gt = np.zeros((sensor_locations.shape[0],
-                       current_dipole_moment.shape[1], 3))
-        gt[0, :, 1] = 1. / 4 / np.pi
-        gt[1, :, 0] = -1. / 4 / np.pi
-        gt[3, :, 1] = -1. / 4 / np.pi
-        gt[4, :, 0] = 1. / 4 / np.pi
+        gt = np.zeros((sensor_locations.shape[0], 3,
+                       current_dipole_moment.shape[1]))
+        gt[0, 1, :] = 1. / 4 / np.pi
+        gt[1, 0, :] = -1. / 4 / np.pi
+        gt[3, 1, :] = -1. / 4 / np.pi
+        gt[4, 0, :] = 1. / 4 / np.pi
 
         meg = eegmegcalc.MEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
+
+    def test_MEG_06(self):
+        '''test eegmegcalc.MEG.get_transformation_matrix()'''
+        current_dipole_moment = np.c_[np.eye(3), -np.eye(3)]
+
+        dipole_location = np.zeros(3)
+        sensor_locations = np.r_[np.eye(3), -np.eye(3)]
+
+        gt = np.array([[[0., 0., 0., 0., 0., 0.],
+                        [0., 0., 1., 0., 0., -1.],
+                        [0., -1., 0., 0., 1., 0.]],
+                       [[0., 0., -1., 0., 0., 1.],
+                        [0., 0., 0., 0., 0., 0.],
+                        [1., 0., 0., -1., 0., 0.]],
+                       [[0., 1., 0., 0., -1., 0.],
+                        [-1., 0., 0., 1., 0., 0.],
+                        [0., 0., 0., 0., 0., 0.]],
+                       [[0., 0., 0., 0., 0., 0.],
+                        [0., 0., -1., 0., 0., 1.],
+                        [0., 1., 0., 0., -1., 0.]],
+                       [[0., 0., 1., 0., 0., -1.],
+                        [0., 0., 0., 0., 0., 0.],
+                        [-1., 0., 0., 1., 0., 0.]],
+                       [[0., -1., 0., 0., 1., 0.],
+                        [1., 0., 0., -1., 0., 0.],
+                        [0., 0., 0., 0., 0., 0.]]]) / 4 / np.pi
+
+        meg = eegmegcalc.MEG(sensor_locations)
+        M = meg.get_transformation_matrix(dipole_location)
+
+        np.testing.assert_equal(gt, M @ current_dipole_moment)
 
 
 class testFourSphereVolumeConductor(unittest.TestCase):
@@ -463,7 +494,6 @@ class testFourSphereVolumeConductor(unittest.TestCase):
 
             M = fs.get_transformation_matrix(p_locs[i])
             np.testing.assert_allclose(M @ dips[i].T, phi)
-
 
     @unittest.skipUnless(LFPy_imported, "skipping: LFPy not installed")
     @unittest.skipUnless(neuron_imported, "skipping: NEURON not installed")
