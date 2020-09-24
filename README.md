@@ -59,6 +59,7 @@ Build Status
 ![Lintly flake8 checks](https://github.com/LFPy/lfpykit/workflows/Lintly%20flake8%20checks/badge.svg)
 ![Python application](https://github.com/LFPy/LFPykit/workflows/Python%20application/badge.svg)
 ![Upload Python Package](https://github.com/LFPy/LFPykit/workflows/Upload%20Python%20Package/badge.svg)
+[![License](http://img.shields.io/:license-GPLv3+-green.svg)](http://www.gnu.org/licenses/gpl-3.0.html)
 
 Features
 --------
