@@ -20,8 +20,7 @@ setuptools.setup(
     version=version,
     author='LFPy-team',
     author_email='lfpy@users.noreply.github.com',
-    description='Electrostatic forward models for '.join(
-        'multicompartment neuron models'),
+    description='Electrostatic models for multicompartment neuron models',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/LFPy/LFPykit',
