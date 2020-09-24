@@ -1056,29 +1056,40 @@ class MEG(object):
 
     >>> import LFPy, os, numpy as np, matplotlib.pyplot as plt
     >>> from lfpykit.eegmegcalc import MEG
+    >>> # create LFPy.Cell object
     >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
     >>>                                          'ball_and_sticks.hoc'),
     >>>                  passive=True)
     >>> cell.set_pos(0., 0., 0.)
-    >>> syn = LFPy.Synapse(cell, idx=0, syntype='ExpSyn', weight=0.01,
+    >>> # create single synaptic stimuli at soma (idx=0)
+    >>> syn = LFPy.Synapse(cell, idx=0, syntype='ExpSyn', weight=0.01, tau=5,
     >>>                    record_current=True)
     >>> syn.set_spike_times_w_netstim()
+    >>> # simulate, record current dipole moment
     >>> cell.simulate(rec_current_dipole_moment=True)
     >>> # Compute the dipole location as an average of segment locations
     >>> # weighted by membrane area:
     >>> dipole_location = (cell.area * np.c_[cell.xmid, cell.ymid, cell.zmid].T
     >>>                    / cell.area.sum()).sum(axis=1)
-    >>> # Instantiate the MEG object, compute and plot the magnetic signal in a
-    >>> # sensor location:
+    >>> # Define sensor site, instantiate MEG object, get transformation matrix
     >>> sensor_locations = np.array([[1E4, 0, 0]])
     >>> meg = MEG(sensor_locations)
-    >>> H = meg.calculate_H(cell.current_dipole_moment.T, dipole_location)
+    >>> M = meg.get_transformation_matrix(dipole_location)
+    >>> # compute the magnetic signal in a single sensor location:
+    >>> H = M @ cell.current_dipole_moment.T
+    >>> # plot output
+    >>> plt.figure(figsize=(12, 8), dpi=120)
     >>> plt.subplot(311)
     >>> plt.plot(cell.tvec, cell.somav)
+    >>> plt.ylabel(r'$V_{soma}$ (mV)')
     >>> plt.subplot(312)
     >>> plt.plot(cell.tvec, syn.i)
+    >>> plt.ylabel(r'$I_{syn}$ (nA)')
     >>> plt.subplot(313)
     >>> plt.plot(cell.tvec, H[0].T)
+    >>> plt.ylabel(r'$H$ (nA/um)')
+    >>> plt.xlabel('$t$ (ms)')
+    >>> plt.legend(['$H_x$', '$H_y$', '$H_z$'])
     >>> plt.show()
 
     Raises
