@@ -24,15 +24,10 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Desktop/Environment (please complete the following information):**
- - OS: [e.g. iOS, Ubuntu-18.04]
- - Browser: [if applicable, e.g. chrome, safari]
- - Shell: [e.g. bash, zsh]
+ - OS: [e.g. macOS, Ubuntu-18.04]
  - Python-Version: [e.g. Python 3.6]
- - NEST-Version: [e.g. nest-2.18, or git hash]
- - Installation: [e.g. conda packet, apt, with/out MPI, ...]
-   (in case you compiled the source code manually, provide the
-    "Installation Summary" that you see at the end of the 
-    cmake step)
+ - LFPykit version: [e.g. LFPykit-0.1, or git hash]
+ - Installation: [e.g. from source, pip, ...]
 
 **Additional context**
 Add any other context about the problem here.
