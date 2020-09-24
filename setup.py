@@ -25,8 +25,6 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/LFPy/LFPykit',
-    download_url='https://github.com/LFPy/LFPykit/'.join(
-        'tarball/v{}'.format(version)),
     packages=setuptools.find_packages(),
     classifiers=[
         'Programming Language :: Python :: 3',
