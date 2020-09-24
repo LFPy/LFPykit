@@ -1,4 +1,4 @@
-lfpykitLFPykit
+LFPykit
 =======
 
 This Python module contain freestanding implementations of electrostatic
