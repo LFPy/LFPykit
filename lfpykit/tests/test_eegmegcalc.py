@@ -146,6 +146,37 @@ class testMEG(unittest.TestCase):
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
 
+    def test_MEG_06(self):
+        '''test eegmegcalc.MEG.get_transformation_matrix()'''
+        current_dipole_moment = np.c_[np.eye(3), -np.eye(3)]
+
+        dipole_location = np.zeros(3)
+        sensor_locations = np.r_[np.eye(3), -np.eye(3)]
+
+        gt = np.array([[[0.,  0.,  0.,  0.,  0.,  0.],
+                        [0.,  0.,  1.,  0.,  0., -1.],
+                        [0., -1.,  0.,  0.,  1.,  0.]],
+                       [[0.,  0., -1.,  0.,  0.,  1.],
+                        [0.,  0.,  0.,  0.,  0.,  0.],
+                        [1.,  0.,  0., -1.,  0.,  0.]],
+                       [[0.,  1.,  0.,  0., -1.,  0.],
+                        [-1.,  0.,  0.,  1.,  0.,  0.],
+                        [0.,  0.,  0.,  0.,  0.,  0.]],
+                       [[0.,  0.,  0.,  0.,  0.,  0.],
+                        [0.,  0., -1.,  0.,  0.,  1.],
+                        [0.,  1.,  0.,  0., -1.,  0.]],
+                       [[0.,  0.,  1.,  0.,  0., -1.],
+                        [0.,  0.,  0.,  0.,  0.,  0.],
+                        [-1.,  0.,  0.,  1.,  0.,  0.]],
+                       [[0., -1.,  0.,  0.,  1.,  0.],
+                        [1.,  0.,  0., -1.,  0.,  0.],
+                        [0.,  0.,  0.,  0.,  0.,  0.]]]) / 4 / np.pi
+
+        meg = eegmegcalc.MEG(sensor_locations)
+        M = meg.get_transformation_matrix(dipole_location)
+
+        np.testing.assert_equal(gt, M @ current_dipole_moment)
+
 
 class testFourSphereVolumeConductor(unittest.TestCase):
     """
@@ -463,7 +494,6 @@ class testFourSphereVolumeConductor(unittest.TestCase):
 
             M = fs.get_transformation_matrix(p_locs[i])
             np.testing.assert_allclose(M @ dips[i].T, phi)
-
 
     @unittest.skipUnless(LFPy_imported, "skipping: LFPy not installed")
     @unittest.skipUnless(neuron_imported, "skipping: NEURON not installed")
