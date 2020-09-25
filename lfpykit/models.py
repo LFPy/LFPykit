@@ -59,7 +59,7 @@ class CurrentDipoleMoment(LinearModel):
     `LinearModel` subclass that defines a 2D linear response matrix
     :math:`\\mathbf{M}` between transmembrane current array
     :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
-    corresponding current dipole moment :math:`\\mathbf{P}` [nA um] as
+    corresponding current dipole moment :math:`\\mathbf{P}` [nA um] [1]_ as
 
     .. math:: \\mathbf{P} = \\mathbf{M} \\mathbf{I}
 
@@ -107,6 +107,13 @@ class CurrentDipoleMoment(LinearModel):
     array([[ 0.,  0.],
            [ 0.,  0.],
            [ 2., -2.]])
+
+    References
+    ----------
+    .. [1] H. Lindén, K. H. Pettersen, G. T. Einevoll (2010). Intrinsic
+        dendritic filtering gives low-pass power spectra of local field
+        potentials. J Comput Neurosci, 29:423–444.
+        DOI: 10.1007/s10827-010-0245-4
     '''
 
     def __init__(self, cell):
