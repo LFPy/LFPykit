@@ -14,6 +14,8 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 """
+import os
+import sys
 from scipy.special import lpmv
 import numpy as np
 from warnings import warn
@@ -1252,3 +1254,166 @@ class MEG(object):
                                @ np.cross(d_, r_rel).reshape((1, -1))).T \
                     / (4 * np.pi * np.sqrt((r_rel**2).sum())**3)
         return H
+
+
+class NYHeadModel(object):
+    """
+    Main class for computing EEG signals from current dipole
+    moment :math:`\\mathbf{P}` in New York Head Model [1, 2]
+
+    Assumes units of nA * um for current dipole moment, and pV for EEG
+    NOTE: The original unit of the New York model current dipole moment
+    is (probably?) mA * m, and the EEG output is V
+    LFPy's current dipole moments have units nA*um, giving EEGs in pV.
+
+    Parameters
+    ----------
+    nyhead_file: str [optional]
+        Location of file containing New York Head Model. If not found,
+        the user is asked if it should be downloaded
+
+    See also
+    --------
+    FourSphereVolumeConductor
+    MEG
+
+    References
+    ----------
+    .. [1] Huang, Parra, Haufe (2016) Neuroimage 140:150–162.
+       [2] Naess et al. (2020) https://www.biorxiv.org/content/10.1101/2020.07.01.181875v1
+
+    Examples
+    --------
+    Computing EEG from dipole moment.
+
+    >>> from lfpykit.eegmegcalc import NYHeadModel
+    >>> import numpy as np
+
+    >>> nyhead = NYHeadModel()
+
+    >>> dipole_position = 'parietal_lobe' # predefined example location
+    >>> M = nyhead.get_transformation_matrix(dipole_position)
+
+    >>> # Rotate to be along normal vector of cortex
+    >>> p = nyhead.rotate_dipole_moment(np.array([[0.], [0.], [1.]]))
+    >>> eeg = M @ p  # [pV]
+
+    """
+
+    def __init__(self, nyhead_file="sa_nyhead.mat"):
+        " Initialize class NYHeadModel "
+
+
+        # Some example locations in NY Head model
+        self.dipole_pos_dict = {
+            'calcarine_sulcus': np.array([5, -85, 0]),
+            'motorsensory_cortex': np.array([17, 10, 79.4]),
+            'parietal_lobe': np.array([55, -49, 57]),
+            'occipital_lobe': np.array([-24.3, -105.4, -1.2])
+        }
+
+        self._load_head_model(nyhead_file)
+
+    def _load_head_model(self, nyhead_file):
+
+        import h5py
+
+        self.head_file = os.path.abspath(nyhead_file)
+        if not os.path.isfile(self.head_file):
+            import sys
+            if sys.version < '3':
+                from urllib2 import urlopen
+            else:
+                from urllib.request import urlopen
+            import ssl
+            print("New York head model not found: %s" % self.head_file)
+            yn = input("Should it be downloaded (710 MB)? [y/n]")
+            if yn == 'y':
+                print("Now downloading. This might take a while ...")
+                nyhead_url = 'https://www.parralab.org/nyhead/sa_nyhead.mat'
+                u = urlopen(nyhead_url, context=ssl._create_unverified_context())
+                localFile = open(self.head_file, 'wb')
+                localFile.write(u.read())
+                localFile.close()
+                print("Download done!")
+            else:
+                print("Exiting program ...")
+                sys.exit()
+
+        self.head_data = h5py.File(self.head_file, 'r')["sa"]
+        self.cortex = np.array(self.head_data["cortex75K"]["vc"])
+        self.lead_field = np.array(self.head_data["cortex75K"]["V_fem"])
+        self.lead_field_normal = np.array(self.head_data["cortex75K"]["V_fem_normal"])
+        self.cortex_normals = np.array(self.head_data["cortex75K"]["normals"])
+        self.elecs = np.array(self.head_data["locs_3D"])
+
+        # Other properties that might be used for plotting
+        # self.sulicmap = np.array(f["sa"]["cortex75K"]["sulcimap"])[0,:]
+        # self.head = np.array(self.head_data["head"]["vc"])
+        # self.head_tri = np.array(self.head_data["head"]["tri"], dtype=int) - 1
+        # self.cortex_tri = np.array(self.head_data["cortex75K"]["tri"], dtype=int)[:, :] - 1
+
+    def rotate_dipole_moment(self, dipole_moment):
+        """
+        Rotate dipole moment vector such that it points in the direction of
+        the brain surface normal.
+        We assume that the pyramidal cells generating the dipole moments is
+        aligned with the z-axis.
+
+        For use when applying lead_field.
+        """
+        # TODO: Make better rotation function. This only uses z-component!
+        p_length = dipole_moment[2]
+        p_idx = self.return_closest_idx(self.dipole_pos)
+        n = self.cortex_normals[:, p_idx]
+        dipole_moment_rot = np.outer(n, p_length)
+
+        return dipole_moment_rot
+
+    def return_closest_idx(self, pos):
+        return np.argmin((self.cortex[0, :] - pos[0])**2 +
+                         (self.cortex[1, :] - pos[1])**2 +
+                         (self.cortex[2, :] - pos[2])**2)
+
+    def find_closest_electrode(self):
+        dists = (np.sqrt(np.sum((np.array(self.dipole_pos)[:, None] -
+                                 np.array(self.elecs[:3, :]))**2, axis=0)))
+        closest_electrode = np.argmin(dists)
+        min_dist = np.min(dists)
+        return min_dist, closest_electrode
+
+
+    def set_dipole_pos(self, dipole_pos=None):
+
+        if dipole_pos is None:
+            dipole_pos = self.dipole_pos_dict['motorsensory_cortex']
+        if type(dipole_pos) is str:
+            self.closest_vertex_idx = self.return_closest_idx(
+                self.dipole_pos_dict[dipole_pos])
+        else:
+            self.closest_vertex_idx = self.return_closest_idx(dipole_pos)
+
+        self.dipole_pos = self.cortex[:, self.closest_vertex_idx]
+        # print("Dipole pos: ", self.dipole_pos)
+        # print("Normal vector: ", self.cortex_normals[:, self.closest_vertex_idx])
+
+
+    def get_transformation_matrix(self, dipole_pos):
+        '''
+        Get linear response matrix mapping current dipole moment in [nA µm]
+        to EEG signal [pV] at EEG electrodes (n=231)
+
+        parameters
+        ----------
+        dipole_pos : Position of dipole. Can be either a string that
+            corresponds to entries in the dictionary self.dipole_pos_dict
+            or a list [x, y, z]
+
+        Returns
+        -------
+        response_matrix: ndarray
+            shape (231, 3) ndarray
+        '''
+
+        self.set_dipole_pos(dipole_pos)
+        return self.lead_field[:, self.closest_vertex_idx, :].T
