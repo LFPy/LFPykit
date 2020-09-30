@@ -290,7 +290,7 @@ class FourSphereVolumeConductor(object):
         multi_p, multi_p_locs = cell.get_multi_current_dipole_moments(
             timepoints)
         N_elec = self.rxyz.shape[0]
-        Ni, Nt, Nd = multi_p.shape
+        Ni, Nd, Nt = multi_p.shape
         potential = np.zeros((N_elec, Nt))
         for i in range(Ni):
             # p = multi_p[i].T  # QUICKFIX !!!!!!!!!!!!!!!!!!!!!!!!
@@ -999,10 +999,10 @@ class InfiniteVolumeConductor(object):
         multi_p, multi_p_locs = cell.get_multi_current_dipole_moments(
             timepoints=timepoints)
         N_elec = electrode_locs.shape[0]
-        Ni, Nt, Nd = multi_p.shape
+        Ni, Nd, Nt = multi_p.shape
         potentials = np.zeros((N_elec, Nt))
         for i in range(Ni):
-            p = multi_p[i].T  # QUICKFIX!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            p = multi_p[i]
             r = electrode_locs - multi_p_locs[i]
             pot = self.get_dipole_potential(p, r)
             potentials += pot
