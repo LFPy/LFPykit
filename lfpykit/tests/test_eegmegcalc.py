@@ -29,7 +29,7 @@ try:
 except ImportError:
     neuron_imported = False
 import lfpykit
-from lfpykit import CellGeometry, eegmegcalc
+from lfpykit import eegmegcalc
 
 
 class testMEG(unittest.TestCase):
@@ -513,14 +513,15 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                                    [10., 90., 300.],
                                    [-90, 50., 400.],
                                    [110.3, -100., 500.]])
-        cell = cell_w_synapse_from_sections(morphology)
+        cell = cell_w_synapse_from_sections(morphology,
+                                            rec_current_dipole_moment=True)
         cell.set_pos(x=0, y=0, z=100)
         t_point = [1, 100, -1]
 
         MD_4s = eegmegcalc.FourSphereVolumeConductor(
             electrode_locs, radii, sigmas)
         p, dipole_locs = cell.get_multi_current_dipole_moments(t_point)
-        Np, Nt, Nd = p.shape
+        Np, Nd, Nt = p.shape
         Ne = electrode_locs.shape[0]
         pot_MD = MD_4s.calc_potential_from_multi_dipoles(cell, t_point)
 
@@ -621,13 +622,13 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         morphology = neuron.h.SectionList()
         morphology.wholetree()
         electrode_locs = np.array([[0., 0., 10000.]])
-        cell, electrode = cell_w_synapse_from_sections_w_electrode(
+        cell, electrode, cdm = cell_w_synapse_from_sections_w_electrode(
             morphology, electrode_locs)
         sigma = 0.3
 
         MD_inf = eegmegcalc.InfiniteVolumeConductor(sigma)
         pot_MD = MD_inf.get_multi_dipole_potential(cell, electrode_locs)
-        pot_cb = electrode.LFP
+        pot_cb = electrode.data
 
         np.testing.assert_almost_equal(pot_MD, pot_cb)
         np.testing.assert_allclose(pot_MD, pot_cb, rtol=1E-4)
@@ -637,13 +638,13 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         morphology = os.path.join(
             LFPy.__path__[0], 'test', 'ball_and_sticks.hoc')
         electrode_locs = np.array([[0., 0., 10000.]])
-        cell, electrode = cell_w_synapse_from_sections_w_electrode(
+        cell, electrode, cdm = cell_w_synapse_from_sections_w_electrode(
             morphology, electrode_locs)
         sigma = 0.3
 
         MD_inf = eegmegcalc.InfiniteVolumeConductor(sigma)
         pot_MD = MD_inf.get_multi_dipole_potential(cell, electrode_locs)
-        pot_cb = electrode.LFP
+        pot_cb = electrode.data
 
         np.testing.assert_almost_equal(pot_MD, pot_cb)
         np.testing.assert_allclose(pot_MD, pot_cb, rtol=1E-3)
@@ -653,7 +654,7 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         morphology = os.path.join(
             LFPy.__path__[0], 'test', 'ball_and_sticks.hoc')
         electrode_locs = np.array([[0., 0., 10000.]])
-        cell, electrode = cell_w_synapse_from_sections_w_electrode(
+        cell, electrode, cdm = cell_w_synapse_from_sections_w_electrode(
             morphology, electrode_locs)
         sigma = 0.3
         t_point = [10, 100, 1000]
@@ -661,7 +662,7 @@ class testInfiniteVolumeConductor(unittest.TestCase):
         MD_inf = eegmegcalc.InfiniteVolumeConductor(sigma)
         pot_MD = MD_inf.get_multi_dipole_potential(
             cell, electrode_locs, t_point)
-        pot_cb = electrode.LFP[:, t_point]
+        pot_cb = electrode.data[:, t_point]
 
         np.testing.assert_almost_equal(pot_MD, pot_cb)
         np.testing.assert_allclose(pot_MD, pot_cb, rtol=1E-3)
@@ -765,14 +766,14 @@ class testOneSphereVolumeConductor(unittest.TestCase):
 
         # predict potential
         sphere = lfpykit.OneSphereVolumeConductor(
-            cell=get_cell_geometry_from_lfpy(cell),
+            cell=cell,
             r=r, R=R, sigma_i=sigma, sigma_o=sigma)
         M = sphere.get_transformation_matrix(n_max=100)
 
         # ground truth and tests
-        for i, x in enumerate(cell.xmid):
+        for i, x in enumerate(cell.x.mean(axis=-1)):
             dist = radius - x
-            dist[abs(dist) < cell.diam[i]] = cell.diam[i]
+            dist[abs(dist) < cell.d[i]] = cell.d[i]
             phi_gt = current / (4 * np.pi * sigma * abs(dist))
             np.testing.assert_almost_equal(M[:, i], phi_gt)
 
@@ -811,7 +812,7 @@ def decompose_dipole(P1):
     return p_rad, p_tan
 
 
-def cell_w_synapse_from_sections(morphology):
+def cell_w_synapse_from_sections(morphology, rec_current_dipole_moment=False):
     '''
     Make cell and synapse objects, set spike, simulate and return cell
     '''
@@ -838,7 +839,13 @@ def cell_w_synapse_from_sections(morphology):
     cell = LFPy.Cell(**cellParams)
     synapse = LFPy.Synapse(cell, **synapse_parameters)
     synapse.set_spike_times(np.array([1.]))
-    cell.simulate(rec_current_dipole_moment=True, rec_vmem=True)
+    if rec_current_dipole_moment:
+        probes = [LFPy.CurrentDipoleMoment(cell)]
+    else:
+        probes = []
+    cell.simulate(probes=probes, rec_vmem=True)
+    if rec_current_dipole_moment:
+        cell.current_dipole_moment = probes[0].data
     return cell
 
 
@@ -866,6 +873,7 @@ def cell_w_synapse_from_sections_w_electrode(morphology, electrode_locs):
                        }
     cell = LFPy.Cell(**cellParams)
     electrode = LFPy.RecExtElectrode(cell, **electrodeParams)
+    cdm = LFPy.CurrentDipoleMoment(cell)
 
     synapse_parameters = {'e': 0.,
                           'syntype': 'ExpSyn',
@@ -876,29 +884,5 @@ def cell_w_synapse_from_sections_w_electrode(morphology, electrode_locs):
 
     synapse = LFPy.Synapse(cell, **synapse_parameters)
     synapse.set_spike_times(np.array([1.]))
-    cell.simulate(
-        electrode=[electrode],
-        rec_current_dipole_moment=True,
-        rec_vmem=True)
-    return cell, electrode
-
-
-def get_cell_geometry_from_lfpy(cell):
-    '''
-    Get CellGeometry object from LFPy.Cell object
-
-    Parameters
-    ----------
-    cell: object
-        LFPy.Cell like object
-
-    Returns
-    -------
-    CellGeometry object
-    '''
-    cell_geometry = CellGeometry(
-        x=np.c_[cell.xstart, cell.xend],
-        y=np.c_[cell.ystart, cell.yend],
-        z=np.c_[cell.zstart, cell.zend],
-        d=cell.diam)
-    return cell_geometry
+    cell.simulate(probes=[electrode, cdm], rec_vmem=True)
+    return cell, electrode, cdm
