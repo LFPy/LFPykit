@@ -29,7 +29,7 @@ try:
 except ImportError:
     neuron_imported = False
 import lfpykit
-from lfpykit import CellGeometry, eegmegcalc
+from lfpykit import eegmegcalc
 
 
 class testMEG(unittest.TestCase):

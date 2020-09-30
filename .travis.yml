@@ -18,8 +18,9 @@ install:
 
   # Replace dep1 dep2 ... with your dependencies
   - conda config --add channels conda-forge
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pytest numpy scipy lfpy coveralls pytest-cov
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pytest numpy scipy neuron=*=mpi_mpich* coveralls pytest-cov pip
   - conda activate test-environment
+  - pip install git+https://github.com/LFPy/LFPy.git@2.2.dev0#egg=LFPy
   - python setup.py install
 
 script:
