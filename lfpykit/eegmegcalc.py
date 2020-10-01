@@ -1165,7 +1165,7 @@ class MEG(object):
         try:
             assert(current_dipole_moment.shape[0] == 3)
         except AssertionError:
-            raise AssertionError('current_dipole_moment.shape[1] != 3')
+            raise AssertionError('current_dipole_moment.shape[0] != 3')
         try:
             assert(dipole_location.shape == (3, ))
         except AssertionError:

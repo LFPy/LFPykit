@@ -1,4 +1,4 @@
 # pip requirements file
-numpy
+numpy>=1.15.2
 scipy
 MEAutility
