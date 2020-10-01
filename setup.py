@@ -27,6 +27,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     classifiers=[
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'License :: OSI Approved :: GNU General Public License (GPL)',
@@ -38,9 +39,9 @@ setuptools.setup(
         'Intended Audience :: Science/Research',
         'Development Status :: 2 - Pre-Alpha',
     ],
-    python_requires='>=3.7',
+    python_requires='>=3.6',
     install_requires=[
-        'numpy>=1.18',
+        'numpy>=1.15.2',
         'scipy',
         'meautility'
         ],
