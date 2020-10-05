@@ -23,11 +23,6 @@ try:
     LFPy_imported = True
 except ImportError:
     LFPy_imported = False
-try:
-    import neuron
-    neuron_imported = True
-except ImportError:
-    neuron_imported = False
 import lfpykit
 from lfpykit import eegmegcalc
 
@@ -662,79 +657,3 @@ def decompose_dipole(P1):
     fs = make_class_object(rz1, r_el)
     p_rad, p_tan = fs._decompose_dipole(P1)
     return p_rad, p_tan
-
-
-def cell_w_synapse_from_sections(morphology, rec_current_dipole_moment=False):
-    '''
-    Make cell and synapse objects, set spike, simulate and return cell
-    '''
-    cellParams = {
-        'morphology': morphology,
-        'cm': 1,
-        'Ra': 150,
-        'v_init': -65,
-        'passive': True,
-        'passive_parameters': {'g_pas': 1. / 30000, 'e_pas': -65},
-        'dt': 2**-6,
-        'tstart': -50,
-        'tstop': 50,
-        'delete_sections': False
-    }
-
-    synapse_parameters = {'e': 0.,
-                          'syntype': 'ExpSyn',
-                          'tau': 5.,
-                          'weight': .001,
-                          'record_current': True,
-                          'idx': 1}
-
-    cell = LFPy.Cell(**cellParams)
-    synapse = LFPy.Synapse(cell, **synapse_parameters)
-    synapse.set_spike_times(np.array([1.]))
-    if rec_current_dipole_moment:
-        probes = [LFPy.CurrentDipoleMoment(cell)]
-    else:
-        probes = []
-    cell.simulate(probes=probes, rec_vmem=True)
-    if rec_current_dipole_moment:
-        cell.current_dipole_moment = probes[0].data
-    return cell
-
-
-def cell_w_synapse_from_sections_w_electrode(morphology, electrode_locs):
-    '''
-    Make cell and synapse objects, set spike, simulate and return cell
-    '''
-    cellParams = {
-        'morphology': morphology,
-        'cm': 1,
-        'Ra': 150,
-        'v_init': -65,
-        'passive': True,
-        'passive_parameters': {'g_pas': 1. / 30000, 'e_pas': -65},
-        'dt': 2**-6,
-        'tstart': -50,
-        'tstop': 50,
-        'delete_sections': False
-    }
-
-    electrodeParams = {'sigma': 0.3,
-                       'x': electrode_locs[:, 0],
-                       'y': electrode_locs[:, 1],
-                       'z': electrode_locs[:, 2],
-                       }
-    cell = LFPy.Cell(**cellParams)
-    electrode = LFPy.RecExtElectrode(cell, **electrodeParams)
-    cdm = LFPy.CurrentDipoleMoment(cell)
-
-    synapse_parameters = {'e': 0.,
-                          'syntype': 'ExpSyn',
-                          'tau': 5.,
-                          'weight': .1,
-                          'record_current': True,
-                          'idx': cell.totnsegs - 1}
-
-    synapse = LFPy.Synapse(cell, **synapse_parameters)
-    synapse.set_spike_times(np.array([1.]))
-    cell.simulate(probes=[electrode, cdm], rec_vmem=True)
-    return cell, electrode, cdm
