@@ -398,11 +398,8 @@ class testFourSphereVolumeConductor(unittest.TestCase):
     def test_calc_potential01(self):
         '''test comparison between analytical 4S-model and FEM simulation'''
         # load data
-        fem_sim = np.load(
-            os.path.join(
-                lfpykit.__path__[0],
-                'tests',
-                'fem_mix_dip.npz'))
+        fem_sim = np.load(os.path.join(lfpykit.__path__[0], 'tests',
+                                       'fem_mix_dip.npz'))
         pot_fem = fem_sim['pot_fem']  # [µV]
         p = fem_sim['p'].T  # [nA µm]
         rz = fem_sim['rz']  # [µm]

@@ -46,10 +46,12 @@ setuptools.setup(
         'meautility'
         ],
     package_data={'lfpykit': [os.path.join('tests', '*.npz')]},
+    include_package_data=True,
     extras_require={'tests': ['pytest'],
                     'docs': ['sphinx', 'numpydoc', 'sphinx_rtd_theme',
                              'recommonmark'],
                     },
     dependency_links=[],
-    provides=['lfpykit']
+    provides=['lfpykit'],
+    zip_safe=False
 )
