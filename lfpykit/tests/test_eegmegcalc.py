@@ -178,7 +178,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
     test class eegmegcalc.FourSphereVolumeConductor
     """
 
-    def test_rz_params(self):
+    def test_rz_params_00(self):
         radii = [1., 2., 4., 8.]
         sigmas = [1., 2., 4., 8.]
         r_el = np.array([[1., 0., 7.]])
@@ -196,7 +196,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         with np.testing.assert_raises(RuntimeError):
             fs._rz_params(rz3)
 
-    def test_check_params00(self):
+    def test_check_params_00(self):
         '''Test that invalid radius values raises RuntimeError'''
         radii1 = [-1., 2., 4., 8.]
         radii2 = [1., .5, 4., 8.]
@@ -213,7 +213,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         with np.testing.assert_raises(RuntimeError):
             eegmegcalc.FourSphereVolumeConductor(r_el, radii4, sigmas)
 
-    def test_check_params01(self):
+    def test_check_params_01(self):
         '''Test that Error is raised if invalid entries in sigmas'''
         radii = [1., 2., 4., 10.]
         sigmas1 = [1., 'str', 4., 8.]
@@ -230,7 +230,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         with np.testing.assert_raises(RuntimeError):
             eegmegcalc.FourSphereVolumeConductor(r_el, radii, sigmas4)
 
-    def test_check_params02(self):
+    def test_check_params_02(self):
         '''Test that ValueError is raised if electrode outside head'''
         radii = [1., 2., 4., 10.]
         sigmas = [1., 2., 4., 8.]
@@ -241,13 +241,13 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         with np.testing.assert_raises(ValueError):
             eegmegcalc.FourSphereVolumeConductor(r_el2, radii, sigmas)
 
-    def test_decompose_dipole01(self):
+    def test_decompose_dipole_00(self):
         '''Test radial and tangential parts of dipole sums to dipole'''
         P1 = np.array([[1., 1., 1.]]).T
         p_rad, p_tan = decompose_dipole(P1)
         np.testing.assert_equal(p_rad + p_tan, P1)
 
-    def test_decompose_dipole02(self):
+    def test_decompose_dipole_01(self):
         '''Test radial and tangential parts of dipole sums to dipole'''
         radii = [88000, 90000, 95000, 100000]
         sigmas = [0.3, 1.5, 0.015, 0.3]
@@ -275,19 +275,19 @@ class testFourSphereVolumeConductor(unittest.TestCase):
             p_rads, p_tans = fs._decompose_dipole(ps)
             np.testing.assert_equal(p_rads + p_tans, ps)
 
-    def test_rad_dipole(self):
+    def test_rad_dipole_00(self):
         '''Test that radial part of decomposed dipole is correct'''
         P1 = np.array([[1., 1., 1.]]).T
         p_rad, p_tan = decompose_dipole(P1)
         np.testing.assert_equal(p_rad, np.array([[0., 0., 1.]]).T)
 
-    def test_tan_dipole(self):
+    def test_tan_dipole_00(self):
         '''Test that tangential part of decomposed dipole is correct'''
         P1 = np.array([[1., 1., 1.]]).T
         p_rad, p_tan = decompose_dipole(P1)
         np.testing.assert_equal(p_tan, np.array([[1., 1., 0.]]).T)
 
-    def test_calc_theta(self):
+    def test_calc_theta_00(self):
         '''Test theta: angle between rz and r'''
         rz1 = np.array([0., 0., 10.])
         r_el = np.array([[0., 0., 90.], [0., 0., -90.],
@@ -297,7 +297,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         np.testing.assert_almost_equal(theta, np.array(
             [0., np.pi, np.pi / 2, np.pi / 2, np.pi / 4]))
 
-    def test_calc_phi01(self):
+    def test_calc_phi_00(self):
         '''Test phi: azimuthal angle between rx and rxy'''
         rz1 = np.array([0., 0., 0.5])
         r_el = np.array([[0., 1., 0], [-1., -1., 1.],
@@ -314,7 +314,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                                                  [0., 0., 0.],
                                                  [0., 0., 0.]]))
 
-    def test_calc_phi02(self):
+    def test_calc_phi_01(self):
         '''Test phi: azimuthal angle between rx and rxy,
            check that theta is not NaN, due to round-off errors'''
         radii = [79000., 80000., 85000., 100000.]
@@ -341,7 +341,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
 
         np.testing.assert_equal(np.isnan(phi).any(), False)
 
-    def test_rad_sign(self):
+    def test_rad_sign_00(self):
         '''Test if radial dipole points inwards or outwards'''
         rz1 = np.array([0., 0., 70.])
         r_el = np.array([[0., 0., 90.]])
@@ -350,28 +350,28 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         s_vector = fs._sign_rad_dipole(P1)
         np.testing.assert_almost_equal(s_vector, np.array([1., -1.]))
 
-    def test_calc_vn(self):
+    def test_calc_vn_00(self):
         '''test that calc_vn gives correct values'''
         n = 1
         fs = make_simple_class_object()
         v1 = fs._calc_vn(n)
         np.testing.assert_almost_equal(v1, -4.75)
 
-    def test_calc_yn(self):
+    def test_calc_yn_00(self):
         '''test that calc_yn gives correct values'''
         n = 1
         fs = make_simple_class_object()
         y1 = fs._calc_yn(n)
         np.testing.assert_almost_equal(y1, -2.3875)
 
-    def test_calc_zn(self):
+    def test_calc_zn_00(self):
         '''test that calc_zn gives correct values'''
         n = 1
         fs = make_simple_class_object()
         z1 = fs._calc_zn(n)
         np.testing.assert_almost_equal(z1, -2.16574585635359)
 
-    def test_calc_potential(self):
+    def test_get_dipole_potential_00(self):
         '''test comparison between four-sphere model and model for
         infinite homogeneous space
         when sigma is constant and r4 goes to infinity'''
@@ -389,13 +389,13 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                            [0., 40., 0.]])
         four_s = eegmegcalc.FourSphereVolumeConductor(
             r_elec, radii, sigmas)
-        pots_4s = four_s.calc_potential(p, rz)
+        pots_4s = four_s.get_dipole_potential(p, rz)
         inf_s = eegmegcalc.InfiniteVolumeConductor(0.3)
         pots_inf = inf_s.get_dipole_potential(p, r_elec - rz)
 
         np.testing.assert_allclose(pots_4s, pots_inf, rtol=1e-6)
 
-    def test_calc_potential01(self):
+    def test_get_dipole_potential_01(self):
         '''test comparison between analytical 4S-model and FEM simulation'''
         # load data
         fem_sim = np.load(os.path.join(lfpykit.__path__[0], 'tests',
@@ -410,7 +410,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         fs = eegmegcalc.FourSphereVolumeConductor(
             ele_coords, radii, sigmas)
         k_mV_to_muV = 1e3
-        pot_analytical = fs.calc_potential(
+        pot_analytical = fs.get_dipole_potential(
             p, rz).reshape(
             (len(ele_coords),)).reshape(
             pot_fem.shape) * k_mV_to_muV
@@ -418,7 +418,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
             (np.max(np.abs(pot_fem)))
         np.testing.assert_array_less(global_error, 0.01)
 
-    def test_calc_potential02(self):
+    def test_get_dipole_potential_02(self):
         '''Test radial and tangential parts of dipole sums to dipole'''
         radii = [88000, 90000, 95000, 100000]
         sigmas = [0.3, 1.5, 0.015, 0.3]
@@ -447,7 +447,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         for i in range(len(p_locs)):
             fs = eegmegcalc.FourSphereVolumeConductor(
                 el_locs[i], radii, sigmas)
-            phi = fs.calc_potential(dips[i].T, p_locs[i])
+            phi = fs.get_dipole_potential(dips[i].T, p_locs[i])
             if i == 0:
                 phi0 = phi[0][0]
             else:
@@ -482,7 +482,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         for i in range(len(p_locs)):
             fs = eegmegcalc.FourSphereVolumeConductor(
                 el_locs[i], radii, sigmas)
-            phi = fs.calc_potential(dips[i].T, p_locs[i])
+            phi = fs.get_dipole_potential(dips[i].T, p_locs[i])
 
             M = fs.get_transformation_matrix(p_locs[i])
             np.testing.assert_allclose(M @ dips[i].T, phi)

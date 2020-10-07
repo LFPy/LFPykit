@@ -66,18 +66,18 @@ class FourSphereVolumeConductor(object):
     Compute extracellular potential from current dipole moment in four-sphere
     head model:
 
-    >>> from lfpykit import FourSphereVolumeConductor
+    >>> from lfpykit.eegmegcalc import FourSphereVolumeConductor
     >>> import numpy as np
     >>> radii = [79000., 80000., 85000., 90000.]  # [µm]
     >>> sigmas = [0.3, 1.5, 0.015, 0.3]  # [S/m]
     >>> r_electrodes = np.array([[0., 0., 90000.], [0., 85000., 0.]]) # [µm]
-    >>> rz = np.array([0., 0., 78000.])  # [µm]
     >>> sphere_model = FourSphereVolumeConductor(r_electrodes, radii,
     >>>                                          sigmas)
     >>> # current dipole moment
-    >>> p = np.array([[10., 10., 10.]]*10) # 10 timesteps [nA µm]
+    >>> p = np.array([[10.]*10, [10.]*10, [10.]*10]) # 10 timesteps [nA µm]
+    >>> dipole_location = np.array([0., 0., 78000.])  # [µm]
     >>> # compute potential
-    >>> sphere_model.calc_potential(p, rz)  # [mV]
+    >>> sphere_model.calc_potential(p, dipole_location)  # [mV]
     array([[1.06247669e-08, 1.06247669e-08, 1.06247669e-08, 1.06247669e-08,
             1.06247669e-08, 1.06247669e-08, 1.06247669e-08, 1.06247669e-08,
             1.06247669e-08, 1.06247669e-08],
@@ -175,16 +175,17 @@ class FourSphereVolumeConductor(object):
         # compute theta angle between rzloc and rxyz
         self._theta = self._calc_theta()
 
-    def calc_potential(self, p, rz):
+    def get_dipole_potential(self, p, dipole_location):
         """
-        Return electric potential from current dipole moment p.
+        Return electric potential from current dipole moment ``p`` in
+        location ``dipole_location`` in  locations ``r_electrodes``
 
         Parameters
         ----------
         p: ndarray, dtype=float
             Shape (3, n_timesteps) array containing the x,y,z components of the
             current dipole moment in units of (nA*µm) for all timesteps.
-        rz: ndarray, dtype=float
+        dipole_location: ndarray, dtype=float
             Shape (3, ) array containing the position of the current dipole in
             cartesian coordinates. Units of [µm].
 
@@ -197,7 +198,7 @@ class FourSphereVolumeConductor(object):
 
         """
 
-        self._rz_params(rz)
+        self._rz_params(dipole_location)
         n_contacts = self.r.shape[0]
         n_timesteps = p.shape[1]
 
@@ -219,7 +220,7 @@ class FourSphereVolumeConductor(object):
         pot_tot = pot_rad + pot_tan
         return pot_tot
 
-    def get_transformation_matrix(self, rz):
+    def get_transformation_matrix(self, dipole_location):
         '''
         Get linear response matrix mapping current dipole moment in [nA µm]
         located in location `rz` to extracellular potential in [mV]
@@ -227,7 +228,7 @@ class FourSphereVolumeConductor(object):
 
         parameters
         ----------
-        rz: ndarray, dtype=float
+        dipole_location: ndarray, dtype=float
             Shape (3, ) array containing the position of the current dipole in
             cartesian coordinates. Units of [µm].
 
@@ -236,7 +237,7 @@ class FourSphereVolumeConductor(object):
         response_matrix: ndarray
             shape (n_contacts, 3) ndarray
         '''
-        return self.calc_potential(np.eye(3), rz)
+        return self.get_dipole_potential(np.eye(3), dipole_location)
 
     def _decompose_dipole(self, p):
         """
@@ -821,7 +822,6 @@ class InfiniteVolumeConductor(object):
     Examples
     --------
     Computing the potential from dipole moment valid in the far field limit.
-    Theta correspond to the dipole alignment angle from the vertical z-axis:
 
     >>> from lfpykit.eegmegcalc import InfiniteVolumeConductor
     >>> import numpy as np
@@ -838,7 +838,8 @@ class InfiniteVolumeConductor(object):
 
     def get_dipole_potential(self, p, r):
         """
-        Return electric potential from current dipole moment
+        Return electric potential from current dipole moment ``p`` in
+        locations ``r`` relative to dipole
 
         Parameters
         ----------
@@ -846,14 +847,14 @@ class InfiniteVolumeConductor(object):
             Shape (3, n_timesteps) array containing the x,y,z components of the
             current dipole moment in units of (nA*µm) for all timesteps
         r: ndarray, dtype=float
-            Shape (n_contacts, 3) array contaning the displacement vectors
+            Shape (n_contacts, 3) array containing the displacement vectors
             from dipole location to measurement location
 
         Returns
         -------
         potential: ndarray, dtype=float
             Shape (n_contacts, n_timesteps) array containing the electric
-            potential at contact point(s) FourSphereVolumeConductor.r in units
+            potential at contact point(s) ``r`` in units
             of [mV] for all timesteps of current dipole moment p
 
         """
@@ -988,8 +989,8 @@ class MEG(object):
     def get_transformation_matrix(self, dipole_location):
         '''
         Get linear response matrix mapping current dipole moment in [nA µm]
-        located in location `dipole_location` to magnetic field
-        :math:`\\mathbf{H}` in units of (nA/µm)
+        located in location ``dipole_location` to magnetic field
+        :math:`\\mathbf{H}` in units of (nA/µm) at ``sensor_locations``
 
         parameters
         ----------
