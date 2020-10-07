@@ -362,30 +362,34 @@ class TestSuite(unittest.TestCase):
         sigma = 0.3
         r = np.array([1, 0, 2])
         # all point sources
-        el0 = lfp.RecExtElectrode(cell=cell,
-                                  x=r[0], y=r[1], z=r[2],
-                                  sigma=sigma,
-                                  method='pointsource')
+        el0 = lfp.PointSourcePotential(cell=cell,
+                                       x=np.array([r[0]]),
+                                       y=np.array([r[1]]),
+                                       z=np.array([r[2]]),
+                                       sigma=sigma)
         M0 = el0.get_transformation_matrix()
 
         # all line sources
-        el1 = lfp.RecExtElectrode(cell=cell,
-                                  x=r[0], y=r[1], z=r[2],
-                                  sigma=sigma,
-                                  method='linesource')
+        el1 = lfp.LineSourcePotential(cell=cell,
+                                      x=np.array([r[0]]),
+                                      y=np.array([r[1]]),
+                                      z=np.array([r[2]]),
+                                      sigma=sigma)
         M1 = el1.get_transformation_matrix()
 
-        # vary which index is treated as root
+        # vary which index is treated as point
         ids = np.arange(cell.totnsegs)
         for i in range(cell.totnsegs):
             el = lfp.RecExtElectrode(cell=cell,
-                                     x=r[0], y=r[1], z=r[2],
+                                     x=r[0],
+                                     y=r[1],
+                                     z=r[2],
                                      sigma=sigma,
                                      method='root_as_point',
                                      rootinds=np.array([i]))
             M = el.get_transformation_matrix()
 
-            np.testing.assert_allclose(M0[0, i], M[0, i])
+            np.testing.assert_almost_equal(M0[0, i], M[0, i])
             np.testing.assert_equal(M1[0, ids != i], M[0, ids != i])
 
         # multiple roots
