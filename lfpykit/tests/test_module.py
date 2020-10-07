@@ -386,11 +386,10 @@ class TestSuite(unittest.TestCase):
             M = el.get_transformation_matrix()
 
             np.testing.assert_allclose(M0[0, i], M[0, i])
-            np.testing.assert_equal(M1[0, ids != i],
-                                    M[0, ids != i])
+            np.testing.assert_equal(M1[0, ids != i], M[0, ids != i])
 
         # multiple roots
-        for i in range(cell.totnsegs-1):
+        for i in range(cell.totnsegs - 1):
             rootinds = np.array([i, i + 1])
             notroots = np.ones(cell.totnsegs, dtype=bool)
             notroots[rootinds] = False
@@ -402,8 +401,7 @@ class TestSuite(unittest.TestCase):
             M = el.get_transformation_matrix()
 
             np.testing.assert_allclose(M0[0, rootinds], M[0, rootinds])
-            np.testing.assert_equal(M1[0, notroots],
-                                    M[0, notroots])
+            np.testing.assert_equal(M1[0, notroots], M[0, notroots])
 
     def test_RecMEAElectrode_00(self):
         """test RecMEAElectrode implementation,
