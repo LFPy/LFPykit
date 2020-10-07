@@ -48,7 +48,6 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.mathjax',
     'numpydoc',
-    # 'recommonmark',
     'm2r2'
 ]
 

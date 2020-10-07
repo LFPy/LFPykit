@@ -517,6 +517,9 @@ class RecExtElectrode(LinearModel):
         Flag for verbose output, i.e., print more information
     seedvalue: int
         random seed when finding random position on contact with r > 0
+    **kwargs:
+        Additional keyword arguments parsed to `RecExtElectrode.lfp_method()`
+        which is determined by `method` parameter.
 
     Examples
     --------
@@ -883,13 +886,13 @@ class RecExtElectrode(LinearModel):
             else:
                 pass
 
-            M = self._lfp_el_pos_calc_dist()
+            M = self._lfp_el_pos_calc_dist(**self.kwargs)
 
             if self.verbose:
                 print('calculations finished, %s, %s' % (str(self),
                                                          str(self.cell)))
         else:
-            M = self._loop_over_contacts()
+            M = self._loop_over_contacts(**self.kwargs)
             if self.verbose:
                 print('calculations finished, %s, %s' % (str(self),
                                                          str(self.cell)))
