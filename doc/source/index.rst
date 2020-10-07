@@ -109,6 +109,14 @@ class :class:`eegmegcalc.MEG`
     :show-inheritance:
     :undoc-members:
 
+class :class:`eegmegcalc.NYHeadModel`
+=====================================
+.. autoclass:: lfpykit.eegmegcalc.NYHeadModel
+    :members:
+    :show-inheritance:
+    :undoc-members:
+
+
 
 Indices and tables
 ==================

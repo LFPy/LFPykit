@@ -1063,12 +1063,15 @@ class MEG(object):
 class NYHeadModel(object):
     """
     Main class for computing EEG signals from current dipole
-    moment :math:`\\mathbf{P}` in New York Head Model [1, 2]
+    moment :math:`\\mathbf{P}` in New York Head Model [1]_, [2]_
 
-    Assumes units of nA * um for current dipole moment, and pV for EEG
-    NOTE: The original unit of the New York model current dipole moment
-    is (probably?) mA * m, and the EEG output is V
-    LFPy's current dipole moments have units nA*um, giving EEGs in pV.
+    Assumes units of nA * um for current dipole moment, and mV for the EEG
+
+    Notes
+    -----
+    The original unit of the New York model current dipole moment
+    is (probably?) mA*m, and the EEG output is V
+    LFPykit's current dipole moments have units nA*um, and EEGs in mV.
 
     Parameters
     ----------
@@ -1084,11 +1087,11 @@ class NYHeadModel(object):
     References
     ----------
     .. [1] Huang, Parra, Haufe (2016) The New York Head—A precise standardized
-       volume conductor model for EEG source localization and tES targeting.
-       Neuroimage 140:150–162. doi: 10.1016/j.neuroimage.2015.12.019
-       [2] Naess et al. (2020) Biophysical modeling of the neural origin of EEG
-       and MEG signals. bioRxiv 2020.07.01.181875.
-       doi: 10.1101/2020.07.01.181875
+        volume conductor model for EEG source localization and tES targeting.
+        Neuroimage 140:150–162. doi: 10.1016/j.neuroimage.2015.12.019
+    .. [2] Naess et al. (2020) Biophysical modeling of the neural origin of EEG
+        and MEG signals. bioRxiv 2020.07.01.181875.
+        doi: 10.1101/2020.07.01.181875
 
     Examples
     --------
