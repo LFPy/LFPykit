@@ -1215,4 +1215,4 @@ class NYHeadModel(object):
             shape (231, 3) ndarray
         '''
         self.set_dipole_pos(dipole_pos)
-        return self.lead_field[:, self.closest_vertex_idx, :].T / 1E6
+        return self.lead_field[:, self.closest_vertex_idx, :].T * 1E-9
