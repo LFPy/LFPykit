@@ -355,6 +355,56 @@ class TestSuite(unittest.TestCase):
 
         np.testing.assert_allclose(V_ex, V_gt)
 
+    def test_RecExtElectrode_04(self):
+        """test RecExcElectrode implementation,
+        method='root_as_point' and rootinds parameter"""
+        cell = get_cell(n_seg=4)
+        sigma = 0.3
+        r = np.array([1, 0, 2])
+        # all point sources
+        el0 = lfp.RecExtElectrode(cell=cell,
+                                  x=r[0], y=r[1], z=r[2],
+                                  sigma=sigma,
+                                  method='pointsource')
+        M0 = el0.get_transformation_matrix()
+
+        # all line sources
+        el1 = lfp.RecExtElectrode(cell=cell,
+                                  x=r[0], y=r[1], z=r[2],
+                                  sigma=sigma,
+                                  method='linesource')
+        M1 = el1.get_transformation_matrix()
+
+        # vary which index is treated as root
+        ids = np.arange(cell.totnsegs)
+        for i in range(cell.totnsegs):
+            el = lfp.RecExtElectrode(cell=cell,
+                                     x=r[0], y=r[1], z=r[2],
+                                     sigma=sigma,
+                                     method='root_as_point',
+                                     rootinds=np.array([i]))
+            M = el.get_transformation_matrix()
+
+            np.testing.assert_allclose(M0[0, i], M[0, i])
+            np.testing.assert_equal(M1[0, ids != i],
+                                    M[0, ids != i])
+
+        # multiple roots
+        for i in range(cell.totnsegs-1):
+            rootinds = np.array([i, i + 1])
+            notroots = np.ones(cell.totnsegs, dtype=bool)
+            notroots[rootinds] = False
+            el = lfp.RecExtElectrode(cell=cell,
+                                     x=r[0], y=r[1], z=r[2],
+                                     sigma=sigma,
+                                     method='root_as_point',
+                                     rootinds=rootinds)
+            M = el.get_transformation_matrix()
+
+            np.testing.assert_allclose(M0[0, rootinds], M[0, rootinds])
+            np.testing.assert_equal(M1[0, notroots],
+                                    M[0, notroots])
+
     def test_RecMEAElectrode_00(self):
         """test RecMEAElectrode implementation,
         method='pointsource' with same conductivity in all layers"""

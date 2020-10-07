@@ -238,7 +238,6 @@ class FourSphereVolumeConductor(object):
         '''
         return self.calc_potential(np.eye(3), rz)
 
-
     def _decompose_dipole(self, p):
         """
         Decompose current dipole moment vector in radial and tangential terms

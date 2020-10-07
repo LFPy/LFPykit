@@ -399,7 +399,8 @@ def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
     return 1 / (4 * np.pi * sigma * deltaS) * mapping
 
 
-def calc_lfp_root_as_point(cell, x, y, z, sigma, r_limit):
+def calc_lfp_root_as_point(cell, x, y, z, sigma, r_limit,
+                           rootinds=np.array([0])):
     """Calculate electric field potential using the line-source method,
     root is treated as point/sphere source
 
@@ -417,11 +418,9 @@ def calc_lfp_root_as_point(cell, x, y, z, sigma, r_limit):
         extracellular conductivity in S/m
     r_limit : np.ndarray
         minimum distance to source current for each compartment.
+    rootinds: ndarray, dtype=int
+        indices of root segment(s). Defaults to np.array([0])
     """
-    # get compartment indices for root segment (to be treated as point
-    # sources)
-    rootinds = np.array([0])
-
     # some variables for h, r2, r_root calculations
     xstart = cell.x[:, 0]
     xmid = cell.x[rootinds, :].mean(axis=-1)
