@@ -1445,7 +1445,6 @@ class OneSphereVolumeConductor(LinearModel):
     point charge in an dielectric sphere embedded in dielectric media [1]_,
     which is mathematically equivalent to a current source in conductive media.
 
-
     This class is a `LinearModel` subclass that defines a 2D linear response
     matrix :math:`\\mathbf{M}` between transmembrane current array
     :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
@@ -1785,3 +1784,212 @@ class OneSphereVolumeConductor(LinearModel):
         # measurement location
 
         return M
+
+
+class LaminarCurrentSourceDensity(LinearModel):
+    """
+    Facilitates calculations of the ground truth Current Source Density (CSD)
+    in cylindrical volumes aligned with the z-axis based on [1]_ and [2]_.
+
+    The implementation assumes piecewise linear current sources similar to
+    LineSourcePotential, and accounts for the fraction of each segment's length
+    within each volume, see Eq. 11 in [2].
+
+    This class is a `LinearModel` subclass that defines a 2D linear response
+    matrix :math:`\\mathbf{M}` between transmembrane current array
+    :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
+    corresponding CSD
+    :math:`\\mathbf{C}` [nA/µm^3] as
+
+    .. math:: \\mathbf{C} = \\mathbf{M} \\mathbf{I}
+
+    The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps)
+    with unit [nA], and each row indexed by :math:`j` of
+    :math:`\\mathbf{C}` represents the CSD in each volume for every time step
+    as the sum of currents divided by the volume.
+
+    Parameters
+    ----------
+    cell: object or None
+        `CellGeometry` instance or similar.
+    z: ndarray, dtype=float
+        shape (n_volumes, 2) array of lower and upper edges of each volume
+        along the z-axis in units of [µm]. The lower edge value must be below
+        the upper edge value.
+    r: ndarray, dtype=float
+        shape (n_volumes, ) array with assumed radius of each cylindrical
+        volume. Each radius must be greater than zero, and in units of [µm]
+
+    References
+    ----------
+    .. [1] Pettersen KH, Hagen E, Einevoll GT (2008) Estimation of population
+       firing rates and current source densities from laminar electrode
+       recordings. J Comput Neurosci (2008) 24:291–313.
+       DOI 10.1007/s10827-007-0056-4
+    .. [2] Hagen E, Fossum JC, Pettersen KH, Alonso JM, Swadlow HA, Einevoll GT
+       (2017) Journal of Neuroscience, 37(20):5123-5143.
+       DOI: https://doi.org/10.1523/JNEUROSCI.2715-16.2017
+
+    Raises
+    ------
+    AttributeError
+        inputs ``z`` and ``r`` must be ndarrays of correct shape etc.
+    """
+    def __init__(self, cell, z, r):
+        super().__init__(cell=cell)
+
+        # check input parameters
+        for varname, var in zip(['z', 'r'], [z, r]):
+            try:
+                assert(type(var) is np.ndarray)
+            except AssertionError:
+                raise AssertionError('type({}) != np.ndarray'.format(varname))
+        try:
+            assert(z.ndim == 2)
+        except AssertionError:
+            raise AssertionError('z.ndim != 2')
+        try:
+            assert(np.all(np.diff(z, axis=-1) > 0))
+        except AssertionError:
+            raise AssertionError('lower edge <= upper edge')
+        try:
+            assert(z.shape[1] == 2)
+        except AssertionError:
+            raise AssertionError('z.shape[1] != 2')
+
+        try:
+            assert(r.ndim == 1)
+        except AssertionError:
+            raise AssertionError('r.ndim != 1')
+        try:
+            assert(r.shape[0] == z.shape[0])
+        except AssertionError:
+            raise AssertionError('r.shape[0] != z.shape[0]')
+        try:
+            assert(np.all(r > 0))
+        except AssertionError:
+            raise AssertionError('r must be greater than 0')
+
+        self.z = z
+        self.r = r
+
+        # lateral offset of each volume from z-axis
+        self.lateral_offset = np.array([0., 0.])
+
+    def get_transformation_matrix(self):
+        '''
+        Get linear response matrix
+
+        Returns
+        -------
+        response_matrix: ndarray
+            shape (n_volumes, n_seg) ndarray
+
+        Raises
+        ------
+        AttributeError
+            if `cell is None`
+        '''
+        if self.cell is None:
+            raise AttributeError(
+                '{}.cell is None'.format(self.__class__.__name__))
+        # initialize transformation matrix
+        M = np.zeros((self.z.shape[0], self.cell.totnsegs))
+
+        # compute radial distance of segment start and end points to z-axis
+        R = np.sqrt((self.cell.x - self.lateral_offset[0])**2 +
+                    (self.cell.y - self.lateral_offset[1])**2)
+
+        # Volume of each cylinder
+        V = np.pi * self.r**2 * np.diff(self.z, axis=-1).flatten()
+
+        # iterate over volumes:
+        for i, (z_i, dz_i, r_i) in enumerate(zip(self.z,
+                                                 np.diff(self.z, axis=-1),
+                                                 self.r)):
+            # start point in [z_i, z_i + dz_i]
+            ii0 = self.cell.z[:, 0] >= z_i[0]
+            jj0 = self.cell.z[:, 0] < z_i[1]
+
+            # end point in [z_i, z_i + dz_i)
+            ii1 = self.cell.z[:, 1] >= z_i[0]
+            jj1 = self.cell.z[:, 1] < z_i[1]
+
+            # start and end point in [0, r_i]
+            kk0 = R[:, 0] <= r_i
+            kk1 = R[:, 1] <= r_i
+
+            # start point in volume
+            ll0 = ii0 & jj0 & kk0
+
+            # end point in volume
+            ll1 = ii1 & jj1 & kk1
+
+            # trivial case, start and end point of segment lies within volume
+            inds = ll0 & ll1
+            M[i, inds] = 1.
+
+            # start point of segment lies within volume
+            inds = ll0 & (~ll1)
+
+            # find coordinate where line source intersects with boundary
+            r2 = np.array([0, 0, r_i])
+            r3 = np.array([r_i, r_i, r_i])
+
+            z2 = np.array([z_i[0], z_i[1], z_i[0]])
+            z3 = np.array([z_i[0], z_i[1], z_i[1]])
+            # iterate over lower, right, upper boundary
+            for k in np.where(inds)[0]:
+                for ll in range(3):
+                    Pr, Pz, hit = _PrPz(r0=R[k, 0], z0=self.cell.z[k, 0],
+                                        r1=R[k, 1], z1=self.cell.z[k, 1],
+                                        r2=r2[ll], z2=z2[ll],
+                                        r3=r3[ll], z3=z3[ll])
+                    if hit:
+                        L = np.sqrt((Pr - R[k, 0])**2
+                                    + (Pz - self.cell.z[k, 0])**2)
+                        M[i, k] = L / self.cell.length[k]
+                        continue
+
+            # end point of segment lies within volume
+            inds = (~ll0) & ll1
+
+            for k in np.where(inds)[0]:
+                for ll in range(3):
+                    Pr, Pz, hit = _PrPz(r0=R[k, 0], z0=self.cell.z[k, 0],
+                                        r1=R[k, 1], z1=self.cell.z[k, 1],
+                                        r2=r2[ll], z2=z2[ll],
+                                        r3=r3[ll], z3=z3[ll])
+                    if hit:
+                        L = np.sqrt((Pr - R[k, 1])**2
+                                    + (Pz - self.cell.z[k, 1])**2)
+                        M[i, k] = L / self.cell.length[k]
+                        continue
+
+        for i, v in enumerate(V):
+            M[i, :] = M[i, :] / v
+
+        return M
+
+
+def _PrPz(r0, z0, r1, z1, r2, z2, r3, z3):
+    '''intersection point for infinite lines'''
+    # intersection point (Pr, Pz)
+    denom = ((r0 - r1) * (z2 - z3) - (z0 - z1) * (r2 - r3))
+    with np.errstate(divide='ignore', invalid='ignore'):
+        Pr = (((r0 * z1 - z0 * r1) * (r2 - r3)
+               - (r0 - r1) * (r2 * z3 - r3 * z2)) / denom)
+        Pz = (((r0 * z1 - z0 * r1) * (z2 - z3)
+               - (z0 - z1) * (r2 * z3 - r3 * z2)) / denom)
+    # check if intersection point lies on lines
+    if (Pr >= r0) & (Pr <= r1) & (Pz >= z0) & (Pz <= z1):
+        hit = True
+    elif (Pr <= r0) & (Pr >= r1) & (Pz >= z0) & (Pz <= z1):
+        hit = True
+    elif (Pr >= r0) & (Pr <= r1) & (Pz <= z0) & (Pz >= z1):
+        hit = True
+    elif (Pr <= r0) & (Pr >= r1) & (Pz <= z0) & (Pz >= z1):
+        hit = True
+    else:
+        hit = False
+    return Pr, Pz, hit

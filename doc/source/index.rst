@@ -83,6 +83,12 @@ class :class:`OneSphereVolumeConductor`
     :show-inheritance:
     :undoc-members:
 
+class :class:`LaminarCurrentSourceDensity`
+==========================================
+.. autoclass:: lfpykit.LaminarCurrentSourceDensity
+    :members:
+    :show-inheritance:
+    :undoc-members:
 
 Module :mod:`lfpykit.eegmegcalc`
 ================================
