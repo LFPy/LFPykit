@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 """
 import os
-import sys
+import math
 from scipy.special import lpmv
 import numpy as np
 from warnings import warn
@@ -1270,7 +1270,8 @@ class NYHeadModel(object):
     ----------
     nyhead_file: str [optional]
         Location of file containing New York Head Model. If not found,
-        the user is asked if it should be downloaded
+        the user is asked if it should be downloaded from
+        https://www.parralab.org/nyhead/sa_nyhead.mat
 
     See also
     --------
@@ -1287,22 +1288,20 @@ class NYHeadModel(object):
     Computing EEG from dipole moment.
 
     >>> from lfpykit.eegmegcalc import NYHeadModel
-    >>> import numpy as np
 
     >>> nyhead = NYHeadModel()
 
-    >>> dipole_position = 'parietal_lobe' # predefined example location
-    >>> M = nyhead.get_transformation_matrix(dipole_position)
+    >>> nyhead.set_dipole_pos('parietal_lobe') # predefined example location
+    >>> M = nyhead.get_transformation_matrix()
 
     >>> # Rotate to be along normal vector of cortex
-    >>> p = nyhead.rotate_dipole_moment(np.array([[0.], [0.], [1.]]))
+    >>> p = nyhead.rotate_dipole_to_surface_normal(p)
     >>> eeg = M @ p  # [pV]
 
     """
 
     def __init__(self, nyhead_file="sa_nyhead.mat"):
-        " Initialize class NYHeadModel "
-
+        """ Initialize class NYHeadModel """
 
         # Some example locations in NY Head model
         self.dipole_pos_dict = {
@@ -1313,10 +1312,15 @@ class NYHeadModel(object):
         }
 
         self._load_head_model(nyhead_file)
+        self.dipole_pos = None
+        self.cortex_normal_vec = None
 
     def _load_head_model(self, nyhead_file):
-
-        import h5py
+        try:
+            import h5py
+        except ModuleNotFoundError:
+            raise ImportError("The package h5py was not found. It is needed for "
+                           "loading the New York Head model.")
 
         self.head_file = os.path.abspath(nyhead_file)
         if not os.path.isfile(self.head_file):
@@ -1353,29 +1357,91 @@ class NYHeadModel(object):
         # self.head_tri = np.array(self.head_data["head"]["tri"], dtype=int) - 1
         # self.cortex_tri = np.array(self.head_data["cortex75K"]["tri"], dtype=int)[:, :] - 1
 
-    def rotate_dipole_moment(self, dipole_moment):
-        """
-        Rotate dipole moment vector such that it points in the direction of
-        the brain surface normal.
-        We assume that the pyramidal cells generating the dipole moments is
-        aligned with the z-axis.
 
-        For use when applying lead_field.
+    def rotate_dipole_to_surface_normal(self, p, orig_ax_vec=[0, 0, 1]):
         """
-        # TODO: Make better rotation function. This only uses z-component!
-        p_length = dipole_moment[2]
-        p_idx = self.return_closest_idx(self.dipole_pos)
-        n = self.cortex_normals[:, p_idx]
-        dipole_moment_rot = np.outer(n, p_length)
+        Returns rotated dipole moment, p_rot, oriented along the normal
+        vector of the cortex at the dipole location
 
-        return dipole_moment_rot
+        Parameters
+        ----------
+        p : np.ndarray of length (3, num_timesteps)
+            Current dipole moment from neural simulation [p_x(t), p_y(t), p_z(t)].
+            If z-axis is the depth axis of cortex in the original neural simulation
+            p_x(t) and p_y(t) will typically be small, and orig_ax_vec = [0, 0, 1]
+        orig_ax_vec : np.ndarray or list of length (3)
+            Original surface vector of cortex in the neural simulation. If
+            depth axis of cortex is the z-axis, orig_ax_vec = [0, 0, 1].
+
+        References
+        ----------
+        See: https://en.wikipedia.org/wiki/Rotation_matrix
+        under "Rotation matrix from axis and angle"
+        """
+
+        if self.cortex_normal_vec is None:
+            raise RuntimeError("Dipole location must first be set by " +
+                               "set_dipole_pos(loc) function.")
+
+        surface_vec = self.cortex_normal_vec
+        # rotation angle
+        surface_vec = surface_vec / np.linalg.norm(surface_vec)
+        orig_ax_vec = orig_ax_vec / np.linalg.norm(orig_ax_vec)
+
+        phi = math.acos(np.dot(orig_ax_vec, surface_vec))
+        cos_th = np.cos(phi)
+        sin_th = np.sin(phi)
+
+        # axis to rotate around
+        rot_axis = np.cross(orig_ax_vec, surface_vec)
+        axis_len = np.linalg.norm(rot_axis)
+        if axis_len > 1e-9:
+            rot_axis /= axis_len
+        x_, y_, z_ = rot_axis
+        # calculate rotation matrix
+        R = np.zeros((3, 3))
+        R[0, 1] = -z_*sin_th + (1.0 - cos_th)*x_*y_
+        R[0, 2] = +y_*sin_th + (1.0 - cos_th)*x_*z_
+        R[1, 0] = +z_*sin_th + (1.0 - cos_th)*x_*y_
+        R[1, 2] = -x_*sin_th + (1.0 - cos_th)*y_*z_
+        R[2, 0] = -y_*sin_th + (1.0 - cos_th)*x_*z_
+        R[2, 1] = +x_*sin_th + (1.0 - cos_th)*y_*z_
+        R[0, 0] = cos_th + x_**2 * (1 - cos_th)
+        R[1, 1] = cos_th + y_**2 * (1 - cos_th)
+        R[2, 2] = cos_th + z_**2 * (1 - cos_th)
+
+        return R @ p
 
     def return_closest_idx(self, pos):
+        """
+        Returns the index of the closest vertex in the brain to a given
+        position (in mm).
+
+        Parameters
+        ----------
+        pos : array of length (3)
+            [x, y, z] of a location in the brain, given in mm, and not in um
+            which is the default position unit in LFPy
+        Returns
+        -------
+        idx : int
+            Index of the vertex in the brain that is closest to the given
+            location
+        """
         return np.argmin((self.cortex[0, :] - pos[0])**2 +
                          (self.cortex[1, :] - pos[1])**2 +
                          (self.cortex[2, :] - pos[2])**2)
 
     def find_closest_electrode(self):
+        """
+        Returns minimal distance (mm) and closest electrode idx to
+        dipole location specified in self.dipole_pos.
+
+        """
+        if self.dipole_pos is None:
+            raise RuntimeError("Dipole location must first be set by " +
+                               "set_dipole_pos(loc) function.")
+
         dists = (np.sqrt(np.sum((np.array(self.dipole_pos)[:, None] -
                                  np.array(self.elecs[:3, :]))**2, axis=0)))
         closest_electrode = np.argmin(dists)
@@ -1384,22 +1450,40 @@ class NYHeadModel(object):
 
 
     def set_dipole_pos(self, dipole_pos=None):
+        """
+        Sets the dipole location in the brain
 
+        Parameters
+        ----------
+        dipole_pos: None, str or array of length (3) [x, y, z) (mm)
+            Location of the dipole. If no argument is given
+            (or dipole_pos=None), a location, 'motorsensory_cortex',
+            from self.dipole_pos_dict is used. If dipole_pos is an
+            array of length 3, the closest vertex in the brain will be
+            set as the dipole location.
+
+        """
         if dipole_pos is None:
-            dipole_pos = self.dipole_pos_dict['motorsensory_cortex']
-        if type(dipole_pos) is str:
-            self.closest_vertex_idx = self.return_closest_idx(
-                self.dipole_pos_dict[dipole_pos])
-        else:
-            self.closest_vertex_idx = self.return_closest_idx(dipole_pos)
+            dipole_pos_ = self.dipole_pos_dict['motorsensory_cortex']
+        elif type(dipole_pos) is str:
+            if dipole_pos not in self.dipole_pos_dict:
+                raise RuntimeError("When dipole_pos is string, location must"
+                                   "be defined in self.dipole_pos_dict. "
+                                   "Choose one of: {}".format(self.dipole_pos_dict.keys()))
+            dipole_pos_ = self.dipole_pos_dict[dipole_pos]
+        elif type(dipole_pos) not in [list, np.ndarray]:
+            raise RuntimeError("dipole_pos argument type is not valid. "
+                               "Must be None, str, or array")
+        elif type(dipole_pos) in [list, np.ndarray] and len(dipole_pos) != 3:
+            raise RuntimeError("If dipole_pos argument is array it must "
+                               "have length 3")
 
+        self.closest_vertex_idx = self.return_closest_idx(dipole_pos_)
         self.dipole_pos = self.cortex[:, self.closest_vertex_idx]
-        # print("Dipole pos: ", self.dipole_pos)
-        # print("Normal vector: ", self.cortex_normals[:, self.closest_vertex_idx])
+        self.cortex_normal_vec = self.cortex_normals[:, self.closest_vertex_idx]
 
-
-    def get_transformation_matrix(self, dipole_pos):
-        '''
+    def get_transformation_matrix(self):
+        """
         Get linear response matrix mapping current dipole moment in [nA µm]
         to EEG signal [pV] at EEG electrodes (n=231)
 
@@ -1413,7 +1497,6 @@ class NYHeadModel(object):
         -------
         response_matrix: ndarray
             shape (231, 3) ndarray
-        '''
+        """
 
-        self.set_dipole_pos(dipole_pos)
         return self.lead_field[:, self.closest_vertex_idx, :].T
