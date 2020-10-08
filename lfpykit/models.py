@@ -31,12 +31,15 @@ class LinearModel(object):
 
     LinearModel only creates a mapping that returns the currents themselves.
     The class is suitable as a base class for other linear model
-    implementations, see for example class CurrentDipoleMoment
+    implementations, see for example class CurrentDipoleMoment or
+    PointSourcePotential
 
     Parameters
     ----------
     cell: object
         ``lfpykit.CellGeometry`` instance or similar.
+        Can also be set to ``None`` which allows setting the attribute ``cell``
+        after class instantiation.
     '''
 
     def __init__(self, cell):
@@ -50,7 +53,15 @@ class LinearModel(object):
         -------
         response_matrix: ndarray
             shape (n_seg, n_seg) ndarray
+
+        Raises
+        ------
+        AttributeError
+            if `cell is None`
         '''
+        if self.cell is None:
+            raise AttributeError(
+                '{}.cell is None'.format(self.__class__.__name__))
         return np.eye(self.cell.totnsegs)
 
 
@@ -127,7 +138,15 @@ class CurrentDipoleMoment(LinearModel):
         -------
         response_matrix: ndarray
             shape (3, n_seg) ndarray
+
+        Raises
+        ------
+        AttributeError
+            if `cell is None`
         '''
+        if self.cell is None:
+            raise AttributeError(
+                '{}.cell is None'.format(self.__class__.__name__))
         return np.stack([self.cell.x.mean(axis=-1),
                          self.cell.y.mean(axis=-1),
                          self.cell.z.mean(axis=-1)])
@@ -273,7 +292,15 @@ class PointSourcePotential(LinearModel):
         -------
         response_matrix: ndarray
             shape (n_coords, n_seg) ndarray
+
+        Raises
+        ------
+        AttributeError
+            if `cell is None`
         '''
+        if self.cell is None:
+            raise AttributeError(
+                '{}.cell is None'.format(self.__class__.__name__))
         M = np.empty((self.x.size, self.cell.totnsegs))
         if self.cell.d.ndim == 2:
             r_limit = self.cell.d.mean(axis=-1) / 2
@@ -434,7 +461,15 @@ class LineSourcePotential(LinearModel):
         -------
         response_matrix: ndarray
             shape (n_coords, n_seg) ndarray
+
+        Raises
+        ------
+        AttributeError
+            if `cell is None`
         '''
+        if self.cell is None:
+            raise AttributeError(
+                '{}.cell is None'.format(self.__class__.__name__))
         M = np.empty((self.x.size, self.cell.totnsegs))
         if self.cell.d.ndim == 2:
             r_limit = self.cell.d.mean(axis=-1) / 2
@@ -517,6 +552,9 @@ class RecExtElectrode(LinearModel):
         Flag for verbose output, i.e., print more information
     seedvalue: int
         random seed when finding random position on contact with r > 0
+    **kwargs:
+        Additional keyword arguments parsed to `RecExtElectrode.lfp_method()`
+        which is determined by `method` parameter.
 
     Examples
     --------
@@ -876,20 +914,28 @@ class RecExtElectrode(LinearModel):
         -------
         response_matrix: ndarray
             shape (n_contacts, n_seg) ndarray
+
+        Raises
+        ------
+        AttributeError
+            if `cell is None`
         '''
+        if self.cell is None:
+            raise AttributeError(
+                '{}.cell is None'.format(self.__class__.__name__))
         if self.n is not None and self.N is not None and self.r is not None:
             if self.n <= 1:
                 raise ValueError("n = %i must be larger that 1" % self.n)
             else:
                 pass
 
-            M = self._lfp_el_pos_calc_dist()
+            M = self._lfp_el_pos_calc_dist(**self.kwargs)
 
             if self.verbose:
                 print('calculations finished, %s, %s' % (str(self),
                                                          str(self.cell)))
         else:
-            M = self._loop_over_contacts()
+            M = self._loop_over_contacts(**self.kwargs)
             if self.verbose:
                 print('calculations finished, %s, %s' % (str(self),
                                                          str(self.cell)))
@@ -1345,7 +1391,15 @@ class RecMEAElectrode(RecExtElectrode):
         -------
         response_matrix: ndarray
             shape (n_contacts, n_seg) ndarray
+
+        Raises
+        ------
+        AttributeError
+            if `cell is None`
         '''
+        if self.cell is None:
+            raise AttributeError(
+                '{}.cell is None'.format(self.__class__.__name__))
 
         self._test_cell_extent()
 
@@ -1609,7 +1663,7 @@ class OneSphereVolumeConductor(LinearModel):
 
         Raises
         ------
-        Exception
+        AttributeError
             if `cell is None`
 
         Examples
@@ -1689,11 +1743,8 @@ class OneSphereVolumeConductor(LinearModel):
 
         """
         if self.cell is None:
-            # perhaps this can be solved with a decorator
-            raise Exception('OneSphereVolumeConductor was instantiated with '
-                            'cell=None: get_transformation_matrix() '
-                            'can not be used!'
-                            )
+            raise AttributeError(
+                '{}.cell is None'.format(self.__class__.__name__))
 
         # midpoint position of compartments in spherical coordinates
         radius = np.sqrt(self.cell.x.mean(axis=-1)**2

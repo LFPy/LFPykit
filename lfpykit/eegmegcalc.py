@@ -15,6 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 """
 import os
+import sys
 import math
 from scipy.special import lpmv
 import numpy as np
@@ -87,7 +88,6 @@ class FourSphereVolumeConductor(object):
             2.39290752e-10, 2.39290752e-10, 2.39290752e-10, 2.39290752e-10,
             2.39290752e-10, 2.39290752e-10]])
     """
-
     def __init__(self,
                  r_electrodes,
                  radii=[79000., 80000., 85000., 90000.],
@@ -240,65 +240,6 @@ class FourSphereVolumeConductor(object):
             shape (n_contacts, 3) ndarray
         '''
         return self.calc_potential(np.eye(3), rz)
-
-    def calc_potential_from_multi_dipoles(self, cell, timepoints=None):
-        """
-        Return electric potential from multiple current dipoles from cell.
-
-        By multiple current dipoles we mean the dipoles computed from all
-        axial currents in a neuron simulation, typically two
-        axial currents per compartment, except for the root compartment.
-
-        Parameters
-        ----------
-        cell: LFPy Cell object, LFPy.Cell
-        timepoints: ndarray, dtype=int
-            array of timepoints at which you want to compute
-            the electric potential. Defaults to None. If not given,
-            all simulation timesteps will be included.
-
-        Returns
-        -------
-        potential: ndarray, dtype=float
-            Shape (n_contacts, n_timesteps) array containing the electric
-            potential at contact point(s) electrode_locs in units
-            of [mV] for all timesteps of neuron simulation.
-
-        Examples
-        --------
-        Compute extracellular potential from neuron simulation in
-        four-sphere head model. Instead of simplifying the neural activity to
-        a single dipole, we compute the contribution from every multi dipole
-        from all axial currents in neuron simulation:
-
-        >>> import LFPy
-        >>> from lfpykit import FourSphereVolumeConductor
-        >>> import numpy as np
-        >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
-        >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,100),
-        >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
-        >>> syn.set_spike_times(np.mgrid[20:100:20])
-        >>> cell.simulate(rec_vmem=True, rec_imem=False)
-        >>> radii = [200., 300., 400., 500.]
-        >>> sigmas = [0.3, 1.5, 0.015, 0.3]
-        >>> electrode_locs = np.array([[50., -50., 250.]])
-        >>> timepoints = np.array([0,100])
-        >>> MD_4s = FourSphereVolumeConductor(radii,
-        >>>                                   sigmas,
-        >>>                                   electrode_locs)
-        >>> phi = MD_4s.calc_potential_from_multi_dipoles(cell,
-        >>>                                               timepoints)
-        """
-        multi_p, multi_p_locs = cell.get_multi_current_dipole_moments(
-            timepoints)
-        N_elec = self.rxyz.shape[0]
-        Ni, Nt, Nd = multi_p.shape
-        potential = np.zeros((N_elec, Nt))
-        for i in range(Ni):
-            # p = multi_p[i].T  # QUICKFIX !!!!!!!!!!!!!!!!!!!!!!!!
-            pot = self.calc_potential(multi_p[i], multi_p_locs[i])
-            potential += pot
-        return potential
 
     def _decompose_dipole(self, p):
         """
@@ -941,75 +882,6 @@ class InfiniteVolumeConductor(object):
         '''
         return self.get_dipole_potential(np.eye(3), r)
 
-    def get_multi_dipole_potential(
-            self,
-            cell,
-            electrode_locs,
-            timepoints=None):
-        """
-        Return electric potential from multiple current dipoles from cell
-
-        The multiple current dipoles corresponds to dipoles computed from all
-        axial currents in a neuron simulation, typically two
-        axial currents per compartment, excluding the root compartment.
-
-        Parameters
-        ----------
-        cell: LFPy.Cell object
-        electrode_locs: ndarray, dtype=float
-            Shape (n_contacts, 3) array containing n_contacts electrode
-            locations in cartesian coordinates in units of [µm].
-            All ``r_el`` in electrode_locs must be placed so that ``|r_el|`` is
-            less than or equal to scalp radius and larger than
-            the distance between dipole and sphere
-            center: ``|rz| < |r_el| <= radii[3]``.
-        timepoints: ndarray, dtype=int
-            array of timepoints at which you want to compute
-            the electric potential. Defaults to None. If not given,
-            all simulation timesteps will be included.
-
-        Returns
-        -------
-        potential: ndarray, dtype=float
-            Shape (n_contacts, n_timesteps) array containing the electric
-            potential at contact point(s) electrode_locs in units
-            of [mV] for all timesteps of neuron simulation
-
-        Examples
-        --------
-        Compute extracellular potential from neuron simulation in
-        four-sphere head model. Instead of simplifying the neural activity to
-        a single dipole, we compute the contribution from every multi dipole
-        from all axial currents in neuron simulation:
-
-        >>> import LFPy
-        >>> from lfpykit.eegmegcalc import InfiniteVolumeConductor
-        >>> import numpy as np
-        >>> cell = LFPy.Cell('PATH/TO/MORPHOLOGY', extracellular=False)
-        >>> syn = LFPy.Synapse(cell, idx=cell.get_closest_idx(0,0,100),
-        >>>                   syntype='ExpSyn', e=0., tau=1., weight=0.001)
-        >>> syn.set_spike_times(np.mgrid[20:100:20])
-        >>> cell.simulate(rec_vmem=True, rec_imem=False)
-        >>> sigma = 0.3
-        >>> timepoints = np.array([10, 20, 50, 100])
-        >>> electrode_locs = np.array([[50., -50., 250.]])
-        >>> MD_INF = InfiniteVolumeConductor(sigma)
-        >>> phi = MD_INF.get_multi_dipole_potential(cell, electrode_locs,
-        >>>                                         timepoints = timepoints)
-        """
-
-        multi_p, multi_p_locs = cell.get_multi_current_dipole_moments(
-            timepoints=timepoints)
-        N_elec = electrode_locs.shape[0]
-        Ni, Nt, Nd = multi_p.shape
-        potentials = np.zeros((N_elec, Nt))
-        for i in range(Ni):
-            p = multi_p[i].T  # QUICKFIX!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            r = electrode_locs - multi_p_locs[i]
-            pot = self.get_dipole_potential(p, r)
-            potentials += pot
-        return potentials
-
 
 class MEG(object):
     """
@@ -1099,7 +971,6 @@ class MEG(object):
     AssertionError
         If dimensionality of sensor_locations is wrong
     """
-
     def __init__(self, sensor_locations, mu=4 * np.pi * 1E-7):
         """
         Initialize class MEG
@@ -1167,7 +1038,7 @@ class MEG(object):
         try:
             assert(current_dipole_moment.shape[0] == 3)
         except AssertionError:
-            raise AssertionError('current_dipole_moment.shape[1] != 3')
+            raise AssertionError('current_dipole_moment.shape[0] != 3')
         try:
             assert(dipole_location.shape == (3, ))
         except AssertionError:
@@ -1189,82 +1060,19 @@ class MEG(object):
 
         return H
 
-    def calculate_H_from_iaxial(self, cell):
-        """
-        Computes the magnetic field in space from axial currents computed from
-        membrane potential values and axial resistances of multicompartment
-        cells.
-
-        See [1]_ for details on the biophysics governing magnetic fields from
-        axial currents.
-
-        Parameters
-        ----------
-        cell: object
-            LFPy.Cell-like object. Must have attribute vmem containing recorded
-            membrane potentials in units of mV
-
-        References
-        ----------
-        .. [1] Blagoev et al. (2007) Modelling the magnetic signature of
-            neuronal tissue. NeuroImage 37 (2007) 137–148
-            DOI: 10.1016/j.neuroimage.2007.04.033
-
-        Examples
-        --------
-        Define cell object, create synapse, compute current dipole moment:
-
-        >>> import LFPy, os, numpy as np, matplotlib.pyplot as plt
-        >>> from lfpykit.eegmegcalc import MEG
-        >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
-        >>>                                          'ball_and_sticks.hoc'),
-        >>>                  passive=True)
-        >>> cell.set_pos(0., 0., 0.)
-        >>> syn = LFPy.Synapse(cell, idx=0, syntype='ExpSyn', weight=0.01,
-        >>>                    record_current=True)
-        >>> syn.set_spike_times_w_netstim()
-        >>> cell.simulate(rec_vmem=True)
-        >>> # Instantiate the MEG object, compute and plot the magnetic
-        >>> # signal in a sensor location:
-        >>> sensor_locations = np.array([[1E4, 0, 0]])
-        >>> meg = MEG(sensor_locations)
-        >>> H = meg.calculate_H_from_iaxial(cell)
-        >>> plt.subplot(311)
-        >>> plt.plot(cell.tvec, cell.somav)
-        >>> plt.subplot(312)
-        >>> plt.plot(cell.tvec, syn.i)
-        >>> plt.subplot(313)
-        >>> plt.plot(cell.tvec, H[0])
-        >>> plt.show()
-
-        Returns
-        -------
-        H: ndarray, dtype=float
-            shape (n_locations x 3 x n_timesteps) array with x,y,z-components
-            of the magnetic field :math:`\\mathbf{H}` in units of (nA/µm)
-        """
-        i_axial, d_vectors, pos_vectors = cell.get_axial_currents_from_vmem()
-        R = self.sensor_locations
-        H = np.zeros((R.shape[0], 3, cell.tvec.size))
-
-        for i, R_ in enumerate(R):
-            for i_, d_, r_ in zip(i_axial, d_vectors, pos_vectors):
-                r_rel = R_ - r_
-                H[i, :, :] += (i_.reshape((-1, 1))
-                               @ np.cross(d_, r_rel).reshape((1, -1))).T \
-                    / (4 * np.pi * np.sqrt((r_rel**2).sum())**3)
-        return H
-
 
 class NYHeadModel(object):
     """
     Main class for computing EEG signals from current dipole
-    moment :math:`\\mathbf{P}` in New York Head Model [1, 2]
+    moment :math:`\\mathbf{P}` in New York Head Model [1]_, [2]_
 
-    Assumes units of nA * um for current dipole moment, and pV for EEG
-    NOTE: The original unit of the New York model current dipole moment
-    is (probably?) mA * m, and the EEG output is V
-    LFPy's current dipole moments have units nA*um, giving EEGs in pV.
+    Assumes units of nA * um for current dipole moment, and mV for the EEG
+
+    Notes
+    -----
+    The original unit of the New York model current dipole moment
+    is (probably?) mA*m, and the EEG output is V
+    LFPykit's current dipole moments have units nA*um, and EEGs in mV.
 
     Parameters
     ----------
@@ -1280,8 +1088,12 @@ class NYHeadModel(object):
 
     References
     ----------
-    .. [1] Huang, Parra, Haufe (2016) Neuroimage 140:150–162.
-       [2] Naess et al. (2020) https://www.biorxiv.org/content/10.1101/2020.07.01.181875v1
+    .. [1] Huang, Parra, Haufe (2016) The New York Head—A precise standardized
+        volume conductor model for EEG source localization and tES targeting.
+        Neuroimage 140:150–162. doi: 10.1016/j.neuroimage.2015.12.019
+    .. [2] Naess et al. (2020) Biophysical modeling of the neural origin of EEG
+        and MEG signals. bioRxiv 2020.07.01.181875.
+        doi: 10.1101/2020.07.01.181875
 
     Examples
     --------
@@ -1295,8 +1107,9 @@ class NYHeadModel(object):
     >>> M = nyhead.get_transformation_matrix()
 
     >>> # Rotate to be along normal vector of cortex
-    >>> p = nyhead.rotate_dipole_to_surface_normal(p)
-    >>> eeg = M @ p  # [pV]
+    >>> p = nyhead.rotate_dipole_to_surface_normal(np.array([[0.], [0.], [1.]]))
+    >>> eeg = M @ p  # [mV]
+
 
     """
 
@@ -1312,30 +1125,30 @@ class NYHeadModel(object):
         }
 
         self._load_head_model(nyhead_file)
+
+        # These will be set by the "set_dipole_pos" function:
         self.dipole_pos = None
         self.cortex_normal_vec = None
+        self.closest_vertex_idx = None
 
     def _load_head_model(self, nyhead_file):
         try:
             import h5py
         except ModuleNotFoundError:
-            raise ImportError("The package h5py was not found. It is needed for "
-                           "loading the New York Head model.")
+            raise ImportError("The package h5py was not found. "
+                              "It is needed for loading New York Head model.")
 
         self.head_file = os.path.abspath(nyhead_file)
         if not os.path.isfile(self.head_file):
-            import sys
-            if sys.version < '3':
-                from urllib2 import urlopen
-            else:
-                from urllib.request import urlopen
+            from urllib.request import urlopen
             import ssl
             print("New York head model not found: %s" % self.head_file)
-            yn = input("Should it be downloaded (710 MB)? [y/n]")
+            yn = input("Should it be downloaded (710 MB)? [y/n]: ")
             if yn == 'y':
                 print("Now downloading. This might take a while ...")
                 nyhead_url = 'https://www.parralab.org/nyhead/sa_nyhead.mat'
-                u = urlopen(nyhead_url, context=ssl._create_unverified_context())
+                u = urlopen(nyhead_url,
+                            context=ssl._create_unverified_context())
                 localFile = open(self.head_file, 'wb')
                 localFile.write(u.read())
                 localFile.close()
@@ -1347,15 +1160,18 @@ class NYHeadModel(object):
         self.head_data = h5py.File(self.head_file, 'r')["sa"]
         self.cortex = np.array(self.head_data["cortex75K"]["vc"])
         self.lead_field = np.array(self.head_data["cortex75K"]["V_fem"])
-        self.lead_field_normal = np.array(self.head_data["cortex75K"]["V_fem_normal"])
+        self.lead_field_normal = np.array(
+            self.head_data["cortex75K"]["V_fem_normal"])
         self.cortex_normals = np.array(self.head_data["cortex75K"]["normals"])
         self.elecs = np.array(self.head_data["locs_3D"])
 
         # Other properties that might be used for plotting
         # self.sulicmap = np.array(f["sa"]["cortex75K"]["sulcimap"])[0,:]
         # self.head = np.array(self.head_data["head"]["vc"])
-        # self.head_tri = np.array(self.head_data["head"]["tri"], dtype=int) - 1
-        # self.cortex_tri = np.array(self.head_data["cortex75K"]["tri"], dtype=int)[:, :] - 1
+        # self.head_tri = np.array(self.head_data["head"]["tri"],
+        #                          dtype=int) - 1
+        # self.cortex_tri = np.array(
+        #     self.head_data["cortex75K"]["tri"], dtype=int)[:, :] - 1
 
 
     def rotate_dipole_to_surface_normal(self, p, orig_ax_vec=[0, 0, 1]):
@@ -1365,13 +1181,19 @@ class NYHeadModel(object):
 
         Parameters
         ----------
-        p : np.ndarray of length (3, num_timesteps)
+        p : np.ndarray of size (3, num_timesteps)
             Current dipole moment from neural simulation [p_x(t), p_y(t), p_z(t)].
             If z-axis is the depth axis of cortex in the original neural simulation
             p_x(t) and p_y(t) will typically be small, and orig_ax_vec = [0, 0, 1]
         orig_ax_vec : np.ndarray or list of length (3)
             Original surface vector of cortex in the neural simulation. If
             depth axis of cortex is the z-axis, orig_ax_vec = [0, 0, 1].
+
+        Returns
+        -------
+        p_rot : np.ndarray of size (3, num_timesteps)
+            Rotated current dipole moment, oriented along cortex normal vector
+            at the dipole location
 
         References
         ----------
@@ -1382,15 +1204,13 @@ class NYHeadModel(object):
         if self.cortex_normal_vec is None:
             raise RuntimeError("Dipole location must first be set by " +
                                "set_dipole_pos(loc) function.")
-
         surface_vec = self.cortex_normal_vec
-        # rotation angle
-        surface_vec = surface_vec / np.linalg.norm(surface_vec)
-        orig_ax_vec = orig_ax_vec / np.linalg.norm(orig_ax_vec)
 
+        surface_vec /= np.linalg.norm(surface_vec)
+        orig_ax_vec /= np.linalg.norm(orig_ax_vec)
+
+        # rotation angle
         phi = math.acos(np.dot(orig_ax_vec, surface_vec))
-        cos_th = np.cos(phi)
-        sin_th = np.sin(phi)
 
         # axis to rotate around
         rot_axis = np.cross(orig_ax_vec, surface_vec)
@@ -1398,7 +1218,10 @@ class NYHeadModel(object):
         if axis_len > 1e-9:
             rot_axis /= axis_len
         x_, y_, z_ = rot_axis
+
         # calculate rotation matrix
+        cos_th = np.cos(phi)
+        sin_th = np.sin(phi)
         R = np.zeros((3, 3))
         R[0, 1] = -z_*sin_th + (1.0 - cos_th)*x_*y_
         R[0, 2] = +y_*sin_th + (1.0 - cos_th)*x_*z_
@@ -1448,7 +1271,6 @@ class NYHeadModel(object):
         min_dist = np.min(dists)
         return min_dist, closest_electrode
 
-
     def set_dipole_pos(self, dipole_pos=None):
         """
         Sets the dipole location in the brain
@@ -1482,21 +1304,17 @@ class NYHeadModel(object):
         self.dipole_pos = self.cortex[:, self.closest_vertex_idx]
         self.cortex_normal_vec = self.cortex_normals[:, self.closest_vertex_idx]
 
+
     def get_transformation_matrix(self):
         """
-        Get linear response matrix mapping current dipole moment in [nA µm]
-        to EEG signal [pV] at EEG electrodes (n=231)
-
-        parameters
-        ----------
-        dipole_pos : Position of dipole. Can be either a string that
-            corresponds to entries in the dictionary self.dipole_pos_dict
-            or a list [x, y, z]
+        Get linear response matrix mapping from current dipole moment [nA µm]
+        to EEG signal [mV] at EEG electrodes (n=231)
 
         Returns
         -------
         response_matrix: ndarray
             shape (231, 3) ndarray
+
         """
 
-        return self.lead_field[:, self.closest_vertex_idx, :].T
+        return self.lead_field[:, self.closest_vertex_idx, :].T * 1E-9
