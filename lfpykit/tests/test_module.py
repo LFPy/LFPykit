@@ -664,3 +664,160 @@ class TestSuite(unittest.TestCase):
 
         MEA = lfp.RecMEAElectrode(stick, **electrodeParams)
         MEA._test_cell_extent()
+
+    def test_LaminarCurrentSourceDensity_00(self):
+        '''test LaminarCurrentSourceDensity implementation
+        2 segs, 2 volumes, each segment in each volume'''
+        cell = get_cell(n_seg=3)
+        cell.z = cell.z * 10
+        cell._set_length()
+
+        h = 10.
+        r = 10.
+        V = np.pi * r**2 * h
+        M_gt = np.array([[1., 0., 0.],
+                         [0., 1., 0.]]) / V
+
+        csd = lfp.LaminarCurrentSourceDensity(
+            cell=cell,
+            z=np.array([[i * h, (i + 1) * h] for i in range(2)]),
+            r=np.array([r, r]))
+        M = csd.get_transformation_matrix()
+
+        np.testing.assert_allclose(M_gt, M)
+
+    def test_LaminarCurrentSourceDensity_01(self):
+        '''test LaminarCurrentSourceDensity implementation'''
+        cell = get_cell(n_seg=4)
+        cell.z = cell.z * 10
+        cell.z -= 10
+        cell._set_length()
+
+        h = 10.
+        r = 10.
+        V = np.pi * r**2 * h
+        M_gt = np.array([[0., 1., 0., 0.],
+                         [0., 0., 1., 0.]]) / V
+
+        csd = lfp.LaminarCurrentSourceDensity(
+            cell=cell,
+            z=np.array([[i * h, (i + 1) * h] for i in range(2)]),
+            r=np.array([r, r]))
+        M = csd.get_transformation_matrix()
+
+        np.testing.assert_allclose(M_gt, M)
+
+    def test_LaminarCurrentSourceDensity_02(self):
+        '''test LaminarCurrentSourceDensity implementation'''
+        cell = get_cell(n_seg=4)
+        cell.z = cell.z * 10
+        cell.z -= 5
+        cell._set_length()
+
+        h = 10.
+        r = 10.
+        V = np.pi * r**2 * h
+        M_gt = np.array([[0.5, 0.5, 0., 0.],
+                         [0., 0.5, 0.5, 0.]]) / V
+
+        csd = lfp.LaminarCurrentSourceDensity(
+            cell=cell,
+            z=np.array([[i * h, (i + 1) * h] for i in range(2)]),
+            r=np.array([r, r]))
+        M = csd.get_transformation_matrix()
+
+        np.testing.assert_allclose(M_gt, M)
+
+    def test_LaminarCurrentSourceDensity_3(self):
+        '''test LaminarCurrentSourceDensity implementation'''
+        cell = get_cell(n_seg=3)
+        cell.z = cell.z * 10
+
+        cell.z -= .1
+        cell._set_length()
+
+        h = 10.
+        r = 10.
+        V = np.pi * r**2 * h
+        M_gt = np.array([[0.99, 0.01, 0.],
+                         [0.0, 0.99, 0.01]]) / V
+
+        csd = lfp.LaminarCurrentSourceDensity(
+            cell=cell,
+            z=np.array([[i * h, (i + 1) * h] for i in range(2)]),
+            r=np.array([r, r]))
+        M = csd.get_transformation_matrix()
+
+        np.testing.assert_allclose(M_gt, M)
+
+    def test_LaminarCurrentSourceDensity_4(self):
+        '''test LaminarCurrentSourceDensity implementation'''
+        cell = get_cell(n_seg=4)
+        cell.z = cell.z * 10
+        cell.z += 2.5
+        cell._set_length()
+
+        h = 10.
+        r = 10.
+        V = np.pi * r**2 * h
+        M_gt = np.array([[0.75, 0.0, 0., 0.],
+                         [0.25, 0.75, 0., 0.]]) / V
+
+        csd = lfp.LaminarCurrentSourceDensity(
+            cell=cell,
+            z=np.array([[i * h, (i + 1) * h] for i in range(2)]),
+            r=np.array([r, r]))
+        M = csd.get_transformation_matrix()
+
+        np.testing.assert_allclose(M_gt, M)
+
+    def test_LaminarCurrentSourceDensity_05(self):
+        '''test LaminarCurrentSourceDensity implementation
+
+        lateral offset segmens
+        '''
+        cell = get_cell(n_seg=4)
+        cell.z = cell.z * 10
+        cell.x[1, 1] += 20
+        cell.x[2:, ] += 20
+        cell._set_length()
+
+        h = 10.
+        r = 10.
+        V = np.pi * r**2 * h
+        M_gt = np.array([[1., 0., 0., 0.],
+                         [0., 0.5, 0., 0.]]) / V
+
+        csd = lfp.LaminarCurrentSourceDensity(
+            cell=cell,
+            z=np.array([[i * h, (i + 1) * h] for i in range(2)]),
+            r=np.array([r, r]))
+        M = csd.get_transformation_matrix()
+
+        np.testing.assert_allclose(M_gt, M)
+
+    def test_LaminarCurrentSourceDensity_06(self):
+        '''test LaminarCurrentSourceDensity implementation
+
+        lateral and vertical offset of segments
+        '''
+        cell = get_cell(n_seg=4)
+        cell.z = cell.z * 10
+        cell.z += 5.
+        cell.x[1, 1] += 20
+        cell.x[2:, ] += 20
+        cell._set_length()
+
+        h = 10.
+        r = 10.
+        V = np.pi * r**2 * h
+        M_gt = np.array([[0.5, 0., 0., 0.],
+                         [0.5, 0.5, 0., 0.]]) / V
+
+        csd = lfp.LaminarCurrentSourceDensity(
+            cell=cell,
+            z=np.array([[i * h, (i + 1) * h] for i in range(2)]),
+            r=np.array([r, r]))
+        M = csd.get_transformation_matrix()
+
+        np.testing.assert_allclose(M_gt, M)

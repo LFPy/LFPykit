@@ -146,7 +146,8 @@ class FourSphereVolumeConductor(object):
         the brain, closer to the center than any measurement location."""
         self._rzloc = rz
         self._rz = np.sqrt(np.sum(rz ** 2))
-        self._z = self._rzloc / self._rz
+        with np.errstate(invalid='ignore'):
+            self._z = self._rzloc / self._rz
         if self._rz == 0:
             raise RuntimeError('Placing dipole in center of head model '
                                'causes division by zero.')
