@@ -1314,7 +1314,7 @@ class NYHeadModel(object):
         if loc_error > 2:
             raise RuntimeWarning("Large dipole location error! "
                                  "Given loc: {}; Closest vertex: {}".format(
-                                    dipole_pos_, self.dipole_pos))
+                                dipole_pos_, self.dipole_pos))
 
         self.cortex_normal_vec = self.cortex_normals[:, self.vertex_idx]
 
