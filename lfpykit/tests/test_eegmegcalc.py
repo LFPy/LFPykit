@@ -645,8 +645,7 @@ class testNYHeadModel(unittest.TestCase):
         nyhead = eegmegcalc.NYHeadModel()
         nyhead.set_dipole_pos()
         M = nyhead.get_transformation_matrix()
-        np.testing.assert_equal(M, (231, 3))
-
+        np.testing.assert_equal(M.shape, (231, 3))
 
     def test_NYH_locations(self):
         nyhead = eegmegcalc.NYHeadModel()
@@ -658,6 +657,33 @@ class testNYHeadModel(unittest.TestCase):
             dipole_pos = [100, 100, 100]
             nyhead.set_dipole_pos(dipole_pos)
 
+    def test_NYH_dip_rotations(self):
+        nyhead = eegmegcalc.NYHeadModel()
+
+        ## Test that nothing is rotated when original axis equal new axis
+        nyhead.set_dipole_pos()
+        p1 = [0.1, 0.1, 1.0]
+        p1_ = nyhead.rotate_dipole_to_surface_normal(p1, nyhead.cortex_normal_vec)
+        np.testing.assert_almost_equal(p1, p1_)
+
+        ## Test that vector has been rotated, but length of vector is same
+        for _ in range(10):
+            p1 = np.random.uniform(0, 1, size=3)
+            p_rot = nyhead.rotate_dipole_to_surface_normal(p1)
+            p1_len = np.linalg.norm(p1)
+            p_rot_len = np.linalg.norm(p_rot)
+
+            # Has been rotated:
+            np.testing.assert_array_less(np.dot(p1 / p1_len, p_rot / p_rot_len), 1)
+
+            # Has same length:
+            np.testing.assert_almost_equal(p1_len, p_rot_len)
+
+        ## Test known rotation
+        p2 = np.array([0.0, 0.0, 1.2])
+        nyhead.cortex_normal_vec = np.array([0.0, 1.0, 0.0])
+        p2_rot = nyhead.rotate_dipole_to_surface_normal(p2)
+        np.testing.assert_almost_equal(p2_rot, np.array([0.0, 1.2, 0.0]))
 
 
 '''

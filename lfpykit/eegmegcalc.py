@@ -1121,10 +1121,10 @@ class NYHeadModel(object):
 
         # Some example locations in NY Head model
         self.dipole_pos_dict = {
-            'calcarine_sulcus': np.array([5, -85, 0]),
-            'motorsensory_cortex': np.array([17, 10, 79.4]),
-            'parietal_lobe': np.array([55, -49, 57]),
-            'occipital_lobe': np.array([-24.3, -105.4, -1.2])
+            'calcarine_sulcus': np.array([5, -86, 2]),
+            'motorsensory_cortex': np.array([18, 8, 71]),
+            'parietal_lobe': np.array([54, -48, 55.9]),
+            'occipital_lobe': np.array([-24.7, -103.3, -1.46])
         }
 
         self._load_head_model(nyhead_file)
@@ -1178,7 +1178,6 @@ class NYHeadModel(object):
         #                          dtype=int) - 1
         # self.cortex_tri = np.array(
         #     self.head_data["cortex75K"]["tri"], dtype=int)[:, :] - 1
-
 
     def rotate_dipole_to_surface_normal(self, p, orig_ax_vec=[0, 0, 1]):
         """
@@ -1311,11 +1310,13 @@ class NYHeadModel(object):
         self.closest_vertex_idx = self.return_closest_idx(dipole_pos_)
         self.dipole_pos = self.cortex[:, self.closest_vertex_idx]
         loc_error = np.sqrt(np.sum((self.dipole_pos - dipole_pos_)**2))
+
         if loc_error > 2:
-            print("Given location: {}; Closest vertex: {}; error: {}".format(
-                dipole_pos_, self.dipole_pos, loc_error))
-            raise RuntimeWarning("Given dipole location and closest brain vertex"
-                                 "are more than 2 mm apart!")
+            raise RuntimeWarning(
+                "Large dipole location error! "
+                "Given loc: {}; Closest vertex: {}".format(
+                dipole_pos_, self.dipole_pos))
+
 
         self.cortex_normal_vec = self.cortex_normals[:, self.closest_vertex_idx]
 
