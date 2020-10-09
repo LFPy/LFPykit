@@ -1110,10 +1110,8 @@ class NYHeadModel(object):
     >>> M = nyhead.get_transformation_matrix()
 
     >>> # Rotate to be along normal vector of cortex
-    >>> p = nyhead.rotate_dipole_to_surface_normal(np.array([[0.], [0.], [1.]]))
+    >>> p = nyhead.rotate_dipole_to_surface_normal([[0.], [0.], [1.]])
     >>> eeg = M @ p  # [mV]
-
-
     """
 
     def __init__(self, nyhead_file=None):
@@ -1132,7 +1130,7 @@ class NYHeadModel(object):
         # These will be set by the "set_dipole_pos" function:
         self.dipole_pos = None
         self.cortex_normal_vec = None
-        self.closest_vertex_idx = None
+        self.vertex_idx = None
 
     def _load_head_model(self, nyhead_file):
         try:
@@ -1187,9 +1185,10 @@ class NYHeadModel(object):
         Parameters
         ----------
         p : np.ndarray of size (3, num_timesteps)
-            Current dipole moment from neural simulation [p_x(t), p_y(t), p_z(t)].
-            If z-axis is the depth axis of cortex in the original neural simulation
-            p_x(t) and p_y(t) will typically be small, and orig_ax_vec = [0, 0, 1]
+            Current dipole moment from neural simulation,
+            [p_x(t), p_y(t), p_z(t)]. If z-axis is the depth axis of cortex
+            in the original neural simulation p_x(t) and p_y(t) will
+            typically be small, and orig_ax_vec = [0, 0, 1].
         orig_ax_vec : np.ndarray or list of length (3)
             Original surface vector of cortex in the neural simulation. If
             depth axis of cortex is the z-axis, orig_ax_vec = [0, 0, 1].
@@ -1228,12 +1227,12 @@ class NYHeadModel(object):
         cos_th = np.cos(phi)
         sin_th = np.sin(phi)
         R = np.zeros((3, 3))
-        R[0, 1] = -z_*sin_th + (1.0 - cos_th)*x_*y_
-        R[0, 2] = +y_*sin_th + (1.0 - cos_th)*x_*z_
-        R[1, 0] = +z_*sin_th + (1.0 - cos_th)*x_*y_
-        R[1, 2] = -x_*sin_th + (1.0 - cos_th)*y_*z_
-        R[2, 0] = -y_*sin_th + (1.0 - cos_th)*x_*z_
-        R[2, 1] = +x_*sin_th + (1.0 - cos_th)*y_*z_
+        R[0, 1] = -z_ * sin_th + (1.0 - cos_th) * x_ * y_
+        R[0, 2] = +y_ * sin_th + (1.0 - cos_th) * x_ * z_
+        R[1, 0] = +z_ * sin_th + (1.0 - cos_th) * x_ * y_
+        R[1, 2] = -x_ * sin_th + (1.0 - cos_th) * y_ * z_
+        R[2, 0] = -y_ * sin_th + (1.0 - cos_th) * x_ * z_
+        R[2, 1] = +x_ * sin_th + (1.0 - cos_th) * y_ * z_
         R[0, 0] = cos_th + x_**2 * (1 - cos_th)
         R[1, 1] = cos_th + y_**2 * (1 - cos_th)
         R[2, 2] = cos_th + z_**2 * (1 - cos_th)
@@ -1296,7 +1295,8 @@ class NYHeadModel(object):
             if dipole_pos not in self.dipole_pos_dict:
                 raise RuntimeError("When dipole_pos is string, location must"
                                    "be defined in self.dipole_pos_dict. "
-                                   "Choose one of: {}".format(self.dipole_pos_dict.keys()))
+                                   "Choose one of: {}".format(
+                                        self.dipole_pos_dict.keys()))
             dipole_pos_ = self.dipole_pos_dict[dipole_pos]
         elif type(dipole_pos) not in [list, np.ndarray]:
             raise RuntimeError("dipole_pos argument type is not valid. "
@@ -1307,18 +1307,16 @@ class NYHeadModel(object):
         else:
             dipole_pos_ = dipole_pos
 
-        self.closest_vertex_idx = self.return_closest_idx(dipole_pos_)
-        self.dipole_pos = self.cortex[:, self.closest_vertex_idx]
+        self.vertex_idx = self.return_closest_idx(dipole_pos_)
+        self.dipole_pos = self.cortex[:, self.vertex_idx]
         loc_error = np.sqrt(np.sum((self.dipole_pos - dipole_pos_)**2))
 
         if loc_error > 2:
-            raise RuntimeWarning(
-                "Large dipole location error! "
-                "Given loc: {}; Closest vertex: {}".format(
-                dipole_pos_, self.dipole_pos))
+            raise RuntimeWarning("Large dipole location error! "
+                                 "Given loc: {}; Closest vertex: {}".format(
+                                    dipole_pos_, self.dipole_pos))
 
-
-        self.cortex_normal_vec = self.cortex_normals[:, self.closest_vertex_idx]
+        self.cortex_normal_vec = self.cortex_normals[:, self.vertex_idx]
 
     def get_transformation_matrix(self):
         """
@@ -1329,7 +1327,5 @@ class NYHeadModel(object):
         -------
         response_matrix: ndarray
             shape (231, 3) ndarray
-
         """
-
-        return self.lead_field[:, self.closest_vertex_idx, :].T * 1E-9
+        return self.lead_field[:, self.vertex_idx, :].T * 1E-9

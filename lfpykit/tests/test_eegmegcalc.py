@@ -28,12 +28,16 @@ import lfpykit
 from lfpykit import eegmegcalc
 try:
     import h5py
-    test_folder = os.path.dirname(os.path.realpath(__file__))
-    nyhead_file = os.path.join(test_folder, '..', "sa_nyhead.mat")
-    head_data = h5py.File(nyhead_file, 'r')["sa"]
-    has_NYHead_file = True
-except:
-    has_NYHead_file = False
+    try:
+        test_folder = os.path.dirname(os.path.realpath(__file__))
+        nyhead_file = os.path.join(test_folder, '..', "sa_nyhead.mat")
+        head_data = h5py.File(nyhead_file, 'r')["sa"]
+        test_NYHeadModel = True
+    except IOError:
+        test_NYHeadModel = False
+
+except ImportError:
+    test_NYHeadModel = False
 
 
 class testMEG(unittest.TestCase):
@@ -631,7 +635,7 @@ class testOneSphereVolumeConductor(unittest.TestCase):
             np.testing.assert_almost_equal(M[:, i], phi_gt)
 
 
-@unittest.skipUnless(has_NYHead_file, "skipping: NYHead model file not found")
+@unittest.skipUnless(test_NYHeadModel, "skipping: NYHead model file not found")
 class testNYHeadModel(unittest.TestCase):
     """
     test class lfpykit.NYHeadModel
@@ -660,13 +664,14 @@ class testNYHeadModel(unittest.TestCase):
     def test_NYH_dip_rotations(self):
         nyhead = eegmegcalc.NYHeadModel()
 
-        ## Test that nothing is rotated when original axis equal new axis
+        # Test that nothing is rotated when original axis equal new axis
         nyhead.set_dipole_pos()
         p1 = [0.1, 0.1, 1.0]
-        p1_ = nyhead.rotate_dipole_to_surface_normal(p1, nyhead.cortex_normal_vec)
+        p1_ = nyhead.rotate_dipole_to_surface_normal(p1,
+                                                     nyhead.cortex_normal_vec)
         np.testing.assert_almost_equal(p1, p1_)
 
-        ## Test that vector has been rotated, but length of vector is same
+        # Test that vector has been rotated, but length of vector is same
         for _ in range(10):
             p1 = np.random.uniform(0, 1, size=3)
             p_rot = nyhead.rotate_dipole_to_surface_normal(p1)
@@ -674,12 +679,13 @@ class testNYHeadModel(unittest.TestCase):
             p_rot_len = np.linalg.norm(p_rot)
 
             # Has been rotated:
-            np.testing.assert_array_less(np.dot(p1 / p1_len, p_rot / p_rot_len), 1)
+            np.testing.assert_array_less(np.dot(p1 / p1_len,
+                                                p_rot / p_rot_len), 1)
 
             # Has same length:
             np.testing.assert_almost_equal(p1_len, p_rot_len)
 
-        ## Test known rotation
+        # Test known rotation
         p2 = np.array([0.0, 0.0, 1.2])
         nyhead.cortex_normal_vec = np.array([0.0, 1.0, 0.0])
         p2_rot = nyhead.rotate_dipole_to_surface_normal(p2)
