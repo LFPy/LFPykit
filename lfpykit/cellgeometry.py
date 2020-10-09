@@ -61,7 +61,7 @@ class CellGeometry(object):
         shape (totnsegs) array of compartment diameters in units of [um]
     length: ndarray
         lenght of each compartment in units of um
-    area : ndarray
+    area: ndarray
         array of compartment surface areas in units of um^2
     '''
     def __init__(self, x, y, z, d):
@@ -111,7 +111,7 @@ class CellGeometry(object):
             conical frusta is assumed.
         length: ndarray
             lenght of each compartment in units of um
-        area : ndarray
+        area: ndarray
             array of compartment surface areas in units of um^2
         '''
         # check input
