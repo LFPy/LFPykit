@@ -23,8 +23,17 @@ try:
     LFPy_imported = True
 except ImportError:
     LFPy_imported = False
+
 import lfpykit
 from lfpykit import eegmegcalc
+try:
+    import h5py
+    test_folder = os.path.dirname(os.path.realpath(__file__))
+    nyhead_file = os.path.join(test_folder, '..', "sa_nyhead.mat")
+    head_data = h5py.File(nyhead_file, 'r')["sa"]
+    has_NYHead_file = True
+except:
+    has_NYHead_file = False
 
 
 class testMEG(unittest.TestCase):
@@ -620,6 +629,35 @@ class testOneSphereVolumeConductor(unittest.TestCase):
             dist[abs(dist) < cell.d[i]] = cell.d[i]
             phi_gt = current / (4 * np.pi * sigma * abs(dist))
             np.testing.assert_almost_equal(M[:, i], phi_gt)
+
+
+@unittest.skipUnless(has_NYHead_file, "skipping: NYHead model file not found")
+class testNYHeadModel(unittest.TestCase):
+    """
+    test class lfpykit.NYHeadModel
+    """
+
+    def test_lead_field_dim(self):
+        nyhead = eegmegcalc.NYHeadModel()
+        np.testing.assert_equal(nyhead.lead_field.shape, (3, 74382, 231))
+
+    def test_transformation_matrix_shape(self):
+        nyhead = eegmegcalc.NYHeadModel()
+        nyhead.set_dipole_pos()
+        M = nyhead.get_transformation_matrix()
+        np.testing.assert_equal(M, (231, 3))
+
+
+    def test_NYH_locations(self):
+        nyhead = eegmegcalc.NYHeadModel()
+
+        with np.testing.assert_raises(RuntimeError):
+            nyhead.set_dipole_pos('not_a_valid_loc')
+
+        with np.testing.assert_raises(RuntimeWarning):
+            dipole_pos = [100, 100, 100]
+            nyhead.set_dipole_pos(dipole_pos)
+
 
 
 '''

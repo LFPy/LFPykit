@@ -1077,7 +1077,8 @@ class NYHeadModel(object):
     Parameters
     ----------
     nyhead_file: str [optional]
-        Location of file containing New York Head Model. If not found,
+        Location of file containing New York Head Model. If empty (or None),
+        it will be looked for in the main LFPykit folder. If not present
         the user is asked if it should be downloaded from
         https://www.parralab.org/nyhead/sa_nyhead.mat
 
@@ -1113,7 +1114,7 @@ class NYHeadModel(object):
 
     """
 
-    def __init__(self, nyhead_file="sa_nyhead.mat"):
+    def __init__(self, nyhead_file=None):
         """ Initialize class NYHeadModel """
 
         # Some example locations in NY Head model
@@ -1138,6 +1139,9 @@ class NYHeadModel(object):
             raise ImportError("The package h5py was not found. "
                               "It is needed for loading New York Head model.")
 
+        if nyhead_file is None:
+            lfpykit_folder = os.path.dirname(os.path.realpath(__file__))
+            nyhead_file = os.path.join(lfpykit_folder, "sa_nyhead.mat")
         self.head_file = os.path.abspath(nyhead_file)
         if not os.path.isfile(self.head_file):
             from urllib.request import urlopen
@@ -1299,11 +1303,19 @@ class NYHeadModel(object):
         elif type(dipole_pos) in [list, np.ndarray] and len(dipole_pos) != 3:
             raise RuntimeError("If dipole_pos argument is array it must "
                                "have length 3")
+        else:
+            dipole_pos_ = dipole_pos
 
         self.closest_vertex_idx = self.return_closest_idx(dipole_pos_)
         self.dipole_pos = self.cortex[:, self.closest_vertex_idx]
-        self.cortex_normal_vec = self.cortex_normals[:, self.closest_vertex_idx]
+        loc_error = np.sqrt(np.sum((self.dipole_pos - dipole_pos_)**2))
+        if loc_error > 2:
+            print("Given location: {}; Closest vertex: {}; error: {}".format(
+                dipole_pos_, self.dipole_pos, loc_error))
+            raise RuntimeWarning("Given dipole location and closest brain vertex"
+                                 "are more than 2 mm apart!")
 
+        self.cortex_normal_vec = self.cortex_normals[:, self.closest_vertex_idx]
 
     def get_transformation_matrix(self):
         """
