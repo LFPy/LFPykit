@@ -6,7 +6,8 @@ dependencies:
   - python=3
   - numpy
   - matplotlib
-  - lfpy
+  - jupyter
   - pip
   pip:
-    pip install ..
+    - pip install ..
+    - -e git+https://github.com/LFPy/LFPy.git@2.2.dev0#egg=LFPy

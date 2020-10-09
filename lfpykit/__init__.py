@@ -34,6 +34,9 @@ GNU General Public License for more details.
   * OneSphereVolumeConductor:
         For computing extracellular potentials within
         and outside a homogeneous sphere
+  * LaminarCurrentSourceDensity:
+        For computing the ground truth current source density in cylindrical
+        volumes aligned with the z-axis.
   * eegmegcalc.FourSphereVolumeConductor:
         For computing extracellular potentials in
         4-sphere model (brain, CSF, skull, scalp) from current dipole moment
@@ -56,5 +59,5 @@ from .version import version as __version__
 from .cellgeometry import CellGeometry
 from .models import LinearModel, CurrentDipoleMoment, PointSourcePotential, \
     LineSourcePotential, RecExtElectrode, RecMEAElectrode, \
-    OneSphereVolumeConductor
+    OneSphereVolumeConductor, LaminarCurrentSourceDensity
 from . import eegmegcalc
