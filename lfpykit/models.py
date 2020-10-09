@@ -608,26 +608,26 @@ class RecExtElectrode(LinearModel):
     >>> from lfpykit import CellGeometry, RecExtElectrode
     >>>
     >>> cellParameters = {
-    >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
-    >>>     'v_init' : -65,                         # initial voltage
-    >>>     'cm' : 1.0,                             # membrane capacitance
-    >>>     'Ra' : 150,                             # axial resistivity
-    >>>     'passive' : True,                       # insert passive channels
-    >>>     'passive_parameters' : {"g_pas":1./3E4,
+    >>>     'morphology': 'examples/morphologies/L5_Mainen96_LFPy.hoc',
+    >>>     'v_init': -65,                         # initial voltage
+    >>>     'cm': 1.0,                             # membrane capacitance
+    >>>     'Ra': 150,                             # axial resistivity
+    >>>     'passive': True,                       # insert passive channels
+    >>>     'passive_parameters': {"g_pas":1./3E4,
     >>>                             "e_pas":-65}, # passive params
-    >>>     'dt' : 2**-4,                         # simulation time res
-    >>>     'tstart' : 0.,                        # start t of simulation
-    >>>     'tstop' : 50.,                        # end t of simulation
+    >>>     'dt': 2**-4,                         # simulation time res
+    >>>     'tstart': 0.,                        # start t of simulation
+    >>>     'tstop': 50.,                        # end t of simulation
     >>> }
     >>> cell = LFPy.Cell(**cellParameters)
     >>>
     >>> synapseParameters = {
-    >>>     'idx' : cell.get_closest_idx(x=0, y=0, z=800), # segment
-    >>>     'e' : 0,                                # reversal potential
-    >>>     'syntype' : 'ExpSyn',                   # synapse type
-    >>>     'tau' : 2,                              # syn. time constant
-    >>>     'weight' : 0.01,                        # syn. weight
-    >>>     'record_current' : True                 # syn. current record
+    >>>     'idx': cell.get_closest_idx(x=0, y=0, z=800), # segment
+    >>>     'e': 0,                                # reversal potential
+    >>>     'syntype': 'ExpSyn',                   # synapse type
+    >>>     'tau': 2,                              # syn. time constant
+    >>>     'weight': 0.01,                        # syn. weight
+    >>>     'record_current': True                 # syn. current record
     >>> }
     >>> synapse = LFPy.Synapse(cell, **synapseParameters)
     >>> synapse.set_spike_times(np.array([10., 15., 20., 25.]))
@@ -637,13 +637,13 @@ class RecExtElectrode(LinearModel):
     >>> N = np.empty((16, 3))
     >>> for i in range(N.shape[0]): N[i,] = [1, 0, 0] # normal vectors
     >>> electrodeParameters = {         # parameters for RecExtElectrode class
-    >>>     'sigma' : 0.3,              # Extracellular potential
-    >>>     'x' : np.zeros(16)+25,      # Coordinates of electrode contacts
-    >>>     'y' : np.zeros(16),
-    >>>     'z' : np.linspace(-500,1000,16),
-    >>>     'n' : 20,
-    >>>     'r' : 10,
-    >>>     'N' : N,
+    >>>     'sigma': 0.3,              # Extracellular potential
+    >>>     'x': np.zeros(16)+25,      # Coordinates of electrode contacts
+    >>>     'y': np.zeros(16),
+    >>>     'z': np.linspace(-500,1000,16),
+    >>>     'n': 20,
+    >>>     'r': 10,
+    >>>     'N': N,
     >>> }
     >>> cell_geometry = CellGeometry(
     >>>     x=np.c_[cell.xstart, cell.xend],
@@ -666,26 +666,26 @@ class RecExtElectrode(LinearModel):
     >>> from lfpykit import CellGeometry, RecExtElectrode
     >>>
     >>> cellParameters = {
-    >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
-    >>>     'v_init' : -65,                         # initial voltage
-    >>>     'cm' : 1.0,                             # membrane capacitance
-    >>>     'Ra' : 150,                             # axial resistivity
-    >>>     'passive' : True,                       # insert passive channels
-    >>>     'passive_parameters' : {"g_pas":1./3E4,
+    >>>     'morphology': 'examples/morphologies/L5_Mainen96_LFPy.hoc',
+    >>>     'v_init': -65,                         # initial voltage
+    >>>     'cm': 1.0,                             # membrane capacitance
+    >>>     'Ra': 150,                             # axial resistivity
+    >>>     'passive': True,                       # insert passive channels
+    >>>     'passive_parameters': {"g_pas":1./3E4,
     >>>                             "e_pas":-65}, # passive params
-    >>>     'dt' : 2**-4,                         # simulation time res
-    >>>     'tstart' : 0.,                        # start t of simulation
-    >>>     'tstop' : 50.,                        # end t of simulation
+    >>>     'dt': 2**-4,                         # simulation time res
+    >>>     'tstart': 0.,                        # start t of simulation
+    >>>     'tstop': 50.,                        # end t of simulation
     >>> }
     >>> cell = LFPy.Cell(**cellParameters)
     >>>
     >>> synapseParameters = {
-    >>>     'idx' : cell.get_closest_idx(x=0, y=0, z=800), # compartment
-    >>>     'e' : 0,                                # reversal potential
-    >>>     'syntype' : 'ExpSyn',                   # synapse type
-    >>>     'tau' : 2,                              # syn. time constant
-    >>>     'weight' : 0.01,                        # syn. weight
-    >>>     'record_current' : True                 # syn. current record
+    >>>     'idx': cell.get_closest_idx(x=0, y=0, z=800), # compartment
+    >>>     'e': 0,                                # reversal potential
+    >>>     'syntype': 'ExpSyn',                   # synapse type
+    >>>     'tau': 2,                              # syn. time constant
+    >>>     'weight': 0.01,                        # syn. weight
+    >>>     'record_current': True                 # syn. current record
     >>> }
     >>> synapse = LFPy.Synapse(cell, **synapseParameters)
     >>> synapse.set_spike_times(np.array([10., 15., 20., 25.]))
@@ -693,13 +693,13 @@ class RecExtElectrode(LinearModel):
     >>> N = np.empty((16, 3))
     >>> for i in range(N.shape[0]): N[i,] = [1, 0, 0] #normal vec. of contacts
     >>> electrodeParameters = {         # parameters for RecExtElectrode class
-    >>>     'sigma' : 0.3,              # Extracellular potential
-    >>>     'x' : np.zeros(16)+25,      # Coordinates of electrode contacts
-    >>>     'y' : np.zeros(16),
-    >>>     'z' : np.linspace(-500,1000,16),
-    >>>     'n' : 20,
-    >>>     'r' : 10,
-    >>>     'N' : N,
+    >>>     'sigma': 0.3,              # Extracellular potential
+    >>>     'x': np.zeros(16)+25,      # Coordinates of electrode contacts
+    >>>     'y': np.zeros(16),
+    >>>     'z': np.linspace(-500,1000,16),
+    >>>     'n': 20,
+    >>>     'r': 10,
+    >>>     'N': N,
     >>> }
     >>> cell_geometry = CellGeometry(
     >>>     x=np.c_[cell.xstart, cell.xend],
@@ -724,26 +724,26 @@ class RecExtElectrode(LinearModel):
     >>> from lfpykit import CellGeometry, RecExtElectrode
     >>>
     >>> cellParameters = {
-    >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
-    >>>     'v_init' : -65,                         # initial voltage
-    >>>     'cm' : 1.0,                             # membrane capacitance
-    >>>     'Ra' : 150,                             # axial resistivity
-    >>>     'passive' : True,                       # insert passive channels
-    >>>     'passive_parameters' : {"g_pas":1./3E4,
+    >>>     'morphology': 'examples/morphologies/L5_Mainen96_LFPy.hoc',
+    >>>     'v_init': -65,                         # initial voltage
+    >>>     'cm': 1.0,                             # membrane capacitance
+    >>>     'Ra': 150,                             # axial resistivity
+    >>>     'passive': True,                       # insert passive channels
+    >>>     'passive_parameters': {"g_pas":1./3E4,
     >>>                             "e_pas":-65}, # passive params
-    >>>     'dt' : 2**-4,                         # simulation time res
-    >>>     'tstart' : 0.,                        # start t of simulation
-    >>>     'tstop' : 50.,                        # end t of simulation
+    >>>     'dt': 2**-4,                         # simulation time res
+    >>>     'tstart': 0.,                        # start t of simulation
+    >>>     'tstop': 50.,                        # end t of simulation
     >>> }
     >>> cell = LFPy.Cell(**cellParameters)
     >>>
     >>> synapseParameters = {
-    >>>     'idx' : cell.get_closest_idx(x=0, y=0, z=800), # compartment
-    >>>     'e' : 0,                                # reversal potential
-    >>>     'syntype' : 'ExpSyn',                   # synapse type
-    >>>     'tau' : 2,                              # syn. time constant
-    >>>     'weight' : 0.01,                        # syn. weight
-    >>>     'record_current' : True                 # syn. current record
+    >>>     'idx': cell.get_closest_idx(x=0, y=0, z=800), # compartment
+    >>>     'e': 0,                                # reversal potential
+    >>>     'syntype': 'ExpSyn',                   # synapse type
+    >>>     'tau': 2,                              # syn. time constant
+    >>>     'weight': 0.01,                        # syn. weight
+    >>>     'record_current': True                 # syn. current record
     >>> }
     >>> synapse = LFPy.Synapse(cell, **synapseParameters)
     >>> synapse.set_spike_times(np.array([10., 15., 20., 25.]))
@@ -1141,38 +1141,38 @@ class RecMEAElectrode(RecExtElectrode):
     >>> from lfpykit import CellGeometry, RecMEAElectrode
     >>>
     >>> cellParameters = {
-    >>>     'morphology' : 'examples/morphologies/L5_Mainen96_LFPy.hoc',
-    >>>     'v_init' : -65,                          # initial voltage
-    >>>     'cm' : 1.0,                             # membrane capacitance
-    >>>     'Ra' : 150,                             # axial resistivity
-    >>>     'passive' : True,                        # insert passive channels
-    >>>     'passive_parameters' : {"g_pas":1./3E4,
+    >>>     'morphology': 'examples/morphologies/L5_Mainen96_LFPy.hoc',
+    >>>     'v_init': -65,                          # initial voltage
+    >>>     'cm': 1.0,                             # membrane capacitance
+    >>>     'Ra': 150,                             # axial resistivity
+    >>>     'passive': True,                        # insert passive channels
+    >>>     'passive_parameters': {"g_pas":1./3E4,
     >>>                             "e_pas":-65}, # passive params
-    >>>     'dt' : 2**-4,                           # simulation time res
-    >>>     'tstart' : 0.,                        # start t of simulation
-    >>>     'tstop' : 50.,                        # end t of simulation
+    >>>     'dt': 2**-4,                           # simulation time res
+    >>>     'tstart': 0.,                        # start t of simulation
+    >>>     'tstop': 50.,                        # end t of simulation
     >>> }
     >>> lfpy_cell = LFPy.Cell(**cellParameters)
     >>> lfpy_cell.set_rotation(x=np.pi/2, z=np.pi/2)
     >>> lfpy_cell.set_pos(z=100)
     >>> synapseParameters = {
-    >>>     'idx' : lfpy_cell.get_closest_idx(x=800, y=0, z=100), # segment
-    >>>     'e' : 0,                                # reversal potential
-    >>>     'syntype' : 'ExpSyn',                   # synapse type
-    >>>     'tau' : 2,                              # syn. time constant
-    >>>     'weight' : 0.01,                       # syn. weight
-    >>>     'record_current' : True                 # syn. current record
+    >>>     'idx': lfpy_cell.get_closest_idx(x=800, y=0, z=100), # segment
+    >>>     'e': 0,                                # reversal potential
+    >>>     'syntype': 'ExpSyn',                   # synapse type
+    >>>     'tau': 2,                              # syn. time constant
+    >>>     'weight': 0.01,                       # syn. weight
+    >>>     'record_current': True                 # syn. current record
     >>> }
     >>> synapse = LFPy.Synapse(lfpy_cell, **synapseParameters)
     >>> synapse.set_spike_times(np.array([10., 15., 20., 25.]))
     >>>
     >>> MEA_electrode_parameters = {
-    >>>     'sigma_T' : 0.3,      # extracellular conductivity
-    >>>     'sigma_G' : 0.0,      # MEA glass electrode plate conductivity
-    >>>     'sigma_S' : 1.5,      # Saline bath conductivity
-    >>>     'x' : np.linspace(0, 1200, 16),  # 1d vector of positions
-    >>>     'y' : np.zeros(16),
-    >>>     'z' : np.zeros(16),
+    >>>     'sigma_T': 0.3,      # extracellular conductivity
+    >>>     'sigma_G': 0.0,      # MEA glass electrode plate conductivity
+    >>>     'sigma_S': 1.5,      # Saline bath conductivity
+    >>>     'x': np.linspace(0, 1200, 16),  # 1d vector of positions
+    >>>     'y': np.zeros(16),
+    >>>     'z': np.zeros(16),
     >>>     "method": "pointsource",
     >>>     "h": 300,
     >>>     "squeeze_cell_factor": 0.5,
@@ -1348,9 +1348,9 @@ class RecMEAElectrode(RecExtElectrode):
 
         Parameters
         ----------
-        axis : str
+        axis: str
             which axis to apply compression/stretching. Default is "z".
-        nu : float
+        nu: float
             Poisson's ratio. Ratio between axial and transversal
             compression/stretching. Default is 0.
         """
@@ -1819,6 +1819,36 @@ class LaminarCurrentSourceDensity(LinearModel):
     r: ndarray, dtype=float
         shape (n_volumes, ) array with assumed radius of each cylindrical
         volume. Each radius must be greater than zero, and in units of [µm]
+
+    Examples
+    --------
+
+    Mock cell geometry and transmembrane currents:
+
+    >>> import numpy as np
+    >>> from lfpykit import CellGeometry, LaminarCurrentSourceDensity
+    >>> # cell geometry with three segments [um]
+    >>> cell = CellGeometry(x=np.array([[0, 0], [0, 0], [0, 0]]),
+    >>>                     y=np.array([[0, 0], [0, 0], [0, 0]]),
+    >>>                     z=np.array([[0, 10], [10, 20], [20, 30]]),
+    >>>                     d=np.array([1, 1, 1]))
+    >>> # transmembrane currents, three time steps [nA]
+    >>> I_m = np.array([[0., -1., 1.], [-1., 1., 0.], [1., 0., -1.]])
+    >>> # define geometry (z - upper and lower boundary;  r - radius)
+    >>> # of cylindrical volumes aligned with the z-axis [um]
+    >>> z = np.array([[-10., 0.], [0., 10.], [10., 20.],
+    >>>               [20., 30.], [30., 40.]])
+    >>> r = np.array([100., 100., 100., 100., 100.])
+    >>> # instantiate electrode, get linear response matrix
+    >>> csd = LaminarCurrentSourceDensity(cell=cell, z=z, r=r)
+    >>> M = csd.get_transformation_matrix()
+    >>> # compute current source density [nA/µm3]
+    >>> M @ I_m
+    array([[ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00],
+           [ 0.00000000e+00, -3.18309886e-06,  3.18309886e-06],
+           [-3.18309886e-06,  3.18309886e-06,  0.00000000e+00],
+           [ 3.18309886e-06,  0.00000000e+00, -3.18309886e-06],
+           [ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00]])
 
     References
     ----------
