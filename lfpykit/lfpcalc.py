@@ -71,15 +71,15 @@ def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma, r_limit):
     ----------
     cell: obj
         `GeometryCell instance or similar
-    x : float
+    x: float
         extracellular position, x-axis
-    y : float
+    y: float
         extracellular position, y-axis
-    z : float
+    z: float
         extracellular position, z-axis
-    sigma : array
+    sigma: array
         extracellular conductivity [sigma_x, sigma_y, sigma_z]
-    r_limit : np.ndarray
+    r_limit: np.ndarray
         minimum distance to source current for each compartment
     """
 
@@ -186,15 +186,15 @@ def calc_lfp_root_as_point_anisotropic(cell, x, y, z, sigma, r_limit):
     ----------
     cell: obj
         `GeometryCell` instance or similar
-    x : float
+    x: float
         extracellular position, x-axis
-    y : float
+    y: float
         extracellular position, y-axis
-    z : float
+    z: float
         extracellular position, z-axis
-    sigma : array
+    sigma: array
         extracellular conductivity [sigma_x, sigma_y, sigma_z]
-    r_limit : np.ndarray
+    r_limit: np.ndarray
         minimum distance to source current for each compartment
     """
 
@@ -351,15 +351,15 @@ def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
     ----------
     cell: obj
         `GeometryCell` instance or similar
-    x : float
+    x: float
         extracellular position, x-axis
-    y : float
+    y: float
         extracellular position, y-axis
-    z : float
+    z: float
         extracellular position, z-axis
-    sigma : float
+    sigma: float
         extracellular conductivity
-    r_limit : np.ndarray
+    r_limit: np.ndarray
         minimum distance to source current for each compartment
     """
 
@@ -408,15 +408,15 @@ def calc_lfp_root_as_point(cell, x, y, z, sigma, r_limit,
     ----------
     cell: obj
         `GeometryCell` instance or similar
-    x : float
+    x: float
         extracellular position, x-axis
-    y : float
+    y: float
         extracellular position, y-axis
-    z : float
+    z: float
         extracellular position, z-axis
-    sigma : float
+    sigma: float
         extracellular conductivity in S/m
-    r_limit : np.ndarray
+    r_limit: np.ndarray
         minimum distance to source current for each compartment.
     rootinds: ndarray, dtype=int
         indices of root segment(s). Defaults to np.array([0])
@@ -534,15 +534,15 @@ def calc_lfp_pointsource(cell, x, y, z, sigma, r_limit):
     ----------
     cell: obj
         `GeometryCell` instance or similar
-    x : float
+    x: float
         extracellular position, x-axis
-    y : float
+    y: float
         extracellular position, y-axis
-    z : float
+    z: float
         extracellular position, z-axis
-    sigma : float
+    sigma: float
         extracellular conductivity
-    r_limit : np.ndarray
+    r_limit: np.ndarray
         minimum distance to source current for each compartment
     """
 
@@ -562,15 +562,15 @@ def calc_lfp_pointsource_anisotropic(cell, x, y, z, sigma, r_limit):
     ----------
     cell: obj
         `GeometryCell` instance or similar
-    x : float
+    x: float
         extracellular position, x-axis
-    y : float
+    y: float
         extracellular position, y-axis
-    z : float
+    z: float
         extracellular position, z-axis
-    sigma : array
+    sigma: array
         extracellular conductivity in [x,y,z]-direction
-    r_limit : np.ndarray
+    r_limit: np.ndarray
         minimum distance to source current for each compartment
     """
 
@@ -616,24 +616,24 @@ def calc_lfp_pointsource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     ----------
     cell: obj
         `GeometryCell` instance or similar
-    x : float
+    x: float
         extracellular position, x-axis
-    y : float
+    y: float
         extracellular position, y-axis
-    z : float
+    z: float
         extracellular position, z-axis
-    sigma_T : float
+    sigma_T: float
         extracellular conductivity in tissue slice
-    sigma_G : float
+    sigma_G: float
         Conductivity of MEA glass electrode plane.
         Should normally be zero for MEA set up.
-    sigma_S : float
+    sigma_S: float
         Conductivity of saline bath that tissue slice is immersed in
-    steps : int
+    steps: int
         Number of steps to average over the in technically infinite sum
-    h : float
+    h: float
         Slice thickness in um.
-    r_limit : np.ndarray
+    r_limit: np.ndarray
         minimum distance to source current for each compartment
     """
 
@@ -676,25 +676,25 @@ def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     ----------
     cell: obj
         `GeometryCell` instance or similar
-    x : float
+    x: float
         extracellular position, x-axis
-    y : float
+    y: float
         extracellular position, y-axis
-    z : float
+    z: float
         extracellular position, z-axis
-    sigma_T : float
+    sigma_T: float
         extracellular conductivity in tissue slice
-    sigma_G : float
+    sigma_G: float
         Conductivity of MEA glass electrode plane.
         Should normally be zero for MEA set up, and for this method,
         only zero valued sigma_G is supported.
-    sigma_S : float
+    sigma_S: float
         Conductivity of saline bath that tissue slice is immersed in
-    steps : int
+    steps: int
         Number of steps to average over the in technically infinite sum
-    h : float
+    h: float
         Slice thickness in um.
-    r_limit : np.ndarray
+    r_limit: np.ndarray
         minimum distance to source current for each compartment
     """
 
@@ -775,25 +775,25 @@ def calc_lfp_root_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     ----------
     cell: obj
         `GeometryCell` instance or similar
-    x : float
+    x: float
         extracellular position, x-axis
-    y : float
+    y: float
         extracellular position, y-axis
-    z : float
+    z: float
         extracellular position, z-axis
-    sigma_T : float
+    sigma_T: float
         extracellular conductivity in tissue slice
-    sigma_G : float
+    sigma_G: float
         Conductivity of MEA glass electrode plane.
         Should normally be zero for MEA set up, and for this method,
         only zero valued sigma_G is supported.
-    sigma_S : float
+    sigma_S: float
         Conductivity of saline bath that tissue slice is immersed in
-    steps : int
+    steps: int
         Number of steps to average over the in technically infinite sum
-    h : float
+    h: float
         Slice thickness in um.
-    r_limit : np.ndarray
+    r_limit: np.ndarray
         minimum distance to source current for each compartment
     """
 
