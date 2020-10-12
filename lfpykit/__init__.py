@@ -45,7 +45,9 @@ GNU General Public License for more details.
         dipole moments in infinite volume conductor
   * eegmegcalc.MEG:
         Class for computing magnetic field from current dipole moments
-
+  * `eegmegcalc.NYHeadModel`:
+        Class for computing extracellular potentials in detailed head volume
+        conductor model (https://www.parralab.org/nyhead)
 
 :Modules:
   * cellgeometry

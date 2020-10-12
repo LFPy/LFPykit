@@ -22,6 +22,7 @@ Module :mod:`lfpykit`
     :show-inheritance:
     :undoc-members:
 
+
 class :class:`CellGeometry`
 ===========================
 .. autoclass:: lfpykit.CellGeometry
@@ -35,56 +36,56 @@ Module :mod:`lfpykit.models`
 
 
 class :class:`LinearModel`
-===========================
+--------------------------
 .. autoclass:: lfpykit.LinearModel
     :members:
     :show-inheritance:
     :undoc-members:
 
 class :class:`CurrentDipoleMoment`
-==================================
+----------------------------------
 .. autoclass:: lfpykit.CurrentDipoleMoment
     :members:
     :show-inheritance:
     :undoc-members:
 
 class :class:`PointSourcePotential`
-===================================
+-----------------------------------
 .. autoclass:: lfpykit.PointSourcePotential
     :members:
     :show-inheritance:
     :undoc-members:
 
 class :class:`LineSourcePotential`
-==================================
+----------------------------------
 .. autoclass:: lfpykit.LineSourcePotential
     :members:
     :show-inheritance:
     :undoc-members:
 
 class :class:`RecExtElectrode`
-==============================
+------------------------------
 .. autoclass:: lfpykit.RecExtElectrode
     :members:
     :show-inheritance:
     :undoc-members:
 
 class :class:`RecMEAElectrode`
-==============================
+------------------------------
 .. autoclass:: lfpykit.RecMEAElectrode
     :members:
     :show-inheritance:
     :undoc-members:
 
 class :class:`OneSphereVolumeConductor`
-=======================================
+---------------------------------------
 .. autoclass:: lfpykit.OneSphereVolumeConductor
     :members:
     :show-inheritance:
     :undoc-members:
 
 class :class:`LaminarCurrentSourceDensity`
-==========================================
+------------------------------------------
 .. autoclass:: lfpykit.LaminarCurrentSourceDensity
     :members:
     :show-inheritance:
@@ -95,34 +96,33 @@ Module :mod:`lfpykit.eegmegcalc`
 .. automodule:: lfpykit.eegmegcalc
 
 class :class:`eegmegcalc.FourSphereVolumeConductor`
-===================================================
+---------------------------------------------------
 .. autoclass:: lfpykit.eegmegcalc.FourSphereVolumeConductor
     :members:
     :show-inheritance:
     :undoc-members:
 
 class :class:`eegmegcalc.InfiniteVolumeConductor`
-=================================================
+-------------------------------------------------
 .. autoclass:: lfpykit.eegmegcalc.InfiniteVolumeConductor
     :members:
     :show-inheritance:
     :undoc-members:
 
 class :class:`eegmegcalc.MEG`
-=============================
+-----------------------------
 .. autoclass:: lfpykit.eegmegcalc.MEG
     :members:
     :show-inheritance:
     :undoc-members:
 
 class :class:`eegmegcalc.NYHeadModel`
-=====================================
+-------------------------------------
 .. autoclass:: lfpykit.eegmegcalc.NYHeadModel
     :members:
     :show-inheritance:
     :undoc-members:
-
-
+    
 
 Indices and tables
 ==================
