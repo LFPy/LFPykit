@@ -1073,8 +1073,9 @@ class NYHeadModel(object):
     Notes
     -----
     The original unit of the New York model current dipole moment
-    is (probably?) mA*m, and the EEG output is V
-    LFPykit's current dipole moments have units nA*um, and EEGs in mV.
+    is (probably?) mA*m, and the EEG output unit is V.
+    LFPykit's current dipole moments have units nA*um, and EEGs from the
+    NYhead model is here recomputed in units of mV.
 
     Parameters
     ----------
