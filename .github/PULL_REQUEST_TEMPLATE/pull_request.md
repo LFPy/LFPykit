@@ -1,6 +1,6 @@
 # PR Details
 
-<!--- Provide a general summary of your changes in the Title above -->
+<!--- Provide a brief summary of your changes in the Title above -->
 
 ## Description
 
