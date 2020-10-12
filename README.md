@@ -99,6 +99,10 @@ to different measurement modalities:
 * `OneSphereVolumeConductor`:
   For computing extracellular potentials within
   sand outside a homogeneous sphere
+* `LaminarCurrentSourceDensity`:
+  For computing the 'ground truth' current source density across
+  cylindrical volumes aligned with the z-axis
+
 
 Different classes built to map current dipole moments (i.e., computed using `CurrentDipoleMoment`)
 to extracellular measurements:
@@ -112,6 +116,9 @@ to extracellular measurements:
   from current dipole moment
 * `eegmegcalc.MEG`:
   Class for computing magnetic field from current dipole moments
+* `eegmegcalc.NYHeadModel`:
+  Class for computing extracellular potentials in detailed head volume
+  conductor model (https://www.parralab.org/nyhead)
 
 Each class (except `CellGeometry`) should have a public method `get_transformation_matrix()`
 that returns the linear map between the transmembrane currents or current dipole moment
