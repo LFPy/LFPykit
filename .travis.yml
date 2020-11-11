@@ -19,8 +19,9 @@ install:
 
   # Replace dep1 dep2 ... with your dependencies
   - conda config --add channels conda-forge
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pytest numpy scipy neuron=*=mpi_mpich* coveralls pytest-cov pip
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pytest numpy scipy coveralls pytest-cov Cython h5py mpi4py MEAutility gxx_linux-64 pip
   - conda activate test-environment
+  - pip install neuron
   - pip install git+https://github.com/LFPy/LFPy.git@2.2.dev0#egg=LFPy
   - pip uninstall lfpykit -y  # uninstall LFPykit from LFPy installation before reinstall
   - python setup.py install
