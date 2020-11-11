@@ -258,22 +258,22 @@ class PointSourcePotential(LinearModel):
 
         # check input
         try:
-            assert(np.all([isinstance(x, np.ndarray),
+            assert np.all([isinstance(x, np.ndarray),
                            isinstance(y, np.ndarray),
-                           isinstance(z, np.ndarray)]))
+                           isinstance(z, np.ndarray)])
         except AssertionError:
             raise AssertionError('x, y and z must be of type numpy.ndarray')
         try:
-            assert(x.ndim == y.ndim == z.ndim == 1)
+            assert x.ndim == y.ndim == z.ndim == 1
         except AssertionError:
             raise AssertionError('x, y and z must be of shape (n_coords, )')
         try:
-            assert(x.shape == y.shape == z.shape)
+            assert x.shape == y.shape == z.shape
         except AssertionError:
             raise AssertionError(
                 'x, y and z must contain the same number of elements')
         try:
-            assert(isinstance(sigma, float) and sigma > 0)
+            assert isinstance(sigma, float) and sigma > 0
         except AssertionError:
             raise AssertionError(
                 'sigma must be a float number greater than zero')
@@ -427,22 +427,22 @@ class LineSourcePotential(LinearModel):
 
         # check input
         try:
-            assert(np.all([isinstance(x, np.ndarray),
+            assert np.all([isinstance(x, np.ndarray),
                            isinstance(y, np.ndarray),
-                           isinstance(z, np.ndarray)]))
+                           isinstance(z, np.ndarray)])
         except AssertionError:
             raise AssertionError('x, y and z must be of type numpy.ndarray')
         try:
-            assert(x.ndim == y.ndim == z.ndim == 1)
+            assert x.ndim == y.ndim == z.ndim == 1
         except AssertionError:
             raise AssertionError('x, y and z must be of shape (n_coords, )')
         try:
-            assert(x.shape == y.shape == z.shape)
+            assert x.shape == y.shape == z.shape
         except AssertionError:
             raise AssertionError(
                 'x, y and z must contain the same number of elements')
         try:
-            assert(isinstance(sigma, float) and sigma > 0)
+            assert isinstance(sigma, float) and sigma > 0
         except AssertionError:
             raise AssertionError(
                 'sigma must be a float number greater than zero')
@@ -1355,12 +1355,12 @@ class RecMEAElectrode(RecExtElectrode):
             compression/stretching. Default is 0.
         """
         try:
-            assert(abs(self.squeeze_cell_factor) < 1.)
+            assert abs(self.squeeze_cell_factor) < 1.
         except AssertionError:
             raise AssertionError('abs(squeeze_cell_factor) >= 1, '
                                  + ' squeeze_cell_factor must be in <-1, 1>')
         try:
-            assert(axis in ['x', 'y', 'z'])
+            assert axis in ['x', 'y', 'z']
         except AssertionError:
             raise AssertionError('axis={} not "x", "y" or "z"'.format(axis))
 
@@ -1515,16 +1515,16 @@ class OneSphereVolumeConductor(LinearModel):
         super().__init__(cell=cell)
         # check inputs
         try:
-            assert(r.shape[0] == 3)
-            assert(r.ndim == 2)
+            assert r.shape[0] == 3
+            assert r.ndim == 2
         except AssertionError:
             raise AssertionError('r must be a shape (3, n_points) ndarray')
         try:
-            assert((isinstance(R, float)) or (isinstance(R, int)))
+            assert (isinstance(R, float)) or (isinstance(R, int))
         except AssertionError:
             raise AssertionError('sphere radius R must be a float value')
         try:
-            assert((sigma_i > 0) & (sigma_o > 0))
+            assert (sigma_i > 0) & (sigma_o > 0)
         except AssertionError:
             raise AssertionError(
                 'sigma_i and sigma_o must both be positive values')
@@ -1564,15 +1564,15 @@ class OneSphereVolumeConductor(LinearModel):
             Unit [mV].
         """
         try:
-            assert(type(rs) in [int, float, np.float64])
-            assert(abs(rs) < self.R)
+            assert type(rs) in [int, float, np.float64]
+            assert abs(rs) < self.R
         except AssertionError:
             raise AssertionError(
                 'source location rs must be a float value and |rs| '
                 'must be less than sphere radius R')
         try:
-            assert((min_distance is None) or (
-                type(min_distance) in [float, int, np.float64]))
+            assert (min_distance is None) \
+                or (type(min_distance) in [float, int, np.float64])
         except AssertionError:
             raise AssertionError('min_distance must be None or a float')
 
@@ -1625,9 +1625,9 @@ class OneSphereVolumeConductor(LinearModel):
 
         if isinstance(current, np.ndarray):
             try:
-                assert(np.all(np.isfinite(current)))
-                assert(np.all(np.isreal(current)))
-                assert(current.ndim == 1)
+                assert np.all(np.isfinite(current))
+                assert np.all(np.isreal(current))
+                assert current.ndim == 1
             except AssertionError:
                 raise AssertionError('input argument current must be float or '
                                      '1D ndarray with float values')
@@ -1637,7 +1637,7 @@ class OneSphereVolumeConductor(LinearModel):
                           ) / (4. * np.pi * self.sigma_i)
         else:
             try:
-                assert(np.isfinite(current)) and (np.shape(current) == ())
+                assert np.isfinite(current) and np.shape(current) == ()
             except AssertionError:
                 raise AssertionError('input argument I must be float or 1D '
                                      'ndarray with float values')
@@ -1871,32 +1871,32 @@ class LaminarCurrentSourceDensity(LinearModel):
         # check input parameters
         for varname, var in zip(['z', 'r'], [z, r]):
             try:
-                assert(type(var) is np.ndarray)
+                assert type(var) is np.ndarray
             except AssertionError:
                 raise AssertionError('type({}) != np.ndarray'.format(varname))
         try:
-            assert(z.ndim == 2)
+            assert z.ndim == 2
         except AssertionError:
             raise AssertionError('z.ndim != 2')
         try:
-            assert(np.all(np.diff(z, axis=-1) > 0))
+            assert np.all(np.diff(z, axis=-1) > 0)
         except AssertionError:
             raise AssertionError('lower edge <= upper edge')
         try:
-            assert(z.shape[1] == 2)
+            assert z.shape[1] == 2
         except AssertionError:
             raise AssertionError('z.shape[1] != 2')
 
         try:
-            assert(r.ndim == 1)
+            assert r.ndim == 1
         except AssertionError:
             raise AssertionError('r.ndim != 1')
         try:
-            assert(r.shape[0] == z.shape[0])
+            assert r.shape[0] == z.shape[0]
         except AssertionError:
             raise AssertionError('r.shape[0] != z.shape[0]')
         try:
-            assert(np.all(r > 0))
+            assert np.all(r > 0)
         except AssertionError:
             raise AssertionError('r must be greater than 0')
 

@@ -978,11 +978,11 @@ class MEG(object):
         Initialize class MEG
         """
         try:
-            assert(sensor_locations.ndim == 2)
+            assert sensor_locations.ndim == 2
         except AssertionError:
             raise AssertionError('sensor_locations.ndim != 2')
         try:
-            assert(sensor_locations.shape[1] == 3)
+            assert sensor_locations.shape[1] == 3
         except AssertionError:
             raise AssertionError('sensor_locations.shape[1] != 3')
 
@@ -1034,15 +1034,15 @@ class MEG(object):
             is wrong
         """
         try:
-            assert(current_dipole_moment.ndim == 2)
+            assert current_dipole_moment.ndim == 2
         except AssertionError:
             raise AssertionError('current_dipole_moment.ndim != 2')
         try:
-            assert(current_dipole_moment.shape[0] == 3)
+            assert current_dipole_moment.shape[0] == 3
         except AssertionError:
             raise AssertionError('current_dipole_moment.shape[0] != 3')
         try:
-            assert(dipole_location.shape == (3, ))
+            assert dipole_location.shape == (3, )
         except AssertionError:
             raise AssertionError('dipole_location.shape != (3, )')
 
@@ -1052,9 +1052,9 @@ class MEG(object):
         # iterate over sensor locations
         for i, r in enumerate(self.sensor_locations):
             R = r - dipole_location
-            assert(R.ndim == 1 and R.size == 3)
+            assert R.ndim == 1 and R.size == 3
             try:
-                assert(not np.allclose(R, np.zeros(3)))
+                assert not np.allclose(R, np.zeros(3))
             except AssertionError:
                 raise AssertionError('Identical dipole and sensor location.')
             H[i, ] = np.cross(current_dipole_moment.T, R).T \
@@ -1315,7 +1315,7 @@ class NYHeadModel(object):
         if loc_error > 2:
             raise RuntimeWarning("Large dipole location error! "
                                  "Given loc: {}; Closest vertex: {}".format(
-                                dipole_pos_, self.dipole_pos))
+                                    dipole_pos_, self.dipole_pos))
 
         self.cortex_normal_vec = self.cortex_normals[:, self.vertex_idx]
 
