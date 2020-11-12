@@ -22,9 +22,9 @@ install:
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION pytest numpy scipy coveralls pytest-cov Cython h5py mpi4py MEAutility gxx_linux-64 pip
   - conda activate test-environment
   # most tests should run even without NEURON/LFPy
-  - if [[ "$TRAVIS_PYTHON_VERSION" < "3.9" ]]; then pip install neuron
-  - if [[ "$TRAVIS_PYTHON_VERSION" < "3.9" ]]; then pip install git+https://github.com/LFPy/LFPy.git@2.2.dev0#egg=LFPy
-  - if [[ "$TRAVIS_PYTHON_VERSION" < "3.9" ]]; then pip uninstall lfpykit -y  # uninstall LFPykit from LFPy installation before reinstall
+  - if [[ "$TRAVIS_PYTHON_VERSION" < "3.9" ]]; then pip install neuron; fi
+  - if [[ "$TRAVIS_PYTHON_VERSION" < "3.9" ]]; then pip install git+https://github.com/LFPy/LFPy.git@2.2.dev0#egg=LFPy; fi
+  - if [[ "$TRAVIS_PYTHON_VERSION" < "3.9" ]]; then pip uninstall lfpykit -y; fi  # uninstall LFPykit from LFPy installation before reinstall
   - python setup.py install
 
 script:
