@@ -30,6 +30,7 @@ setuptools.setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Operating System :: OS Independent',
         'Topic :: Scientific/Engineering',
@@ -37,7 +38,7 @@ setuptools.setup(
         'Topic :: Utilities',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 4 - Beta',
     ],
     python_requires='>=3.6',
     install_requires=[
