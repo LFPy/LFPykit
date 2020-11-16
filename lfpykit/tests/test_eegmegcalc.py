@@ -18,12 +18,6 @@ GNU General Public License for more details.
 import unittest
 import os
 import numpy as np
-try:
-    import LFPy
-    LFPy_imported = True
-except ImportError:
-    LFPy_imported = False
-
 import lfpykit
 from lfpykit import eegmegcalc
 try:
