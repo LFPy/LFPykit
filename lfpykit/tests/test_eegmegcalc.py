@@ -593,47 +593,6 @@ class testOneSphereVolumeConductor(unittest.TestCase):
         np.testing.assert_almost_equal(phi,
                                        np.array([phi_gt] * current.size).T)
 
-    @unittest.skipUnless(LFPy_imported, "skipping: LFPy not installed")
-    def test_OneSphereVolumeConductor_02(self):
-        """test case where sigma_i == sigma_o which
-        should be identical to the standard point-source potential in
-        infinite homogeneous media
-        """
-        # current magnitude
-        current = 1.
-        # conductivity
-        sigma = 0.3
-        # sphere radius
-        R = 10000
-        # cell body position
-        xs = 8000.
-        # sphere coordinates of observation points
-        radius = np.r_[np.arange(0, xs), np.arange(xs + 1, xs * 2)][::10]
-        theta = np.zeros(radius.shape) + np.pi / 2
-        phi = np.zeros(radius.shape)
-        r = np.array([radius, theta, phi])
-        # set up cell
-        cell = LFPy.Cell(
-            morphology=os.path.join(
-                LFPy.__path__[0],
-                'test',
-                'stick.hoc'))
-        cell.set_pos(x=xs, y=0, z=0)
-        cell.set_rotation(y=np.pi / 2)
-
-        # predict potential
-        sphere = lfpykit.OneSphereVolumeConductor(
-            cell=cell,
-            r=r, R=R, sigma_i=sigma, sigma_o=sigma)
-        M = sphere.get_transformation_matrix(n_max=100)
-
-        # ground truth and tests
-        for i, x in enumerate(cell.x.mean(axis=-1)):
-            dist = radius - x
-            dist[abs(dist) < cell.d[i]] = cell.d[i]
-            phi_gt = current / (4 * np.pi * sigma * abs(dist))
-            np.testing.assert_almost_equal(M[:, i], phi_gt)
-
 
 @unittest.skipUnless(test_NYHeadModel, "skipping: NYHead model file not found")
 class testNYHeadModel(unittest.TestCase):
