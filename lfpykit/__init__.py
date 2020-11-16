@@ -37,6 +37,9 @@ GNU General Public License for more details.
   * LaminarCurrentSourceDensity:
         For computing the ground truth current source density in cylindrical
         volumes aligned with the z-axis.
+  * VolumetricCurrentSourceDensity:
+        For computing the ground truth current source density in cubic volumes
+        with bin edges defined by x, y, z
   * eegmegcalc.FourSphereVolumeConductor:
         For computing extracellular potentials in
         4-sphere model (brain, CSF, skull, scalp) from current dipole moment
@@ -61,5 +64,6 @@ from .version import version as __version__
 from .cellgeometry import CellGeometry
 from .models import LinearModel, CurrentDipoleMoment, PointSourcePotential, \
     LineSourcePotential, RecExtElectrode, RecMEAElectrode, \
-    OneSphereVolumeConductor, LaminarCurrentSourceDensity
+    OneSphereVolumeConductor, LaminarCurrentSourceDensity, \
+    VolumetricCurrentSourceDensity
 from . import eegmegcalc
