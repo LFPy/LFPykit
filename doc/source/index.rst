@@ -91,6 +91,13 @@ class :class:`LaminarCurrentSourceDensity`
     :show-inheritance:
     :undoc-members:
 
+class :class:`VolumetricCurrentSourceDensity`
+---------------------------------------------
+.. autoclass:: lfpykit.VolumetricCurrentSourceDensity
+    :members:
+    :show-inheritance:
+    :undoc-members:
+
 Module :mod:`lfpykit.eegmegcalc`
 ================================
 .. automodule:: lfpykit.eegmegcalc
@@ -122,7 +129,7 @@ class :class:`eegmegcalc.NYHeadModel`
     :members:
     :show-inheritance:
     :undoc-members:
-    
+
 
 Indices and tables
 ==================
