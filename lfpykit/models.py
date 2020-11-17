@@ -1015,6 +1015,13 @@ class RecMEAElectrode(RecExtElectrode):
 
     For further details, see reference [1]_.
 
+    See also
+    --------
+    LinearModel
+    PointSourcePotential
+    LineSourcePotential
+    RecExtElectrode
+
     Parameters
     ----------
     cell: object
@@ -1761,6 +1768,11 @@ class VolumetricCurrentSourceDensity(LinearModel):
     :math:`\\mathbf{C}` represents the CSD in each bin for every time step
     as the sum of currents divided by the volume.
 
+    See also
+    --------
+    LinearModel
+    LaminarCurrentSourceDensity
+
     Parameters
     ----------
     cell: object or None
@@ -1769,8 +1781,9 @@ class VolumetricCurrentSourceDensity(LinearModel):
         shape (n, ) array of bin edges of each volume
         along each axis in units of [µm]. Must be monotonously increasing.
     dl: float
-        discretization length of compartments before binning [µm] (default=1.).
-        Lower values will result in more accurate estimates.
+        discretization length of compartments before binning [µm]. Default=1.
+        Lower values will result in more accurate estimates as each line source
+        gets split into more points.
 
     Examples
     --------
@@ -1890,6 +1903,11 @@ class LaminarCurrentSourceDensity(LinearModel):
     with unit [nA], and each row indexed by :math:`j` of
     :math:`\\mathbf{C}` represents the CSD in each volume for every time step
     as the sum of currents divided by the volume.
+
+    See also
+    --------
+    LinearModel
+    VolumetricCurrentSourceDensity
 
     Parameters
     ----------
