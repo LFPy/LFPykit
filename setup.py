@@ -46,7 +46,8 @@ setuptools.setup(
         'scipy',
         'meautility'
         ],
-    package_data={'lfpykit': [os.path.join('tests', '*.npz')]},
+    package_data={'lfpykit': [os.path.join('tests', '*.npz'),
+                              os.path.join('tests', '*.py')]},
     include_package_data=True,
     extras_require={'tests': ['pytest'],
                     'docs': ['sphinx', 'numpydoc', 'sphinx_rtd_theme',
