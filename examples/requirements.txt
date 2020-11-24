@@ -1,2 +1,2 @@
 jupyter
--e git+https://github.com/LFPy/LFPy.git@2.2.dev0#egg=LFPy
+-e git+https://github.com/LFPy/LFPy.git@master#egg=LFPy
