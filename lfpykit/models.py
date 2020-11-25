@@ -1015,6 +1015,13 @@ class RecMEAElectrode(RecExtElectrode):
 
     For further details, see reference [1]_.
 
+    See also
+    --------
+    LinearModel
+    PointSourcePotential
+    LineSourcePotential
+    RecExtElectrode
+
     Parameters
     ----------
     cell: object
@@ -1737,6 +1744,144 @@ class OneSphereVolumeConductor(LinearModel):
         return M
 
 
+class VolumetricCurrentSourceDensity(LinearModel):
+    """
+    Facilitates calculations of the ground truth Current Source Density (CSD)
+    across 3D volumetric grid with bin edges defined by
+    parameters ``x``, ``y`` and ``z``.
+
+    The implementation assumes piecewise constant current sources similar to
+    LineSourcePotential, and accounts for the fraction of each segment's length
+    within each volume by counting the number of points representing partial
+    segments with max length ``dl`` divided by the number of partial segments.
+
+    This class is a `LinearModel` subclass that defines a 4D linear response
+    matrix :math:`\\mathbf{M}` of shape
+    ``(x.size-1, y.size-1, z.size-1, n_seg)`` between transmembrane current
+    array :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
+    corresponding CSD :math:`\\mathbf{C}` [nA/µm^3] as
+
+    .. math:: \\mathbf{C} = \\mathbf{M} \\mathbf{I}
+
+    The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps)
+    with unit [nA], and each row indexed by :math:`j` of
+    :math:`\\mathbf{C}` represents the CSD in each bin for every time step
+    as the sum of currents divided by the volume.
+
+    See also
+    --------
+    LinearModel
+    LaminarCurrentSourceDensity
+
+    Parameters
+    ----------
+    cell: object or None
+        `CellGeometry` instance or similar.
+    x, y, z: ndarray, dtype=float
+        shape (n, ) array of bin edges of each volume
+        along each axis in units of [µm]. Must be monotonously increasing.
+    dl: float
+        discretization length of compartments before binning [µm]. Default=1.
+        Lower values will result in more accurate estimates as each line source
+        gets split into more points.
+
+    Examples
+    --------
+
+    Mock cell geometry and transmembrane currents:
+
+    >>> import numpy as np
+    >>> from lfpykit import CellGeometry, VolumetricCurrentSourceDensity
+    >>> # cell geometry with three segments [um]
+    >>> cell = CellGeometry(x=np.array([[0, 0], [0, 0], [0, 0]]),
+    >>>                     y=np.array([[0, 0], [0, 0], [0, 0]]),
+    >>>                     z=np.array([[0, 10], [10, 20], [20, 30]]),
+    >>>                     d=np.array([1, 1, 1]))
+    >>> # transmembrane currents, three time steps [nA]
+    >>> I_m = np.array([[0., -1., 1.], [-1., 1., 0.], [1., 0., -1.]])
+    >>> # instantiate probe, get linear response matrix
+    >>> csd = VolumetricCurrentSourceDensity(cell=cell,
+    >>>                                      x=np.linspace(-20, 20, 5),
+    >>>                                      y=np.linspace(-20, 20, 5),
+    >>>                                      z=np.linspace(-20, 20, 5), dl=1.)
+    >>> M = csd.get_transformation_matrix()
+    >>> # compute current source density [nA/µm3]
+    >>> M @ I_m
+    array([[[[ 0.,  0.,  0.],
+             [ 0.,  0.,  0.],
+             [ 0.,  0.,  0.],
+             [ 0.,  0.,  0.]],
+             ...
+
+    Notes
+    -----
+    The resulting mapping M may be very sparse (i.e, mostly made up by zeros)
+    and can be converted into a sparse array for more efficient multiplication
+    for the same result:
+
+    >>> import scipy.sparse as ss
+    >>> M_csc = ss.csc_matrix(M.reshape((-1, M.shape[-1])))
+    >>> C = M_csc @ I_m
+    >>> np.all(C.reshape((M.shape[:-1] + (-1,))) == (M @ I_m))
+    True
+
+    References
+    ----------
+
+    Raises
+    ------
+
+    """
+    def __init__(self, cell, x=None, y=None, z=None, dl=1.):
+        super().__init__(cell=cell)
+
+        self.x = x
+        self.y = y
+        self.z = z
+        self.dl = dl
+
+    def get_transformation_matrix(self):
+        '''
+        Get linear response matrix
+
+        Returns
+        -------
+        response_matrix: ndarray
+            shape (x.size-1, y.size-1, z.size-1, n_seg) ndarray
+
+        Raises
+        ------
+        AttributeError
+            if `cell is None`
+        '''
+        if self.cell is None:
+            raise AttributeError(
+                '{}.cell is None'.format(self.__class__.__name__))
+
+        # initialize transformation matrix
+        M = np.zeros((self.x.size - 1, self.y.size - 1, self.z.size - 1,
+                      self.cell.totnsegs))
+
+        for i in range(self.cell.totnsegs):
+            # find points along each segments and assign to bins
+            n = int(np.ceil(self.cell.length[i] / self.dl))
+            dx = (self.cell.x[i, 0] - self.cell.x[i, 1]) / n
+            x = np.linspace(self.cell.x[i, 0] - dx / 2,
+                            self.cell.x[i, 1] + dx / 2, n)
+            dy = (self.cell.y[i, 0] - self.cell.y[i, 1]) / n
+            y = np.linspace(self.cell.y[i, 0] - dy / 2,
+                            self.cell.y[i, 1] + dy / 2, n)
+            dz = (self.cell.z[i, 0] - self.cell.z[i, 1]) / n
+            z = np.linspace(self.cell.z[i, 0] - dz / 2,
+                            self.cell.z[i, 1] + dz / 2, n)
+            # update mapping as weighted 3D histogram
+            M[:, :, :, i] = np.histogramdd(sample=np.c_[x, y, z],
+                                           bins=(self.x, self.y, self.z),
+                                           weights=np.ones(n) / n)[0]
+
+        return M
+
+
 class LaminarCurrentSourceDensity(LinearModel):
     """
     Facilitates calculations of the ground truth Current Source Density (CSD)
@@ -1758,6 +1903,11 @@ class LaminarCurrentSourceDensity(LinearModel):
     with unit [nA], and each row indexed by :math:`j` of
     :math:`\\mathbf{C}` represents the CSD in each volume for every time step
     as the sum of currents divided by the volume.
+
+    See also
+    --------
+    LinearModel
+    VolumetricCurrentSourceDensity
 
     Parameters
     ----------

@@ -821,3 +821,87 @@ class TestSuite(unittest.TestCase):
         M = csd.get_transformation_matrix()
 
         np.testing.assert_allclose(M_gt, M)
+
+    def test_VolumetricCurrentSourceDensity_00(self):
+        cell = get_cell(n_seg=1)
+        cell.z = cell.z * 10.
+        cell._set_length()
+        csd = lfp.VolumetricCurrentSourceDensity(cell,
+                                                 x=np.linspace(-5., 5., 2),
+                                                 y=np.linspace(-5., 5., 2),
+                                                 z=np.linspace(-5., 5., 2),
+                                                 dl=1.)
+        M = csd.get_transformation_matrix()
+
+        M_gt = np.zeros((1, 1, 1, 1))
+        M_gt[0, 0, 0, 0] = 0.5
+
+        np.testing.assert_allclose(M_gt, M)
+
+    def test_VolumetricCurrentSourceDensity_01(self):
+        cell = get_cell(n_seg=1)
+        cell.z = cell.z * 10.
+        cell._set_length()
+        csd = lfp.VolumetricCurrentSourceDensity(cell,
+                                                 x=np.linspace(-5., 5., 2),
+                                                 y=np.linspace(-5., 5., 2),
+                                                 z=np.linspace(-5., 15., 3),
+                                                 dl=1.)
+        M = csd.get_transformation_matrix()
+
+        M_gt = np.zeros((1, 1, 2, 1))
+        M_gt[0, 0, :, 0] = 0.5
+
+        np.testing.assert_allclose(M_gt, M)
+
+    def test_VolumetricCurrentSourceDensity_02(self):
+        cell = get_cell(n_seg=1)
+        cell.z = cell.z * 10.
+        cell._set_length()
+        csd = lfp.VolumetricCurrentSourceDensity(cell,
+                                                 x=np.linspace(-5., 5., 2),
+                                                 y=np.linspace(-5., 5., 2),
+                                                 z=np.linspace(-15., 25., 5),
+                                                 dl=1.)
+        M = csd.get_transformation_matrix()
+
+        M_gt = np.zeros((1, 1, 4, 1))
+        M_gt[0, 0, 1:3, 0] = 0.5
+
+        np.testing.assert_allclose(M_gt, M)
+
+    def test_VolumetricCurrentSourceDensity_03(self):
+        cell = get_cell(n_seg=2)
+        cell.z -= 1.
+        cell.z = cell.z * 10.
+        cell._set_length()
+        csd = lfp.VolumetricCurrentSourceDensity(cell,
+                                                 x=np.linspace(-5., 5., 2),
+                                                 y=np.linspace(-5., 5., 2),
+                                                 z=np.linspace(-20., 20., 5),
+                                                 dl=1.)
+        M = csd.get_transformation_matrix()
+
+        M_gt = np.zeros((1, 1, 4, 2))
+        M_gt[0, 0, 1, 0] = 1.
+        M_gt[0, 0, 2, 1] = 1.
+
+        np.testing.assert_allclose(M_gt, M)
+
+    def test_VolumetricCurrentSourceDensity_04(self):
+        cell = get_cell(n_seg=2)
+        cell.z -= 0.5
+        cell.z = cell.z * 10.
+        cell._set_length()
+        csd = lfp.VolumetricCurrentSourceDensity(cell,
+                                                 x=np.linspace(-5., 5., 2),
+                                                 y=np.linspace(-5., 5., 2),
+                                                 z=np.linspace(-20., 20., 5),
+                                                 dl=1.)
+        M = csd.get_transformation_matrix()
+
+        M_gt = np.zeros((1, 1, 4, 2))
+        M_gt[0, 0, 1:3, 0] = 0.5
+        M_gt[0, 0, 2:4, 1] = 0.5
+
+        np.testing.assert_allclose(M_gt, M)
