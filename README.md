@@ -54,7 +54,7 @@ Build Status
 ------------
 
 [![DOI](https://zenodo.org/badge/288660131.svg)](https://zenodo.org/badge/latestdoi/288660131)
-[![Build Status](https://travis-ci.org/LFPy/LFPykit.svg?branch=master)](https://travis-ci.org/LFPy/LFPykit)
+[![Build Status](https://travis-ci.com/LFPy/LFPykit.svg?branch=master)](https://travis-ci.com/LFPy/LFPykit)
 [![Coverage Status](https://coveralls.io/repos/github/LFPy/LFPykit/badge.svg?branch=master)](https://coveralls.io/github/LFPy/LFPykit?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/lfpykit/badge/?version=latest)](https://lfpykit.readthedocs.io/en/latest/?badge=latest)
 [![Lintly flake8 checks](https://github.com/LFPy/lfpykit/workflows/Lintly%20flake8%20checks/badge.svg)](https://github.com/LFPy/LFPykit/actions?query=workflow%3A%22Lintly+flake8+checks%22)
