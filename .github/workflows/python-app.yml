@@ -29,7 +29,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        if [ ${{ matrix.python-version }} < "3.9" ]; then pip install neuron; fi
+        if [[ "${{ matrix.python-version }}" < "3.9" ]]; then pip install neuron; fi
         pip install .
     - name: Lint with flake8
       run: |
