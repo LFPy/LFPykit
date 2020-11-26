@@ -129,7 +129,7 @@ and corresponding measurements (see Usage below)
 Usage
 -----
 
-A basic usage example using a mock 3-segment stick like neuron,
+A basic usage example using a mock 3-segment stick-like neuron,
 treating each segment as a point source in a linear, isotropic and homogeneous volume conductor,
 computing the extracellular potential in ten different locations
 alongside the cell geometry:
@@ -171,7 +171,7 @@ alongside the cell geometry:
            [ 0.00093413, -0.00093413]])
 
 
-A basic usage example using a mock 3-segment stick like neuron,
+A basic usage example using a mock 3-segment stick-like neuron,
 treating each segment as a point source,
 computing the current dipole moment and computing the potential in ten different
 remote locations away from the cell geometry:
@@ -258,7 +258,7 @@ Documentation
 -------------
 
 The online Documentation of `LFPykit` can be found here:
-https://lfpy-forward-models.readthedocs.io/en/latest
+https://lfpykit.readthedocs.io/en/latest
 
 
 Dependencies
