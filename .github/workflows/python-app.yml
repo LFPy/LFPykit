@@ -41,5 +41,5 @@ jobs:
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
-        py.test -v --cov=.
-        coveralls
+        py.test -v --cov-report term --cov=lfpykit/tests/
+        coveralls report --show-missing
