@@ -1,8 +1,7 @@
-LFPykit
-=======
+# LFPykit
 
 This Python module contain freestanding implementations of electrostatic
-forward models presently incorporated in LFPy
+forward models incorporated in LFPy
 (https://github.com/LFPy/LFPy, https://LFPy.readthedocs.io).
 
 The aim of the `LFPykit` module is to provide electrostatic models
@@ -50,8 +49,7 @@ as described in various papers and books:
    Neurosci. 11:490. doi: 10.3389/fnhum.2017.00490
 
 
-Build Status
-------------
+## Build Status
 
 [![DOI](https://zenodo.org/badge/288660131.svg)](https://zenodo.org/badge/latestdoi/288660131)
 [![Coverage Status](https://coveralls.io/repos/github/LFPy/LFPykit/badge.svg?branch=master)](https://coveralls.io/github/LFPy/LFPykit?branch=master)
@@ -59,11 +57,15 @@ Build Status
 [![Lintly flake8 checks](https://github.com/LFPy/lfpykit/workflows/Lintly%20flake8%20checks/badge.svg)](https://github.com/LFPy/LFPykit/actions?query=workflow%3A%22Lintly+flake8+checks%22)
 [![Python application](https://github.com/LFPy/LFPykit/workflows/Python%20application/badge.svg)](https://github.com/LFPy/LFPykit/actions?query=workflow%3A%22Python+application%22)
 [![Upload Python Package](https://github.com/LFPy/LFPykit/workflows/Upload%20Python%20Package/badge.svg)](https://pypi.org/project/LFPykit)
+[![Conda Recipe](https://img.shields.io/badge/recipe-lfpykit-green.svg)](https://anaconda.org/conda-forge/lfpykit)
+[![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/lfpykit.svg)](https://anaconda.org/conda-forge/lfpykit)
+[![Conda Version](https://img.shields.io/conda/vn/conda-forge/lfpykit.svg)](https://anaconda.org/conda-forge/lfpykit)
+[![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/lfpykit.svg)](https://anaconda.org/conda-forge/lfpykit)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/LFPy/LFPykit.git/master)
 [![License](http://img.shields.io/:license-GPLv3+-green.svg)](http://www.gnu.org/licenses/gpl-3.0.html)
 
-Features
---------
+
+## Features
 
 `LFPykit` presently incorporates different electrostatic forward models for extracellular potentials
 and magnetic signals that has been derived using volume conductor theory.
@@ -102,7 +104,9 @@ to different measurement modalities:
 * `LaminarCurrentSourceDensity`:
   For computing the 'ground truth' current source density across
   cylindrical volumes aligned with the z-axis
-
+* `VolumetricCurrentSourceDensity`:
+  For computing the 'ground truth' current source density on regularly
+  spaced 3D grid
 
 Different classes built to map current dipole moments (i.e., computed using `CurrentDipoleMoment`)
 to extracellular measurements:
@@ -125,8 +129,7 @@ that returns the linear map between the transmembrane currents or current dipole
 and corresponding measurements (see Usage below)
 
 
-Usage
------
+## Usage
 
 A basic usage example using a mock 3-segment stick-like neuron,
 treating each segment as a point source in a linear, isotropic and homogeneous volume conductor,
@@ -216,8 +219,7 @@ remote locations away from the cell geometry:
           [ 1.96075587e-06, -1.96075587e-06]])
 
 
-Physical units
---------------
+## Physical units
 
 Notes on physical units used in `LFPykit`:
 
@@ -236,8 +238,7 @@ Notes on physical units used in `LFPykit`:
 - Magnetic fields are assumed to be in units of (nA/µm)
 
 
-Dimensionality
---------------
+## Dimensionality
 
 - Transmembrane currents are represented by arrays with shape `(n_seg, n_timesteps)`
   where `n_seg` is the number of segments of the neuron model.
@@ -253,15 +254,13 @@ Dimensionality
   `(n_points, n_timesteps)`
 
 
-Documentation
--------------
+## Documentation
 
 The online Documentation of `LFPykit` can be found here:
 https://lfpykit.readthedocs.io/en/latest
 
 
-Dependencies
-------------
+## Dependencies
 
 `LFPykit` is implemented in Python and is written (and continuously tested) for `Python >= 3.7`.
 The main `LFPykit` module depends on `numpy`, `scipy` and `MEAutility` (https://github.com/alejoe91/MEAutility, https://meautility.readthedocs.io/en/latest/).
@@ -272,10 +271,9 @@ Running all unit tests and example files may in addition require `py.test`, `mat
 `LFPy` (https://github.com/LFPy/LFPy, https://LFPy.readthedocs.io).
 
 
-Installation
-------------
+## Installation
 
-First, make sure that the above dependencies are installed in the current Python environment.
+### From development sources
 
 Install the current development version on https://GitHub.com using `git` (https://git-scm.com):
 
@@ -291,6 +289,26 @@ For active development, link the repository location
 
     $ python setup.py develop  # --user optional
 
-Installing from the Python Package Index (pypi.org):
+### Installation of stable releases on PyPI.org (https://www.pypi.org)
+
+Installing from the Python Package Index (https://www.pypi.org/project/lfpykit):
 
     $ pip install lfpykit  # --user optional
+
+To upgrade the installation using pip:
+
+    $ pip install --upgrade --no-deps lfpykit
+
+### Installation of stable releases on conda-forge (https://conda-forge.org)
+
+Installing `lfpykit` from the `conda-forge` channel can be achieved by adding `conda-forge` to your channels with:
+
+    $ conda config --add channels conda-forge
+
+Once the `conda-forge` channel has been enabled, `lfpykit` can be installed with:
+
+    $ conda install lfpykit
+
+It is possible to list all of the versions of `lfpykit` available on your platform with:
+
+    $ conda search lfpykit --channel conda-forge
