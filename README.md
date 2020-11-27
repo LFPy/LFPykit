@@ -273,7 +273,7 @@ Running all unit tests and example files may in addition require `py.test`, `mat
 
 ## Installation
 
-### From development sources
+### From development sources (https://github.com/LFPy/LFPykit)
 
 Install the current development version on https://GitHub.com using `git` (https://git-scm.com):
 
