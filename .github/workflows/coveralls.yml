@@ -35,8 +35,6 @@ jobs:
         if [[ "${{ matrix.python-version }}" < "3.9" ]]; then pip install neuron; fi
         pip install .
     - name: Test with pytest and coveralls
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
