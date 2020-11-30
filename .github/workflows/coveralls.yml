@@ -4,8 +4,10 @@
 name: Coveralls
 
 on:
+  pull_request:
+    branches: [ master ]
   pull_request_target:
-    types: [opened]
+    types: [ opened ]
 
 jobs:
   build:
