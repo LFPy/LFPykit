@@ -1284,7 +1284,7 @@ class NYHeadModel(object):
                 raise RuntimeError("When dipole_pos is string, location must"
                                    "be defined in self.dipole_pos_dict. "
                                    "Choose one of: {}".format(
-                                        self.dipole_pos_dict.keys()))
+                                       self.dipole_pos_dict.keys()))
             dipole_pos_ = self.dipole_pos_dict[dipole_pos]
         elif type(dipole_pos) not in [list, np.ndarray]:
             raise RuntimeError("dipole_pos argument type is not valid. "

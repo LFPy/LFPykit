@@ -636,8 +636,6 @@ def calc_lfp_pointsource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     r_limit: np.ndarray
         minimum distance to source current for each compartment
     """
-
-
     cell_z_mid = cell.z.mean(axis=-1)
     z_ = z
 
