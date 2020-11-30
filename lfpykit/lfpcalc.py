@@ -64,8 +64,7 @@ def return_dist_from_segments(xstart, ystart, zstart, xend, yend, zend, p):
 
 
 def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma, r_limit):
-    """Calculate electric field potential using the line-source method, all
-    segments treated as line sources.
+    """Calculate electric field potential using the line-source method, all segments treated as line sources.
 
     Parameters
     ----------
