@@ -14,12 +14,13 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 """
+import math
 import os
 import sys
-import math
-from scipy.special import lpmv
-import numpy as np
 from warnings import warn
+
+import numpy as np
+from scipy.special import lpmv
 
 
 class FourSphereVolumeConductor(object):
@@ -88,11 +89,14 @@ class FourSphereVolumeConductor(object):
             2.39290752e-10, 2.39290752e-10, 2.39290752e-10, 2.39290752e-10,
             2.39290752e-10, 2.39290752e-10]])
     """
-    def __init__(self,
-                 r_electrodes,
-                 radii=[79000., 80000., 85000., 90000.],
-                 sigmas=[0.3, 1.5, 0.015, 0.3],
-                 iter_factor=2. / 99. * 1e-6):
+
+    def __init__(
+        self,
+        r_electrodes,
+        radii=[79000.0, 80000.0, 85000.0, 90000.0],
+        sigmas=[0.3, 1.5, 0.015, 0.3],
+        iter_factor=2.0 / 99.0 * 1e-6,
+    ):
         """Initialize class FourSphereVolumeConductor"""
         self.r1 = float(radii[0])
         self.r2 = float(radii[1])
@@ -126,55 +130,74 @@ class FourSphereVolumeConductor(object):
 
     def _check_params(self):
         """Check that radii, sigmas and r contain reasonable values"""
-        if (self.r1 < 0) or (self.r1 > self.r2) or (
-                self.r2 > self.r3) or (self.r3 > self.r4):
+        if (
+            (self.r1 < 0)
+            or (self.r1 > self.r2)
+            or (self.r2 > self.r3)
+            or (self.r3 > self.r4)
+        ):
             raise RuntimeError(
-                'Radii of brain (radii[0]), CSF (radii[1]), '
-                'skull (radii[2]) and scalp (radii[3]) '
-                'must be positive ints or floats such that '
-                '0 < radii[0] < radii[1] < radii[2] < radii[3].')
+                "Radii of brain (radii[0]), CSF (radii[1]), "
+                "skull (radii[2]) and scalp (radii[3]) "
+                "must be positive ints or floats such that "
+                "0 < radii[0] < radii[1] < radii[2] < radii[3]."
+            )
 
-        if (self.sigma1 < 0) or (self.sigma2 < 0) or (
-                self.sigma3 < 0) or (self.sigma4 < 0):
-            raise RuntimeError('Conductivities (sigmas), must contain positive'
-                               ' ints or floats.')
+        if (
+            (self.sigma1 < 0)
+            or (self.sigma2 < 0)
+            or (self.sigma3 < 0)
+            or (self.sigma4 < 0)
+        ):
+            raise RuntimeError(
+                "Conductivities (sigmas), must contain positive" " ints or floats."
+            )
 
         if any(r > self.r4 for r in self.r):
-            raise ValueError('Electrode located outside head model.'
-                             'r > radii[3]. r = %s, r4 = %s',
-                             self.r, self.r4)
+            raise ValueError(
+                "Electrode located outside head model." "r > radii[3]. r = %s, r4 = %s",
+                self.r,
+                self.r4,
+            )
 
     def _rz_params(self, rz):
         """Define dipole location vector, and check that dipole is located in
         the brain, closer to the center than any measurement location."""
         self._rzloc = rz
         self._rz = np.sqrt(np.sum(rz ** 2))
-        with np.errstate(invalid='ignore'):
+        with np.errstate(invalid="ignore"):
             self._z = self._rzloc / self._rz
         if self._rz == 0:
-            raise RuntimeError('Placing dipole in center of head model '
-                               'causes division by zero.')
+            raise RuntimeError(
+                "Placing dipole in center of head model " "causes division by zero."
+            )
 
         self._rz1 = self._rz / self.r1
 
         if self._rz1 >= 1:
-            raise RuntimeError(
-                'Dipole should be placed inside brain, i.e. |rz| < |r1|')
+            raise RuntimeError("Dipole should be placed inside brain, i.e. |rz| < |r1|")
 
         elif self._rz1 > 0.99999:
             warn(
-                'Dipole should be placed minimum ~1µm away from brain surface,'
-                ' to avoid extremely slow convergence.')
+                "Dipole should be placed minimum ~1µm away from brain surface,"
+                " to avoid extremely slow convergence."
+            )
 
         elif self._rz1 > 0.9999:
-            warn('Computation time might be long due to slow convergence. '
-                 'Can be avoided by placing dipole further away from '
-                 'brain surface.')
+            warn(
+                "Computation time might be long due to slow convergence. "
+                "Can be avoided by placing dipole further away from "
+                "brain surface."
+            )
 
         if any(r < self._rz for r in self.r):
-            raise RuntimeError('Electrode must be farther away from '
-                               'brain center than dipole: r > rz.'
-                               'r = %s, rz = %s', self.r, self._rz)
+            raise RuntimeError(
+                "Electrode must be farther away from "
+                "brain center than dipole: r > rz."
+                "r = %s, rz = %s",
+                self.r,
+                self._rz,
+            )
 
         # compute theta angle between rzloc and rxyz
         self._theta = self._calc_theta()
@@ -211,12 +234,12 @@ class FourSphereVolumeConductor(object):
         else:
             p_rad = np.zeros((3, n_timesteps))
             p_tan = np.zeros((3, n_timesteps))
-        if np.linalg.norm(p_rad) != 0.:
+        if np.linalg.norm(p_rad) != 0.0:
             pot_rad = self._calc_rad_potential(p_rad)
         else:
             pot_rad = np.zeros((n_contacts, n_timesteps))
 
-        if np.linalg.norm(p_tan) != 0.:
+        if np.linalg.norm(p_tan) != 0.0:
             pot_tan = self._calc_tan_potential(p_tan)
         else:
             pot_tan = np.zeros((n_contacts, n_timesteps))
@@ -225,7 +248,7 @@ class FourSphereVolumeConductor(object):
         return pot_tot
 
     def get_transformation_matrix(self, dipole_location):
-        '''
+        """
         Get linear response matrix mapping current dipole moment in [nA µm]
         located in location `rz` to extracellular potential in [mV]
         at recording sites `FourSphereVolumeConductor.` [µm]
@@ -240,7 +263,7 @@ class FourSphereVolumeConductor(object):
         -------
         response_matrix: ndarray
             shape (n_contacts, 3) ndarray
-        '''
+        """
         return self.get_dipole_potential(np.eye(3), dipole_location)
 
     def _decompose_dipole(self, p):
@@ -288,24 +311,19 @@ class FourSphereVolumeConductor(object):
 
         p_tot = np.linalg.norm(p_rad, axis=0)
         s_vector = self._sign_rad_dipole(p_rad)
-        phi_const = s_vector * p_tot / \
-            (4 * np.pi * self.sigma1 * self._rz ** 2)
+        phi_const = s_vector * p_tot / (4 * np.pi * self.sigma1 * self._rz ** 2)
         n_terms = np.zeros((len(self.r), len(p_tot)))
         for el_point in range(len(self.r)):
             r_point = self.r[el_point]
             theta_point = self._theta[el_point]
             if r_point <= self.r1:
-                n_terms[el_point] = self._potential_brain_rad(r_point,
-                                                              theta_point)
+                n_terms[el_point] = self._potential_brain_rad(r_point, theta_point)
             elif r_point <= self.r2:
-                n_terms[el_point] = self._potential_csf_rad(r_point,
-                                                            theta_point)
+                n_terms[el_point] = self._potential_csf_rad(r_point, theta_point)
             elif r_point <= self.r3:
-                n_terms[el_point] = self._potential_skull_rad(r_point,
-                                                              theta_point)
+                n_terms[el_point] = self._potential_skull_rad(r_point, theta_point)
             else:
-                n_terms[el_point] = self._potential_scalp_rad(r_point,
-                                                              theta_point)
+                n_terms[el_point] = self._potential_scalp_rad(r_point, theta_point)
         potential = phi_const * n_terms
         return potential
 
@@ -329,8 +347,7 @@ class FourSphereVolumeConductor(object):
         """
         phi = self._calc_phi(p_tan)
         p_tot = np.linalg.norm(p_tan, axis=0)
-        phi_hom = - p_tot / (4 * np.pi * self.sigma1 *
-                             self._rz ** 2) * np.sin(phi)
+        phi_hom = -p_tot / (4 * np.pi * self.sigma1 * self._rz ** 2) * np.sin(phi)
         n_terms = np.zeros((len(self.r), 1))
         for el_point in range(len(self.r)):
             r_point = self.r[el_point]
@@ -338,20 +355,16 @@ class FourSphereVolumeConductor(object):
             # if r_electrode is orthogonal to p_tan, i.e. theta = 0 or
             # theta = pi,  there is no contribution to electric potential
             # from p_tan
-            if (theta_point == 0.) or (theta_point == np.pi):
+            if (theta_point == 0.0) or (theta_point == np.pi):
                 n_terms[el_point] = 0
             elif r_point <= self.r1:
-                n_terms[el_point] = self._potential_brain_tan(
-                    r_point, theta_point)
+                n_terms[el_point] = self._potential_brain_tan(r_point, theta_point)
             elif r_point <= self.r2:
-                n_terms[el_point] = self._potential_csf_tan(
-                    r_point, theta_point)
+                n_terms[el_point] = self._potential_csf_tan(r_point, theta_point)
             elif r_point <= self.r3:
-                n_terms[el_point] = self._potential_skull_tan(
-                    r_point, theta_point)
+                n_terms[el_point] = self._potential_skull_tan(r_point, theta_point)
             else:
-                n_terms[el_point] = self._potential_scalp_tan(
-                    r_point, theta_point)
+                n_terms[el_point] = self._potential_scalp_tan(r_point, theta_point)
         potential = n_terms * phi_hom
 
         return potential
@@ -369,7 +382,8 @@ class FourSphereVolumeConductor(object):
             z-axis is defined in the direction of rzloc and the radial dipole.
         """
         cos_theta = (self.rxyz @ self._rzloc) / (
-            np.linalg.norm(self.rxyz, axis=1) * np.linalg.norm(self._rzloc))
+            np.linalg.norm(self.rxyz, axis=1) * np.linalg.norm(self._rzloc)
+        )
         theta = np.arccos(cos_theta)
         return theta
 
@@ -405,15 +419,14 @@ class FourSphereVolumeConductor(object):
         # create masks to avoid computing phi when phi is not defined
         mask = np.ones(phi.shape, dtype=bool)
         # phi is not defined when theta= 0,pi or |p_tan| = 0
-        mask[(self._theta == 0) | (self._theta == np.pi)] = np.zeros(
-            p_tan.shape[1])
+        mask[(self._theta == 0) | (self._theta == np.pi)] = np.zeros(p_tan.shape[1])
         mask[:, np.abs(np.linalg.norm(p_tan, axis=0)) == 0] = 0
 
         cos_phi = np.zeros(phi.shape)
         # compute cos_phi using mask to avoid zerodivision
-        cos_phi[mask] = (rxy @ x.T)[mask] \
-            / np.outer(np.linalg.norm(rxy, axis=1),
-                       np.linalg.norm(x, axis=1))[mask]
+        cos_phi[mask] = (rxy @ x.T)[mask] / np.outer(
+            np.linalg.norm(rxy, axis=1), np.linalg.norm(x, axis=1)
+        )[mask]
 
         # compute phi in [0, pi]
         phi[mask] = np.arccos(cos_phi[mask])
@@ -464,8 +477,8 @@ class FourSphereVolumeConductor(object):
             from radial current dipole moment. (unitless)
         """
         n = 1
-        const = 1.
-        coeff_sum = 0.
+        const = 1.0
+        coeff_sum = 0.0
         consts = []
         while const > self.iteration_stop_factor * 1e-6 * coeff_sum:
             c1n = self._calc_c1n(n)
@@ -497,8 +510,8 @@ class FourSphereVolumeConductor(object):
             from radial current dipole moment. (unitless)
         """
         n = 1
-        const = 1.
-        coeff_sum = 0.
+        const = 1.0
+        coeff_sum = 0.0
         consts = []
         while const > self.iteration_stop_factor * coeff_sum:
             term1 = self._calc_csf_term1(n, r)
@@ -532,14 +545,13 @@ class FourSphereVolumeConductor(object):
             from radial current dipole moment. (unitless)
         """
         n = 1
-        const = 1.
-        coeff_sum = 0.
+        const = 1.0
+        coeff_sum = 0.0
         consts = []
         while const > self.iteration_stop_factor * coeff_sum:
             c3n = self._calc_c3n(n)
             d3n = self._calc_d3n(n, c3n)
-            const = n * (c3n * (r / self.r3) ** n +
-                         d3n * (self.r3 / r) ** (n + 1))
+            const = n * (c3n * (r / self.r3) ** n + d3n * (self.r3 / r) ** (n + 1))
             coeff_sum += const
             consts.append(const)
             n += 1
@@ -568,14 +580,13 @@ class FourSphereVolumeConductor(object):
             from radial current dipole moment. (unitless)
         """
         n = 1
-        const = 1.
-        coeff_sum = 0.
+        const = 1.0
+        coeff_sum = 0.0
         consts = []
         while const > self.iteration_stop_factor * coeff_sum:
             c4n = self._calc_c4n(n)
             d4n = self._calc_d4n(n, c4n)
-            const = n * (c4n * (r / self.r4) ** n +
-                         d4n * (self.r4 / r) ** (n + 1))
+            const = n * (c4n * (r / self.r4) ** n + d4n * (self.r4 / r) ** (n + 1))
             coeff_sum += const
             consts.append(const)
             n += 1
@@ -604,17 +615,18 @@ class FourSphereVolumeConductor(object):
             from tangential current dipole moment. (unitless)
         """
         n = 1
-        const = 1.
-        coeff_sum = 0.
+        const = 1.0
+        coeff_sum = 0.0
         consts = []
         while const > self.iteration_stop_factor * coeff_sum:
             c1n = self._calc_c1n(n)
-            const = (c1n * (r / self.r1) ** n + (self._rz / r) ** (n + 1))
+            const = c1n * (r / self.r1) ** n + (self._rz / r) ** (n + 1)
             coeff_sum += const
             consts.append(const)
             n += 1
-        pot_sum = np.sum([c * lpmv(1, i, np.cos(theta))
-                          for c, i in zip(consts, np.arange(1, n))])
+        pot_sum = np.sum(
+            [c * lpmv(1, i, np.cos(theta)) for c, i in zip(consts, np.arange(1, n))]
+        )
         return pot_sum
 
     def _potential_csf_tan(self, r, theta):
@@ -636,8 +648,8 @@ class FourSphereVolumeConductor(object):
             from tangential current dipole moment. (unitless)
         """
         n = 1
-        const = 1.
-        coeff_sum = 0.
+        const = 1.0
+        coeff_sum = 0.0
         consts = []
         while const > self.iteration_stop_factor * coeff_sum:
             term1 = self._calc_csf_term1(n, r)
@@ -646,8 +658,9 @@ class FourSphereVolumeConductor(object):
             coeff_sum += const
             consts.append(const)
             n += 1
-        pot_sum = np.sum([c * lpmv(1, i, np.cos(theta))
-                          for c, i in zip(consts, np.arange(1, n))])
+        pot_sum = np.sum(
+            [c * lpmv(1, i, np.cos(theta)) for c, i in zip(consts, np.arange(1, n))]
+        )
         return pot_sum
 
     def _potential_skull_tan(self, r, theta):
@@ -669,8 +682,8 @@ class FourSphereVolumeConductor(object):
             from tangential current dipole moment. (unitless)
         """
         n = 1
-        const = 1.
-        coeff_sum = 0.
+        const = 1.0
+        coeff_sum = 0.0
         consts = []
         while const > self.iteration_stop_factor * coeff_sum:
             c3n = self._calc_c3n(n)
@@ -679,8 +692,9 @@ class FourSphereVolumeConductor(object):
             coeff_sum += const
             consts.append(const)
             n += 1
-        pot_sum = np.sum([c * lpmv(1, i, np.cos(theta))
-                          for c, i in zip(consts, np.arange(1, n))])
+        pot_sum = np.sum(
+            [c * lpmv(1, i, np.cos(theta)) for c, i in zip(consts, np.arange(1, n))]
+        )
         return pot_sum
 
     def _potential_scalp_tan(self, r, theta):
@@ -702,8 +716,8 @@ class FourSphereVolumeConductor(object):
             from tangential current dipole moment. (unitless)
         """
         n = 1
-        const = 1.
-        coeff_sum = 0.
+        const = 1.0
+        coeff_sum = 0.0
         consts = []
         while const > self.iteration_stop_factor * coeff_sum:
             c4n = self._calc_c4n(n)
@@ -712,48 +726,56 @@ class FourSphereVolumeConductor(object):
             coeff_sum += const
             consts.append(const)
             n += 1
-        pot_sum = np.sum([c * lpmv(1, i, np.cos(theta))
-                          for c, i in zip(consts, np.arange(1, n))])
+        pot_sum = np.sum(
+            [c * lpmv(1, i, np.cos(theta)) for c, i in zip(consts, np.arange(1, n))]
+        )
         return pot_sum
 
     def _calc_vn(self, n):
-        r_const = ((self.r34 ** (2 * n + 1) - 1) /
-                   ((n + 1) / n * self.r34 ** (2 * n + 1) + 1))
+        r_const = (self.r34 ** (2 * n + 1) - 1) / (
+            (n + 1) / n * self.r34 ** (2 * n + 1) + 1
+        )
         if self.sigma23 + r_const == 0.0:
             v = 1e12
         else:
-            v = (n / (n + 1) * self.sigma34 - r_const) / \
-                (self.sigma34 + r_const)
+            v = (n / (n + 1) * self.sigma34 - r_const) / (self.sigma34 + r_const)
         return v
 
     def _calc_yn(self, n):
         vn = self._calc_vn(n)
-        r_const = ((n / (n + 1) * self.r23 ** (2 * n + 1) - vn) /
-                   (self.r23 ** (2 * n + 1) + vn))
+        r_const = (n / (n + 1) * self.r23 ** (2 * n + 1) - vn) / (
+            self.r23 ** (2 * n + 1) + vn
+        )
         if self.sigma23 + r_const == 0.0:
             y = 1e12
         else:
-            y = (n / (n + 1) * self.sigma23 - r_const) / \
-                (self.sigma23 + r_const)
+            y = (n / (n + 1) * self.sigma23 - r_const) / (self.sigma23 + r_const)
         return y
 
     def _calc_zn(self, n):
         yn = self._calc_yn(n)
-        z = (self.r12 ** (2 * n + 1) - (n + 1) / n * yn) / \
-            (self.r12 ** (2 * n + 1) + yn)
+        z = (self.r12 ** (2 * n + 1) - (n + 1) / n * yn) / (
+            self.r12 ** (2 * n + 1) + yn
+        )
         return z
 
     def _calc_c1n(self, n):
         zn = self._calc_zn(n)
-        c1 = (((n + 1) / n * self.sigma12 + zn) /
-              (self.sigma12 - zn) * self._rz1**(n + 1))
+        c1 = (
+            ((n + 1) / n * self.sigma12 + zn)
+            / (self.sigma12 - zn)
+            * self._rz1 ** (n + 1)
+        )
         return c1
 
     def _calc_c2n(self, n):
         yn = self._calc_yn(n)
         c1 = self._calc_c1n(n)
-        c2 = ((c1 + self._rz1**(n + 1)) * self.r12 ** (n + 1) /
-              (self.r12 ** (2 * n + 1) + yn))
+        c2 = (
+            (c1 + self._rz1 ** (n + 1))
+            * self.r12 ** (n + 1)
+            / (self.r12 ** (2 * n + 1) + yn)
+        )
         return c2
 
     def _calc_d2n(self, n, c2):
@@ -776,8 +798,13 @@ class FourSphereVolumeConductor(object):
     def _calc_c4n(self, n):
         c3 = self._calc_c3n(n)
         d3 = self._calc_d3n(n, c3)
-        c4 = ((n + 1) / n * self.r34 ** (n + 1) * (c3 + d3) /
-              ((n + 1) / n * self.r34 ** (2 * n + 1) + 1))
+        c4 = (
+            (n + 1)
+            / n
+            * self.r34 ** (n + 1)
+            * (c3 + d3)
+            / ((n + 1) / n * self.r34 ** (2 * n + 1) + 1)
+        )
         return c4
 
     def _calc_d4n(self, n, c4):
@@ -787,16 +814,25 @@ class FourSphereVolumeConductor(object):
     def _calc_csf_term1(self, n, r):
         yn = self._calc_yn(n)
         c1 = self._calc_c1n(n)
-        term1 = ((c1 + self._rz1 ** (n + 1)) * self.r12 * ((self.r1 * r) /
-                 (self.r2 ** 2)) ** n / (self.r12**(2 * n + 1) + yn))
+        term1 = (
+            (c1 + self._rz1 ** (n + 1))
+            * self.r12
+            * ((self.r1 * r) / (self.r2 ** 2)) ** n
+            / (self.r12 ** (2 * n + 1) + yn)
+        )
         return term1
 
     def _calc_csf_term2(self, n, r):
         yn = self._calc_yn(n)
         c1 = self._calc_c1n(n)
-        term2 = (yn * (c1 + self._rz1 ** (n + 1)) /
-                 (r / self.r2 * ((self.r1 * r) / self.r2**2) ** n +
-                  (r / self.r1) ** (n + 1) * yn))
+        term2 = (
+            yn
+            * (c1 + self._rz1 ** (n + 1))
+            / (
+                r / self.r2 * ((self.r1 * r) / self.r2 ** 2) ** n
+                + (r / self.r1) ** (n + 1) * yn
+            )
+        )
         return term2
 
 
@@ -862,12 +898,13 @@ class InfiniteVolumeConductor(object):
             of [mV] for all timesteps of current dipole moment p
 
         """
-        phi = (r @ p) / (4 * np.pi * self.sigma *
-                         np.linalg.norm(r, axis=-1, keepdims=True)**3)
+        phi = (r @ p) / (
+            4 * np.pi * self.sigma * np.linalg.norm(r, axis=-1, keepdims=True) ** 3
+        )
         return phi
 
     def get_transformation_matrix(self, r):
-        '''
+        """
         Get linear response matrix mapping current dipole moment in [nA µm]
         to extracellular potential in [mV] at recording sites `r` [µm]
 
@@ -881,7 +918,7 @@ class InfiniteVolumeConductor(object):
         -------
         response_matrix: ndarray
             shape (n_contacts, 3) ndarray
-        '''
+        """
         return self.get_dipole_potential(np.eye(3), r)
 
 
@@ -973,19 +1010,20 @@ class MEG(object):
     AssertionError
         If dimensionality of sensor_locations is wrong
     """
-    def __init__(self, sensor_locations, mu=4 * np.pi * 1E-7):
+
+    def __init__(self, sensor_locations, mu=4 * np.pi * 1e-7):
         """
         Initialize class MEG
         """
-        assert sensor_locations.ndim == 2, 'sensor_locations.ndim != 2'
-        assert sensor_locations.shape[1] == 3, 'sensor_locations.shape[1] != 3'
+        assert sensor_locations.ndim == 2, "sensor_locations.ndim != 2"
+        assert sensor_locations.shape[1] == 3, "sensor_locations.shape[1] != 3"
 
         # set attributes
         self.sensor_locations = sensor_locations
         self.mu = mu
 
     def get_transformation_matrix(self, dipole_location):
-        '''
+        """
         Get linear response matrix mapping current dipole moment in [nA µm]
         located in location ``dipole_location` to magnetic field
         :math:`\\mathbf{H}` in units of (nA/µm) at ``sensor_locations``
@@ -999,7 +1037,7 @@ class MEG(object):
         -------
         response_matrix: ndarray
             shape (n_contacts, 3, 3) ndarray
-        '''
+        """
         return self.calculate_H(np.eye(3), dipole_location)
 
     def calculate_H(self, current_dipole_moment, dipole_location):
@@ -1027,25 +1065,27 @@ class MEG(object):
             If dimensionality of current_dipole_moment and/or dipole_location
             is wrong
         """
-        assert current_dipole_moment.ndim == 2, \
-            'current_dipole_moment.ndim != 2'
-        assert current_dipole_moment.shape[0] == 3, \
-            'current_dipole_moment.shape[0] != 3'
-        assert dipole_location.shape == (3, ), \
-            'dipole_location.shape != (3, )'
+        assert current_dipole_moment.ndim == 2, "current_dipole_moment.ndim != 2"
+        assert (
+            current_dipole_moment.shape[0] == 3
+        ), "current_dipole_moment.shape[0] != 3"
+        assert dipole_location.shape == (3,), "dipole_location.shape != (3, )"
 
         # container
-        H = np.empty((self.sensor_locations.shape[0], 3,
-                      current_dipole_moment.shape[1]))
+        H = np.empty(
+            (self.sensor_locations.shape[0], 3, current_dipole_moment.shape[1])
+        )
         # iterate over sensor locations
         for i, r in enumerate(self.sensor_locations):
             R = r - dipole_location
             assert R.ndim == 1 and R.size == 3
-            assert not np.allclose(R, np.zeros(3)), \
-                'Identical dipole and sensor location.'
+            assert not np.allclose(
+                R, np.zeros(3)
+            ), "Identical dipole and sensor location."
 
-            H[i, ] = np.cross(current_dipole_moment.T, R).T \
-                / (4 * np.pi * np.sqrt((R**2).sum())**3)
+            H[i,] = np.cross(
+                current_dipole_moment.T, R
+            ).T / (4 * np.pi * np.sqrt((R ** 2).sum()) ** 3)
 
         return H
 
@@ -1107,10 +1147,10 @@ class NYHeadModel(object):
 
         # Some example locations in NY Head model
         self.dipole_pos_dict = {
-            'calcarine_sulcus': np.array([5, -86, 2]),
-            'motorsensory_cortex': np.array([18, 8, 71]),
-            'parietal_lobe': np.array([54, -48, 55.9]),
-            'occipital_lobe': np.array([-24.7, -103.3, -1.46])
+            "calcarine_sulcus": np.array([5, -86, 2]),
+            "motorsensory_cortex": np.array([18, 8, 71]),
+            "parietal_lobe": np.array([54, -48, 55.9]),
+            "occipital_lobe": np.array([-24.7, -103.3, -1.46]),
         }
 
         self._load_head_model(nyhead_file)
@@ -1124,24 +1164,26 @@ class NYHeadModel(object):
         try:
             import h5py
         except ModuleNotFoundError:
-            raise ImportError("The package h5py was not found. "
-                              "It is needed for loading New York Head model.")
+            raise ImportError(
+                "The package h5py was not found. "
+                "It is needed for loading New York Head model."
+            )
 
         if nyhead_file is None:
             lfpykit_folder = os.path.dirname(os.path.realpath(__file__))
             nyhead_file = os.path.join(lfpykit_folder, "sa_nyhead.mat")
         self.head_file = os.path.abspath(nyhead_file)
         if not os.path.isfile(self.head_file):
-            from urllib.request import urlopen
             import ssl
+            from urllib.request import urlopen
+
             print("New York head model not found: %s" % self.head_file)
             yn = input("Should it be downloaded (710 MB)? [y/n]: ")
-            if yn == 'y':
+            if yn == "y":
                 print("Now downloading. This might take a while ...")
-                nyhead_url = 'https://www.parralab.org/nyhead/sa_nyhead.mat'
-                u = urlopen(nyhead_url,
-                            context=ssl._create_unverified_context())
-                localFile = open(self.head_file, 'wb')
+                nyhead_url = "https://www.parralab.org/nyhead/sa_nyhead.mat"
+                u = urlopen(nyhead_url, context=ssl._create_unverified_context())
+                localFile = open(self.head_file, "wb")
                 localFile.write(u.read())
                 localFile.close()
                 print("Download done!")
@@ -1149,11 +1191,10 @@ class NYHeadModel(object):
                 print("Exiting program ...")
                 sys.exit()
 
-        self.head_data = h5py.File(self.head_file, 'r')["sa"]
+        self.head_data = h5py.File(self.head_file, "r")["sa"]
         self.cortex = np.array(self.head_data["cortex75K"]["vc"])
         self.lead_field = np.array(self.head_data["cortex75K"]["V_fem"])
-        self.lead_field_normal = np.array(
-            self.head_data["cortex75K"]["V_fem_normal"])
+        self.lead_field_normal = np.array(self.head_data["cortex75K"]["V_fem_normal"])
         self.cortex_normals = np.array(self.head_data["cortex75K"]["normals"])
         self.elecs = np.array(self.head_data["locs_3D"])
 
@@ -1194,8 +1235,10 @@ class NYHeadModel(object):
         """
 
         if self.cortex_normal_vec is None:
-            raise RuntimeError("Dipole location must first be set by " +
-                               "set_dipole_pos(loc) function.")
+            raise RuntimeError(
+                "Dipole location must first be set by "
+                + "set_dipole_pos(loc) function."
+            )
         surface_vec = self.cortex_normal_vec
 
         surface_vec /= np.linalg.norm(surface_vec)
@@ -1221,9 +1264,9 @@ class NYHeadModel(object):
         R[1, 2] = -x_ * sin_th + (1.0 - cos_th) * y_ * z_
         R[2, 0] = -y_ * sin_th + (1.0 - cos_th) * x_ * z_
         R[2, 1] = +x_ * sin_th + (1.0 - cos_th) * y_ * z_
-        R[0, 0] = cos_th + x_**2 * (1 - cos_th)
-        R[1, 1] = cos_th + y_**2 * (1 - cos_th)
-        R[2, 2] = cos_th + z_**2 * (1 - cos_th)
+        R[0, 0] = cos_th + x_ ** 2 * (1 - cos_th)
+        R[1, 1] = cos_th + y_ ** 2 * (1 - cos_th)
+        R[2, 2] = cos_th + z_ ** 2 * (1 - cos_th)
 
         return R @ p
 
@@ -1243,9 +1286,11 @@ class NYHeadModel(object):
             Index of the vertex in the brain that is closest to the given
             location
         """
-        return np.argmin((self.cortex[0, :] - pos[0])**2 +
-                         (self.cortex[1, :] - pos[1])**2 +
-                         (self.cortex[2, :] - pos[2])**2)
+        return np.argmin(
+            (self.cortex[0, :] - pos[0]) ** 2
+            + (self.cortex[1, :] - pos[1]) ** 2
+            + (self.cortex[2, :] - pos[2]) ** 2
+        )
 
     def find_closest_electrode(self):
         """
@@ -1254,11 +1299,17 @@ class NYHeadModel(object):
 
         """
         if self.dipole_pos is None:
-            raise RuntimeError("Dipole location must first be set by " +
-                               "set_dipole_pos(loc) function.")
+            raise RuntimeError(
+                "Dipole location must first be set by "
+                + "set_dipole_pos(loc) function."
+            )
 
-        dists = (np.sqrt(np.sum((np.array(self.dipole_pos)[:, None] -
-                                 np.array(self.elecs[:3, :]))**2, axis=0)))
+        dists = np.sqrt(
+            np.sum(
+                (np.array(self.dipole_pos)[:, None] - np.array(self.elecs[:3, :])) ** 2,
+                axis=0,
+            )
+        )
         closest_electrode = np.argmin(dists)
         min_dist = np.min(dists)
         return min_dist, closest_electrode
@@ -1278,31 +1329,35 @@ class NYHeadModel(object):
 
         """
         if dipole_pos is None:
-            dipole_pos_ = self.dipole_pos_dict['motorsensory_cortex']
+            dipole_pos_ = self.dipole_pos_dict["motorsensory_cortex"]
         elif type(dipole_pos) is str:
             if dipole_pos not in self.dipole_pos_dict:
-                raise RuntimeError("When dipole_pos is string, location must"
-                                   "be defined in self.dipole_pos_dict. "
-                                   "Choose one of: {}".format(
-                                       self.dipole_pos_dict.keys()))
+                raise RuntimeError(
+                    "When dipole_pos is string, location must"
+                    "be defined in self.dipole_pos_dict. "
+                    "Choose one of: {}".format(self.dipole_pos_dict.keys())
+                )
             dipole_pos_ = self.dipole_pos_dict[dipole_pos]
         elif type(dipole_pos) not in [list, np.ndarray]:
-            raise RuntimeError("dipole_pos argument type is not valid. "
-                               "Must be None, str, or array")
+            raise RuntimeError(
+                "dipole_pos argument type is not valid. " "Must be None, str, or array"
+            )
         elif type(dipole_pos) in [list, np.ndarray] and len(dipole_pos) != 3:
-            raise RuntimeError("If dipole_pos argument is array it must "
-                               "have length 3")
+            raise RuntimeError(
+                "If dipole_pos argument is array it must " "have length 3"
+            )
         else:
             dipole_pos_ = dipole_pos
 
         self.vertex_idx = self.return_closest_idx(dipole_pos_)
         self.dipole_pos = self.cortex[:, self.vertex_idx]
-        loc_error = np.sqrt(np.sum((self.dipole_pos - dipole_pos_)**2))
+        loc_error = np.sqrt(np.sum((self.dipole_pos - dipole_pos_) ** 2))
 
         if loc_error > 2:
-            raise RuntimeWarning("Large dipole location error! "
-                                 "Given loc: {}; Closest vertex: {}".format(
-                                    dipole_pos_, self.dipole_pos))
+            raise RuntimeWarning(
+                "Large dipole location error! "
+                "Given loc: {}; Closest vertex: {}".format(dipole_pos_, self.dipole_pos)
+            )
 
         self.cortex_normal_vec = self.cortex_normals[:, self.vertex_idx]
 
@@ -1316,4 +1371,4 @@ class NYHeadModel(object):
         response_matrix: ndarray
             shape (231, 3) ndarray
         """
-        return self.lead_field[:, self.vertex_idx, :].T * 1E-9
+        return self.lead_field[:, self.vertex_idx, :].T * 1e-9

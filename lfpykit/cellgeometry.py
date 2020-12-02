@@ -17,7 +17,7 @@ import numpy as np
 
 
 class CellGeometry(object):
-    '''
+    """
     Base class representing the geometry of multicompartment neuron
     models.
 
@@ -63,9 +63,10 @@ class CellGeometry(object):
         lenght of each compartment in units of um
     area: ndarray
         array of compartment surface areas in units of um^2
-    '''
+    """
+
     def __init__(self, x, y, z, d):
-        '''
+        """
         Base class representing the geometry of multicompartment neuron
         models.
 
@@ -113,22 +114,25 @@ class CellGeometry(object):
             lenght of each compartment in units of um
         area: ndarray
             array of compartment surface areas in units of um^2
-        '''
+        """
         # check input
-        assert np.all([type(x) is np.ndarray,
-                       type(y) is np.ndarray,
-                       type(z) is np.ndarray,
-                       type(d) is np.ndarray]), \
-            'x, y, z and d must be of type numpy.ndarray'
-        assert x.ndim == y.ndim == z.ndim == 2, \
-            'x, y and z must be of shape (n_seg x 2)'
-        assert x.shape == y.shape == z.shape, \
-            'x, y and z must all be the same shape'
-        assert x.shape[1] == 2, \
-            'the last axis of x, y and z must be of length 2'
-        assert d.shape == x.shape or (d.ndim == 1 and d.size == x.shape[0]), \
-            'd must either be 1-dimensional with size == n_seg ' + \
-            'or 2-dimensional with d.shape == x.shape'
+        assert np.all(
+            [
+                type(x) is np.ndarray,
+                type(y) is np.ndarray,
+                type(z) is np.ndarray,
+                type(d) is np.ndarray,
+            ]
+        ), "x, y, z and d must be of type numpy.ndarray"
+        assert (
+            x.ndim == y.ndim == z.ndim == 2
+        ), "x, y and z must be of shape (n_seg x 2)"
+        assert x.shape == y.shape == z.shape, "x, y and z must all be the same shape"
+        assert x.shape[1] == 2, "the last axis of x, y and z must be of length 2"
+        assert d.shape == x.shape or (d.ndim == 1 and d.size == x.shape[0]), (
+            "d must either be 1-dimensional with size == n_seg "
+            + "or 2-dimensional with d.shape == x.shape"
+        )
 
         # set attributes
         self.x = x
@@ -143,9 +147,11 @@ class CellGeometry(object):
         self._set_area()
 
     def _set_length(self):
-        self.length = np.sqrt(np.diff(self.x, axis=-1)**2 +
-                              np.diff(self.y, axis=-1)**2 +
-                              np.diff(self.z, axis=-1)**2).flatten()
+        self.length = np.sqrt(
+            np.diff(self.x, axis=-1) ** 2
+            + np.diff(self.y, axis=-1) ** 2
+            + np.diff(self.z, axis=-1) ** 2
+        ).flatten()
 
     def _set_area(self):
         if self.d.ndim == 1:
@@ -153,5 +159,8 @@ class CellGeometry(object):
         else:
             # Surface area of conical frusta
             # A = pi*(r1+r2)*sqrt((r1-r2)^2 + h^2)
-            self.area = np.pi * self.d.sum(axis=-1) * \
-                np.sqrt(np.diff(self.d, axis=-1)**2 + self.length**2)
+            self.area = (
+                np.pi
+                * self.d.sum(axis=-1)
+                * np.sqrt(np.diff(self.d, axis=-1) ** 2 + self.length ** 2)
+            )

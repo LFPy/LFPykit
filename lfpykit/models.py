@@ -21,7 +21,7 @@ import MEAutility as mu
 
 
 class LinearModel(object):
-    '''
+    """
     Base class that defines a 2D linear response matrix :math:`\\mathbf{M}`
     between transmembrane currents
     :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and some
@@ -40,13 +40,13 @@ class LinearModel(object):
         ``lfpykit.CellGeometry`` instance or similar.
         Can also be set to ``None`` which allows setting the attribute ``cell``
         after class instantiation.
-    '''
+    """
 
     def __init__(self, cell):
         self.cell = cell
 
     def get_transformation_matrix(self):
-        '''
+        """
         Get linear response matrix
 
         Returns
@@ -58,15 +58,14 @@ class LinearModel(object):
         ------
         AttributeError
             if `cell is None`
-        '''
+        """
         if self.cell is None:
-            raise AttributeError(
-                '{}.cell is None'.format(self.__class__.__name__))
+            raise AttributeError("{}.cell is None".format(self.__class__.__name__))
         return np.eye(self.cell.totnsegs)
 
 
 class CurrentDipoleMoment(LinearModel):
-    '''
+    """
     `LinearModel` subclass that defines a 2D linear response matrix
     :math:`\\mathbf{M}` between transmembrane current array
     :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
@@ -125,13 +124,13 @@ class CurrentDipoleMoment(LinearModel):
         dendritic filtering gives low-pass power spectra of local field
         potentials. J Comput Neurosci, 29:423–444.
         DOI: 10.1007/s10827-010-0245-4
-    '''
+    """
 
     def __init__(self, cell):
         super().__init__(cell=cell)
 
     def get_transformation_matrix(self):
-        '''
+        """
         Get linear response matrix
 
         Returns
@@ -143,17 +142,20 @@ class CurrentDipoleMoment(LinearModel):
         ------
         AttributeError
             if `cell is None`
-        '''
+        """
         if self.cell is None:
-            raise AttributeError(
-                '{}.cell is None'.format(self.__class__.__name__))
-        return np.stack([self.cell.x.mean(axis=-1),
-                         self.cell.y.mean(axis=-1),
-                         self.cell.z.mean(axis=-1)])
+            raise AttributeError("{}.cell is None".format(self.__class__.__name__))
+        return np.stack(
+            [
+                self.cell.x.mean(axis=-1),
+                self.cell.y.mean(axis=-1),
+                self.cell.z.mean(axis=-1),
+            ]
+        )
 
 
 class PointSourcePotential(LinearModel):
-    '''
+    """
     `LinearModel` subclass that defines a 2D linear response matrix
     :math:`\\mathbf{M}` between transmembrane current array
     :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
@@ -251,22 +253,28 @@ class PointSourcePotential(LinearModel):
        of Neural Network Activity: Computing LFP, ECoG, EEG, and MEG
        Signals With LFPy 2.0. Front. Neuroinform. 12:92.
        doi: 10.3389/fninf.2018.00092
-    '''
+    """
 
     def __init__(self, cell, x, y, z, sigma=0.3):
         super().__init__(cell=cell)
 
         # check input
-        assert np.all([isinstance(x, np.ndarray),
-                       isinstance(y, np.ndarray),
-                       isinstance(z, np.ndarray)]), \
-            'x, y and z must be of type numpy.ndarray'
-        assert x.ndim == y.ndim == z.ndim == 1, \
-            'x, y and z must be of shape (n_coords, )'
-        assert x.shape == y.shape == z.shape, \
-            'x, y and z must contain the same number of elements'
-        assert isinstance(sigma, float) and sigma > 0, \
-            'sigma must be a float number greater than zero'
+        assert np.all(
+            [
+                isinstance(x, np.ndarray),
+                isinstance(y, np.ndarray),
+                isinstance(z, np.ndarray),
+            ]
+        ), "x, y and z must be of type numpy.ndarray"
+        assert (
+            x.ndim == y.ndim == z.ndim == 1
+        ), "x, y and z must be of shape (n_coords, )"
+        assert (
+            x.shape == y.shape == z.shape
+        ), "x, y and z must contain the same number of elements"
+        assert (
+            isinstance(sigma, float) and sigma > 0
+        ), "sigma must be a float number greater than zero"
 
         # set attributes
         self.x = x
@@ -275,7 +283,7 @@ class PointSourcePotential(LinearModel):
         self.sigma = sigma
 
     def get_transformation_matrix(self):
-        '''
+        """
         Get linear response matrix
 
         Returns
@@ -287,27 +295,28 @@ class PointSourcePotential(LinearModel):
         ------
         AttributeError
             if `cell is None`
-        '''
+        """
         if self.cell is None:
-            raise AttributeError(
-                '{}.cell is None'.format(self.__class__.__name__))
+            raise AttributeError("{}.cell is None".format(self.__class__.__name__))
         M = np.empty((self.x.size, self.cell.totnsegs))
         if self.cell.d.ndim == 2:
             r_limit = self.cell.d.mean(axis=-1) / 2
         else:
             r_limit = self.cell.d / 2
         for j in range(self.x.size):
-            M[j, :] = lfpcalc.calc_lfp_pointsource(self.cell,
-                                                   x=self.x[j],
-                                                   y=self.y[j],
-                                                   z=self.z[j],
-                                                   sigma=self.sigma,
-                                                   r_limit=r_limit)
+            M[j, :] = lfpcalc.calc_lfp_pointsource(
+                self.cell,
+                x=self.x[j],
+                y=self.y[j],
+                z=self.z[j],
+                sigma=self.sigma,
+                r_limit=r_limit,
+            )
         return M
 
 
 class LineSourcePotential(LinearModel):
-    '''
+    """
     `LinearModel` subclass that defines a 2D linear response matrix
     :math:`\\mathbf{M}` between transmembrane current array
     :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
@@ -410,22 +419,28 @@ class LineSourcePotential(LinearModel):
        of Neural Network Activity: Computing LFP, ECoG, EEG, and MEG
        Signals With LFPy 2.0. Front. Neuroinform. 12:92.
        doi: 10.3389/fninf.2018.00092
-    '''
+    """
 
     def __init__(self, cell, x, y, z, sigma=0.3):
         super().__init__(cell=cell)
 
         # check input
-        assert np.all([isinstance(x, np.ndarray),
-                       isinstance(y, np.ndarray),
-                       isinstance(z, np.ndarray)]), \
-            'x, y and z must be of type numpy.ndarray'
-        assert x.ndim == y.ndim == z.ndim == 1, \
-            'x, y and z must be of shape (n_coords, )'
-        assert x.shape == y.shape == z.shape, \
-            'x, y and z must contain the same number of elements'
-        assert isinstance(sigma, float) and sigma > 0, \
-            'sigma must be a float number greater than zero'
+        assert np.all(
+            [
+                isinstance(x, np.ndarray),
+                isinstance(y, np.ndarray),
+                isinstance(z, np.ndarray),
+            ]
+        ), "x, y and z must be of type numpy.ndarray"
+        assert (
+            x.ndim == y.ndim == z.ndim == 1
+        ), "x, y and z must be of shape (n_coords, )"
+        assert (
+            x.shape == y.shape == z.shape
+        ), "x, y and z must contain the same number of elements"
+        assert (
+            isinstance(sigma, float) and sigma > 0
+        ), "sigma must be a float number greater than zero"
 
         # set attributes
         self.x = x
@@ -434,7 +449,7 @@ class LineSourcePotential(LinearModel):
         self.sigma = sigma
 
     def get_transformation_matrix(self):
-        '''
+        """
         Get linear response matrix
 
         Returns
@@ -446,22 +461,23 @@ class LineSourcePotential(LinearModel):
         ------
         AttributeError
             if `cell is None`
-        '''
+        """
         if self.cell is None:
-            raise AttributeError(
-                '{}.cell is None'.format(self.__class__.__name__))
+            raise AttributeError("{}.cell is None".format(self.__class__.__name__))
         M = np.empty((self.x.size, self.cell.totnsegs))
         if self.cell.d.ndim == 2:
             r_limit = self.cell.d.mean(axis=-1) / 2
         else:
             r_limit = self.cell.d / 2
         for j in range(self.x.size):
-            M[j, :] = lfpcalc.calc_lfp_linesource(self.cell,
-                                                  x=self.x[j],
-                                                  y=self.y[j],
-                                                  z=self.z[j],
-                                                  sigma=self.sigma,
-                                                  r_limit=r_limit)
+            M[j, :] = lfpcalc.calc_lfp_linesource(
+                self.cell,
+                x=self.x[j],
+                y=self.y[j],
+                z=self.z[j],
+                sigma=self.sigma,
+                r_limit=r_limit,
+            )
         return M
 
 
@@ -758,12 +774,23 @@ class RecExtElectrode(LinearModel):
        doi: 10.3389/fninf.2018.00092
     """
 
-    def __init__(self, cell, sigma=0.3, probe=None,
-                 x=None, y=None, z=None,
-                 N=None, r=None, n=None, contact_shape='circle',
-                 method='linesource',
-                 verbose=False,
-                 seedvalue=None, **kwargs):
+    def __init__(
+        self,
+        cell,
+        sigma=0.3,
+        probe=None,
+        x=None,
+        y=None,
+        z=None,
+        N=None,
+        r=None,
+        n=None,
+        contact_shape="circle",
+        method="linesource",
+        verbose=False,
+        seedvalue=None,
+        **kwargs
+    ):
         """Initialize RecExtElectrode class"""
         super().__init__(cell=cell)
 
@@ -771,17 +798,20 @@ class RecExtElectrode(LinearModel):
         if type(sigma) in [list, np.ndarray]:
             self.sigma = np.array(sigma)
             if not self.sigma.shape == (3,):
-                raise ValueError("Conductivity, sigma, should be float "
-                                 "or ndarray of length 3: "
-                                 "[sigma_x, sigma_y, sigma_z]")
+                raise ValueError(
+                    "Conductivity, sigma, should be float "
+                    "or ndarray of length 3: "
+                    "[sigma_x, sigma_y, sigma_z]"
+                )
             self.anisotropic = True
         else:
             self.sigma = sigma
             self.anisotropic = False
 
         if probe is None:
-            assert np.all([arg is not None] for arg in [x, y, z]), \
-                "instance requires either 'probe' or 'x', 'y', and 'z'"
+            assert np.all(
+                [arg is not None] for arg in [x, y, z]
+            ), "instance requires either 'probe' or 'x', 'y', and 'z'"
 
             if type(x) in [float, int]:
                 self.x = np.array([x])
@@ -795,17 +825,19 @@ class RecExtElectrode(LinearModel):
                 self.z = np.array([z])
             else:
                 self.z = np.array(z).flatten()
-            assert (self.x.size == self.y.size and
-                    self.x.size == self.z.size), \
-                "The number of elements in [x, y, z] must be equal"
+            assert (
+                self.x.size == self.y.size and self.x.size == self.z.size
+            ), "The number of elements in [x, y, z] must be equal"
 
             if N is not None:
                 if not isinstance(N, np.ndarray):
                     try:
                         N = np.array(N)
                     except TypeError as te:
-                        print('Keyword argument N could not be converted to a '
-                              'numpy.ndarray of shape (n_contacts, 3)')
+                        print(
+                            "Keyword argument N could not be converted to a "
+                            "numpy.ndarray of shape (n_contacts, 3)"
+                        )
                         print(sys.exc_info()[0])
                         raise te
                 if N.shape[-1] == 3:
@@ -813,7 +845,7 @@ class RecExtElectrode(LinearModel):
                 else:
                     self.N = N.T
                     if N.shape[-1] != 3:
-                        raise Exception('N.shape must be (n_contacts, 1, 3)!')
+                        raise Exception("N.shape must be (n_contacts, 1, 3)!")
             else:
                 self.N = N
 
@@ -821,28 +853,35 @@ class RecExtElectrode(LinearModel):
             self.n = n
 
             if contact_shape is None:
-                self.contact_shape = 'circle'
-            elif contact_shape in ['circle', 'square', 'rect']:
+                self.contact_shape = "circle"
+            elif contact_shape in ["circle", "square", "rect"]:
                 self.contact_shape = contact_shape
             else:
-                raise ValueError('The contact_shape argument must be either: '
-                                 'None, \'circle\', \'square\', \'rect\'')
-            if self.contact_shape == 'rect':
-                assert len(np.array(self.r)) == 2, \
-                    "For 'rect' shape, 'r' indicates rectangle side length"
+                raise ValueError(
+                    "The contact_shape argument must be either: "
+                    "None, 'circle', 'square', 'rect'"
+                )
+            if self.contact_shape == "rect":
+                assert (
+                    len(np.array(self.r)) == 2
+                ), "For 'rect' shape, 'r' indicates rectangle side length"
 
             positions = np.array([self.x, self.y, self.z]).T
-            probe_info = {'pos': positions,
-                          'description': 'custom',
-                          'size': self.r,
-                          'shape': self.contact_shape,
-                          'type': 'wire',
-                          'center': False}  # add mea type
-            self.probe = mu.MEA(positions=positions, info=probe_info,
-                                normal=self.N, sigma=self.sigma)
+            probe_info = {
+                "pos": positions,
+                "description": "custom",
+                "size": self.r,
+                "shape": self.contact_shape,
+                "type": "wire",
+                "center": False,
+            }  # add mea type
+            self.probe = mu.MEA(
+                positions=positions, info=probe_info, normal=self.N, sigma=self.sigma
+            )
         else:
-            assert isinstance(probe, mu.core.MEA), \
-                "'probe' should be a MEAutility MEA object"
+            assert isinstance(
+                probe, mu.core.MEA
+            ), "'probe' should be a MEAutility MEA object"
             self.probe = deepcopy(probe)
             self.x = probe.positions[:, 0]
             self.y = probe.positions[:, 1]
@@ -863,28 +902,30 @@ class RecExtElectrode(LinearModel):
         self.circle = None
         self.offsets = None
 
-        if method == 'root_as_point':
+        if method == "root_as_point":
             if self.anisotropic:
                 self.lfp_method = lfpcalc.calc_lfp_root_as_point_anisotropic
             else:
                 self.lfp_method = lfpcalc.calc_lfp_root_as_point
-        elif method == 'linesource':
+        elif method == "linesource":
             if self.anisotropic:
                 self.lfp_method = lfpcalc.calc_lfp_linesource_anisotropic
             else:
                 self.lfp_method = lfpcalc.calc_lfp_linesource
-        elif method == 'pointsource':
+        elif method == "pointsource":
             if self.anisotropic:
                 self.lfp_method = lfpcalc.calc_lfp_pointsource_anisotropic
             else:
                 self.lfp_method = lfpcalc.calc_lfp_pointsource
         else:
-            raise ValueError("LFP method not recognized. "
-                             "Should be 'root_as_point', 'linesource' "
-                             "or 'pointsource'")
+            raise ValueError(
+                "LFP method not recognized. "
+                "Should be 'root_as_point', 'linesource' "
+                "or 'pointsource'"
+            )
 
     def get_transformation_matrix(self):
-        '''
+        """
         Get linear response matrix
 
         Returns
@@ -896,10 +937,9 @@ class RecExtElectrode(LinearModel):
         ------
         AttributeError
             if `cell is None`
-        '''
+        """
         if self.cell is None:
-            raise AttributeError(
-                '{}.cell is None'.format(self.__class__.__name__))
+            raise AttributeError("{}.cell is None".format(self.__class__.__name__))
         if self.n is not None and self.N is not None and self.r is not None:
             if self.n <= 1:
                 raise ValueError("n = %i must be larger that 1" % self.n)
@@ -909,13 +949,11 @@ class RecExtElectrode(LinearModel):
             M = self._lfp_el_pos_calc_dist(**self.kwargs)
 
             if self.verbose:
-                print('calculations finished, %s, %s' % (str(self),
-                                                         str(self.cell)))
+                print("calculations finished, %s, %s" % (str(self), str(self.cell)))
         else:
             M = self._loop_over_contacts(**self.kwargs)
             if self.verbose:
-                print('calculations finished, %s, %s' % (str(self),
-                                                         str(self.cell)))
+                print("calculations finished, %s, %s" % (str(self), str(self.cell)))
         # return mapping
         return M
 
@@ -927,13 +965,15 @@ class RecExtElectrode(LinearModel):
         else:
             r_limit = self.cell.d / 2
         for i in range(self.x.size):
-            M[i, :] = self.lfp_method(self.cell,
-                                      x=self.x[i],
-                                      y=self.y[i],
-                                      z=self.z[i],
-                                      sigma=self.sigma,
-                                      r_limit=r_limit,
-                                      **kwargs)
+            M[i, :] = self.lfp_method(
+                self.cell,
+                x=self.x[i],
+                y=self.y[i],
+                z=self.z[i],
+                sigma=self.sigma,
+                r_limit=r_limit,
+                **kwargs
+            )
         return M
 
     def _lfp_el_pos_calc_dist(self, **kwargs):
@@ -941,7 +981,7 @@ class RecExtElectrode(LinearModel):
         Calc. of LFP over an n-point integral approximation over flat
         electrode surface: circle of radius r or square of side r. The
         locations of these n points on the electrode surface are random,
-        within the given surface. """
+        within the given surface."""
 
         def loop_over_points(points):
 
@@ -952,14 +992,15 @@ class RecExtElectrode(LinearModel):
             else:
                 r_limit = self.cell.d / 2
             for j in range(self.n):
-                tmp = self.lfp_method(self.cell,
-                                      x=points[j, 0],
-                                      y=points[j, 1],
-                                      z=points[j, 2],
-                                      r_limit=r_limit,
-                                      sigma=self.sigma,
-                                      **kwargs
-                                      )
+                tmp = self.lfp_method(
+                    self.cell,
+                    x=points[j, 0],
+                    y=points[j, 1],
+                    z=points[j, 2],
+                    r_limit=r_limit,
+                    sigma=self.sigma,
+                    **kwargs
+                )
                 lfp_e += tmp
 
             return lfp_e / self.n
@@ -972,7 +1013,9 @@ class RecExtElectrode(LinearModel):
             points = self.probe.get_random_points_inside(self.n)
             for i, p in enumerate(points):
                 # fill in with contact average
-                M[i, ] = loop_over_points(p)
+                M[
+                    i,
+                ] = loop_over_points(p)
             self.recorded_points = points
         else:
             if self.cell.d.ndim == 2:
@@ -980,13 +1023,15 @@ class RecExtElectrode(LinearModel):
             else:
                 r_limit = self.cell.d / 2
             for i, (x, y, z) in enumerate(zip(self.x, self.y, self.z)):
-                M[i, ] = self.lfp_method(self.cell,
-                                         x=x,
-                                         y=y,
-                                         z=z,
-                                         r_limit=r_limit,
-                                         sigma=self.sigma,
-                                         **kwargs)
+                M[i,] = self.lfp_method(
+                    self.cell,
+                    x=x,
+                    y=y,
+                    z=z,
+                    r_limit=r_limit,
+                    sigma=self.sigma,
+                    **kwargs
+                )
             self.recorded_points = np.array([self.x, self.y, self.z]).T
 
         return M
@@ -1177,21 +1222,43 @@ class RecMEAElectrode(RecExtElectrode):
     >>> plt.show()
     """
 
-    def __init__(self, cell, sigma_T=0.3, sigma_S=1.5, sigma_G=0.0,
-                 h=300., z_shift=0., steps=20, probe=None,
-                 x=np.array([0]), y=np.array([0]), z=np.array([0]),
-                 N=None, r=None, n=None,
-                 method='linesource',
-                 verbose=False,
-                 seedvalue=None, squeeze_cell_factor=None, **kwargs):
+    def __init__(
+        self,
+        cell,
+        sigma_T=0.3,
+        sigma_S=1.5,
+        sigma_G=0.0,
+        h=300.0,
+        z_shift=0.0,
+        steps=20,
+        probe=None,
+        x=np.array([0]),
+        y=np.array([0]),
+        z=np.array([0]),
+        N=None,
+        r=None,
+        n=None,
+        method="linesource",
+        verbose=False,
+        seedvalue=None,
+        squeeze_cell_factor=None,
+        **kwargs
+    ):
 
-        super().__init__(cell=cell,
-                         x=x, y=y, z=z,
-                         probe=probe,
-                         N=N, r=r, n=n,
-                         method=method,
-                         verbose=verbose,
-                         seedvalue=seedvalue, **kwargs)
+        super().__init__(
+            cell=cell,
+            x=x,
+            y=y,
+            z=z,
+            probe=probe,
+            N=N,
+            r=r,
+            n=n,
+            method=method,
+            verbose=verbose,
+            seedvalue=seedvalue,
+            **kwargs
+        )
 
         self.sigma_G = sigma_G
         self.sigma_T = sigma_T
@@ -1201,44 +1268,55 @@ class RecMEAElectrode(RecExtElectrode):
         self.z_shift = z_shift
         self.steps = steps
         self.squeeze_cell_factor = squeeze_cell_factor
-        self.moi_param_kwargs = {"h": self.h,
-                                 "steps": self.steps,
-                                 "sigma_G": self.sigma_G,
-                                 "sigma_T": self.sigma_T,
-                                 "sigma_S": self.sigma_S,
-                                 "z_shift": self.z_shift,
-                                 }
+        self.moi_param_kwargs = {
+            "h": self.h,
+            "steps": self.steps,
+            "sigma_G": self.sigma_G,
+            "sigma_T": self.sigma_T,
+            "sigma_S": self.sigma_S,
+            "z_shift": self.z_shift,
+        }
 
-        if method == 'pointsource':
+        if method == "pointsource":
             self.lfp_method = lfpcalc.calc_lfp_pointsource_moi
         elif method == "linesource":
             if (np.abs(z - self.z_shift) > 1e-9).any():
-                raise NotImplementedError("The method 'linesource' is only "
-                                          "supported for electrodes at the "
-                                          "z=0 plane. Use z=0 or method "
-                                          "'pointsource'.")
+                raise NotImplementedError(
+                    "The method 'linesource' is only "
+                    "supported for electrodes at the "
+                    "z=0 plane. Use z=0 or method "
+                    "'pointsource'."
+                )
             if np.abs(self.sigma_G) > 1e-9:
-                raise NotImplementedError("The method 'linesource' is only "
-                                          "supported for sigma_G=0. Use "
-                                          "sigma_G=0 or method "
-                                          "'pointsource'.")
+                raise NotImplementedError(
+                    "The method 'linesource' is only "
+                    "supported for sigma_G=0. Use "
+                    "sigma_G=0 or method "
+                    "'pointsource'."
+                )
             self.lfp_method = lfpcalc.calc_lfp_linesource_moi
         elif method == "root_as_point":
             if (np.abs(z - self.z_shift) > 1e-9).any():
-                raise NotImplementedError("The method 'root_as_point' is only "
-                                          "supported for electrodes at the "
-                                          "z=0 plane. Use z=0 or method "
-                                          "'pointsource'.")
+                raise NotImplementedError(
+                    "The method 'root_as_point' is only "
+                    "supported for electrodes at the "
+                    "z=0 plane. Use z=0 or method "
+                    "'pointsource'."
+                )
             if np.abs(self.sigma_G) > 1e-9:
-                raise NotImplementedError("The method 'root_as_point' is only "
-                                          "supported for sigma_G=0. Use "
-                                          "sigma_G=0 or method "
-                                          "'pointsource'.")
+                raise NotImplementedError(
+                    "The method 'root_as_point' is only "
+                    "supported for sigma_G=0. Use "
+                    "sigma_G=0 or method "
+                    "'pointsource'."
+                )
             self.lfp_method = lfpcalc.calc_lfp_root_as_point_moi
         else:
-            raise ValueError("LFP method not recognized. "
-                             "Should be 'root_as_point', 'linesource' "
-                             "or 'pointsource'")
+            raise ValueError(
+                "LFP method not recognized. "
+                "Should be 'root_as_point', 'linesource' "
+                "or 'pointsource'"
+            )
 
     def _squeeze_cell_in_depth_direction(self):
         """Will squeeze self.cell centered around the root segment by a scaling
@@ -1247,12 +1325,15 @@ class RecMEAElectrode(RecExtElectrode):
 
         self.distort_cell_geometry()
 
-        if (self.cell.z.max() > self.h + self.z_shift or
-                self.cell.z.min() < self.z_shift):
+        if (
+            self.cell.z.max() > self.h + self.z_shift
+            or self.cell.z.min() < self.z_shift
+        ):
             bad_comps, reason = self._return_comp_outside_slice()
-            msg = ("Compartments {} of cell ({}) has cell.{} slice. "
-                   "Increase squeeze_cell_factor, move or rotate cell."
-                   ).format(bad_comps, self.cell, reason)
+            msg = (
+                "Compartments {} of cell ({}) has cell.{} slice. "
+                "Increase squeeze_cell_factor, move or rotate cell."
+            ).format(bad_comps, self.cell, reason)
 
             raise RuntimeError(msg)
 
@@ -1283,8 +1364,9 @@ class RecMEAElectrode(RecExtElectrode):
             return zend_above, "zend above"
         if len(zend_below) > 0:
             return zend_below, "zend below"
-        raise RuntimeError("This function should only be called if cell"
-                           "extends outside slice")
+        raise RuntimeError(
+            "This function should only be called if cell" "extends outside slice"
+        )
 
     def _test_cell_extent(self):
         """
@@ -1295,22 +1377,30 @@ class RecMEAElectrode(RecExtElectrode):
         if self.cell is None:
             raise RuntimeError("Does not have cell instance.")
 
-        if (self.cell.z.max() > self.z_shift + self.h or
-                self.cell.z.min() < self.z_shift):
+        if (
+            self.cell.z.max() > self.z_shift + self.h
+            or self.cell.z.min() < self.z_shift
+        ):
 
             if self.verbose:
                 print("Cell extends outside slice.")
 
             if self.squeeze_cell_factor is not None:
-                if not self.z_shift < self.cell.z[0, ].mean() < \
-                        (self.z_shift + self.h):
+                if (
+                    not self.z_shift
+                    < self.cell.z[
+                        0,
+                    ].mean()
+                    < (self.z_shift + self.h)
+                ):
                     raise RuntimeError("Soma position is not in slice.")
                 self._squeeze_cell_in_depth_direction()
             else:
                 bad_comps, reason = self._return_comp_outside_slice()
-                msg = ("Compartments {} of cell ({}) has cell.{} slice "
-                       "and argument squeeze_cell_factor is None."
-                       ).format(bad_comps, self.cell, reason)
+                msg = (
+                    "Compartments {} of cell ({}) has cell.{} slice "
+                    "and argument squeeze_cell_factor is None."
+                ).format(bad_comps, self.cell, reason)
                 raise RuntimeError(msg)
         else:
             if self.verbose:
@@ -1320,7 +1410,7 @@ class RecMEAElectrode(RecExtElectrode):
                     print("Squeezing cell anyway.")
                 self._squeeze_cell_in_depth_direction()
 
-    def distort_cell_geometry(self, axis='z', nu=0.0):
+    def distort_cell_geometry(self, axis="z", nu=0.0):
         """
         Distorts cellular morphology with a relative squeeze_cell_factor along
         a chosen axis preserving Poisson's ratio. A ratio nu=0.5 assumes
@@ -1339,23 +1429,33 @@ class RecMEAElectrode(RecExtElectrode):
             Poisson's ratio. Ratio between axial and transversal
             compression/stretching. Default is 0.
         """
-        assert abs(self.squeeze_cell_factor) < 1., \
-            'abs(squeeze_cell_factor) >= 1, must be in <-1, 1>'
-        assert axis in ['x', 'y', 'z'], \
-            'axis={} not "x", "y" or "z"'.format(axis)
+        assert (
+            abs(self.squeeze_cell_factor) < 1.0
+        ), "abs(squeeze_cell_factor) >= 1, must be in <-1, 1>"
+        assert axis in ["x", "y", "z"], 'axis={} not "x", "y" or "z"'.format(axis)
 
-        for pos, dir_ in zip([self.cell.x[0, ].mean(),
-                              self.cell.y[0, ].mean(),
-                              self.cell.z[0, ].mean()],
-                             'xyz'):
+        for pos, dir_ in zip(
+            [
+                self.cell.x[
+                    0,
+                ].mean(),
+                self.cell.y[
+                    0,
+                ].mean(),
+                self.cell.z[
+                    0,
+                ].mean(),
+            ],
+            "xyz",
+        ):
             geometry = getattr(self.cell, dir_)
             if dir_ == axis:
                 geometry -= pos
-                geometry *= (1. - self.squeeze_cell_factor)
+                geometry *= 1.0 - self.squeeze_cell_factor
                 geometry += pos
             else:
                 geometry -= pos
-                geometry *= (1. + self.squeeze_cell_factor * nu)
+                geometry *= 1.0 + self.squeeze_cell_factor * nu
                 geometry += pos
             setattr(self.cell, dir_, geometry)
 
@@ -1364,7 +1464,7 @@ class RecMEAElectrode(RecExtElectrode):
         self.cell._set_area()
 
     def get_transformation_matrix(self):
-        '''
+        """
         Get linear response matrix
 
         Returns
@@ -1376,10 +1476,9 @@ class RecMEAElectrode(RecExtElectrode):
         ------
         AttributeError
             if `cell is None`
-        '''
+        """
         if self.cell is None:
-            raise AttributeError(
-                '{}.cell is None'.format(self.__class__.__name__))
+            raise AttributeError("{}.cell is None".format(self.__class__.__name__))
 
         self._test_cell_extent()
 
@@ -1392,13 +1491,11 @@ class RecMEAElectrode(RecExtElectrode):
             M = self._lfp_el_pos_calc_dist(**self.moi_param_kwargs)
 
             if self.verbose:
-                print('calculations finished, %s, %s' % (str(self),
-                                                         str(self.cell)))
+                print("calculations finished, %s, %s" % (str(self), str(self.cell)))
         else:
             M = self._loop_over_contacts(**self.moi_param_kwargs)
             if self.verbose:
-                print('calculations finished, %s, %s' % (str(self),
-                                                         str(self.cell)))
+                print("calculations finished, %s, %s" % (str(self), str(self.cell)))
 
         return M
 
@@ -1475,28 +1572,26 @@ class OneSphereVolumeConductor(LinearModel):
     >>> plt.show()
     """
 
-    def __init__(self,
-                 cell,
-                 r,
-                 R=10000.,
-                 sigma_i=0.3,
-                 sigma_o=0.03):
+    def __init__(self, cell, r, R=10000.0, sigma_i=0.3, sigma_o=0.03):
         """initialize class OneSphereVolumeConductor"""
         super().__init__(cell=cell)
         # check inputs
-        assert r.shape[0] == 3 and r.ndim == 2, \
-            'r must be a shape (3, n_points) ndarray'
-        assert (isinstance(R, float)) or (isinstance(R, int)), \
-            'sphere radius R must be a float value'
-        assert sigma_i > 0 and sigma_o > 0, \
-            'sigma_i and sigma_o must both be positive values'
+        assert (
+            r.shape[0] == 3 and r.ndim == 2
+        ), "r must be a shape (3, n_points) ndarray"
+        assert (isinstance(R, float)) or (
+            isinstance(R, int)
+        ), "sphere radius R must be a float value"
+        assert (
+            sigma_i > 0 and sigma_o > 0
+        ), "sigma_i and sigma_o must both be positive values"
 
         self.r = r
         self.R = R
         self.sigma_i = sigma_i
         self.sigma_o = sigma_o
 
-    def calc_potential(self, rs, current, min_distance=1., n_max=1000):
+    def calc_potential(self, rs, current, min_distance=1.0, n_max=1000):
         """
         Return the electric potential at observation points for source current
         as function of time.
@@ -1525,12 +1620,15 @@ class OneSphereVolumeConductor(LinearModel):
             an 1D ndarray, and shape (n-points, I.size) ndarray is returned.
             Unit [mV].
         """
-        assert type(rs) in [int, float, np.float64], \
-            'source location rs must be a float value '
-        assert abs(rs) < self.R, '|rs| must be less than sphere radius R'
-        assert (min_distance is None) or \
-            (type(min_distance) in [float, int, np.float64]), \
-            'min_distance must be None or a float'
+        assert type(rs) in [
+            int,
+            float,
+            np.float64,
+        ], "source location rs must be a float value "
+        assert abs(rs) < self.R, "|rs| must be less than sphere radius R"
+        assert (min_distance is None) or (
+            type(min_distance) in [float, int, np.float64]
+        ), "min_distance must be None or a float"
 
         r = self.r[0]
         theta = self.r[1]
@@ -1544,53 +1642,57 @@ class OneSphereVolumeConductor(LinearModel):
         for j, (theta_i, r_i) in enumerate(zip(theta[inds_i], r[inds_i])):
             coeffs_i = np.zeros(n_max)
             for n in range(n_max):
-                coeffs_i[n] = ((self.sigma_i - self.sigma_o) * (n + 1)) / (
-                    self.sigma_i * n + self.sigma_o * (n + 1)) * (
-                    (r_i * rs) / self.R**2)**n
+                coeffs_i[n] = (
+                    ((self.sigma_i - self.sigma_o) * (n + 1))
+                    / (self.sigma_i * n + self.sigma_o * (n + 1))
+                    * ((r_i * rs) / self.R ** 2) ** n
+                )
             poly_i = np.polynomial.legendre.Legendre(coeffs_i)
             phi_i[np.where(inds_i)[0][j]] = poly_i(np.cos(theta_i))
-        phi_i[inds_i] *= 1. / self.R
+        phi_i[inds_i] *= 1.0 / self.R
 
         # observation points r > R
         phi_o = np.zeros(r.size)
         for j, (theta_o, r_o) in enumerate(zip(theta[inds_o], r[inds_o])):
             coeffs_o = np.zeros(n_max)
             for n in range(n_max):
-                coeffs_o[n] = (self.sigma_i * (2 * n + 1)) / \
-                    (self.sigma_i * n + self.sigma_o * (n + 1)) * (rs / r_o)**n
+                coeffs_o[n] = (
+                    (self.sigma_i * (2 * n + 1))
+                    / (self.sigma_i * n + self.sigma_o * (n + 1))
+                    * (rs / r_o) ** n
+                )
             poly_o = np.polynomial.legendre.Legendre(coeffs_o)
             phi_o[np.where(inds_o)[0][j]] = poly_o(np.cos(theta_o))
-        phi_o[inds_o] *= 1. / r[inds_o]
+        phi_o[inds_o] *= 1.0 / r[inds_o]
 
         # potential in homogeneous media
         if min_distance is None:
-            phi_i[inds_i] += 1. / \
-                np.sqrt(r[r <= self.R]**2 + rs**2 -
-                        2 * r[inds_i] * rs * np.cos(theta[inds_i]))
+            phi_i[inds_i] += 1.0 / np.sqrt(
+                r[r <= self.R] ** 2
+                + rs ** 2
+                - 2 * r[inds_i] * rs * np.cos(theta[inds_i])
+            )
         else:
             denom = np.sqrt(
-                r[inds_i]**2 +
-                rs**2 -
-                2 *
-                r[inds_i] *
-                rs *
-                np.cos(
-                    theta[inds_i]))
+                r[inds_i] ** 2 + rs ** 2 - 2 * r[inds_i] * rs * np.cos(theta[inds_i])
+            )
             denom[denom < min_distance] = min_distance
-            phi_i[inds_i] += 1. / denom
+            phi_i[inds_i] += 1.0 / denom
 
         if isinstance(current, np.ndarray):
-            assert np.all(np.isfinite(current) & np.isreal(current)), \
-                'current must be finite and real'
-            assert current.ndim == 1, 'current must be 1D'
+            assert np.all(
+                np.isfinite(current) & np.isreal(current)
+            ), "current must be finite and real"
+            assert current.ndim == 1, "current must be 1D"
 
-            return np.dot((phi_i + phi_o).reshape((1, -1)).T,
-                          current.reshape((1, -1))
-                          ) / (4. * np.pi * self.sigma_i)
+            return np.dot(
+                (phi_i + phi_o).reshape((1, -1)).T, current.reshape((1, -1))
+            ) / (4.0 * np.pi * self.sigma_i)
         else:
-            assert np.isfinite(current) and np.shape(current) == (), \
-                'current must be float or 1D ndarray with float values'
-            return current / (4. * np.pi * self.sigma_i) * (phi_i + phi_o)
+            assert (
+                np.isfinite(current) and np.shape(current) == ()
+            ), "current must be float or 1D ndarray with float values"
+            return current / (4.0 * np.pi * self.sigma_i) * (phi_i + phi_o)
 
     def get_transformation_matrix(self, n_max=1000):
         """
@@ -1691,13 +1793,14 @@ class OneSphereVolumeConductor(LinearModel):
 
         """
         if self.cell is None:
-            raise AttributeError(
-                '{}.cell is None'.format(self.__class__.__name__))
+            raise AttributeError("{}.cell is None".format(self.__class__.__name__))
 
         # midpoint position of compartments in spherical coordinates
-        radius = np.sqrt(self.cell.x.mean(axis=-1)**2
-                         + self.cell.y.mean(axis=-1)**2
-                         + self.cell.z.mean(axis=-1)**2)
+        radius = np.sqrt(
+            self.cell.x.mean(axis=-1) ** 2
+            + self.cell.y.mean(axis=-1) ** 2
+            + self.cell.z.mean(axis=-1) ** 2
+        )
         theta = np.arccos(self.cell.z.mean(axis=-1) / radius)
         phi = np.arctan2(self.cell.y.mean(axis=-1), self.cell.x.mean(axis=-1))
         diam = self.cell.d
@@ -1711,20 +1814,26 @@ class OneSphereVolumeConductor(LinearModel):
         r_orig = np.copy(self.r)
 
         # unit current amplitude
-        current = 1.
+        current = 1.0
 
         # initialize mapping array
         M = np.zeros((self.r.shape[1], radius.size))
 
         # compute the mapping for each compartment
         for i, (radius_i, theta_i, _, diam_i) in enumerate(
-                zip(radius, theta, phi, diam)):
-            self.r = np.array([r_orig[0],  # radius unchanged
-                               r_orig[1] - theta_i,
-                               # rotate relative to source location
-                               r_orig[2]])  # phi unchanged
+            zip(radius, theta, phi, diam)
+        ):
+            self.r = np.array(
+                [
+                    r_orig[0],  # radius unchanged
+                    r_orig[1] - theta_i,
+                    # rotate relative to source location
+                    r_orig[2],
+                ]
+            )  # phi unchanged
             M[:, i] = self.calc_potential(
-                radius_i, current=current, min_distance=diam_i, n_max=n_max)
+                radius_i, current=current, min_distance=diam_i, n_max=n_max
+            )
 
         # reset measurement locations
         self.r = r_orig
@@ -1823,7 +1932,8 @@ class VolumetricCurrentSourceDensity(LinearModel):
     ------
 
     """
-    def __init__(self, cell, x=None, y=None, z=None, dl=1.):
+
+    def __init__(self, cell, x=None, y=None, z=None, dl=1.0):
         super().__init__(cell=cell)
 
         self.x = x
@@ -1832,7 +1942,7 @@ class VolumetricCurrentSourceDensity(LinearModel):
         self.dl = dl
 
     def get_transformation_matrix(self):
-        '''
+        """
         Get linear response matrix
 
         Returns
@@ -1844,31 +1954,30 @@ class VolumetricCurrentSourceDensity(LinearModel):
         ------
         AttributeError
             if `cell is None`
-        '''
+        """
         if self.cell is None:
-            raise AttributeError(
-                '{}.cell is None'.format(self.__class__.__name__))
+            raise AttributeError("{}.cell is None".format(self.__class__.__name__))
 
         # initialize transformation matrix
-        M = np.zeros((self.x.size - 1, self.y.size - 1, self.z.size - 1,
-                      self.cell.totnsegs))
+        M = np.zeros(
+            (self.x.size - 1, self.y.size - 1, self.z.size - 1, self.cell.totnsegs)
+        )
 
         for i in range(self.cell.totnsegs):
             # find points along each segments and assign to bins
             n = int(np.ceil(self.cell.length[i] / self.dl))
             dx = (self.cell.x[i, 0] - self.cell.x[i, 1]) / n
-            x = np.linspace(self.cell.x[i, 0] - dx / 2,
-                            self.cell.x[i, 1] + dx / 2, n)
+            x = np.linspace(self.cell.x[i, 0] - dx / 2, self.cell.x[i, 1] + dx / 2, n)
             dy = (self.cell.y[i, 0] - self.cell.y[i, 1]) / n
-            y = np.linspace(self.cell.y[i, 0] - dy / 2,
-                            self.cell.y[i, 1] + dy / 2, n)
+            y = np.linspace(self.cell.y[i, 0] - dy / 2, self.cell.y[i, 1] + dy / 2, n)
             dz = (self.cell.z[i, 0] - self.cell.z[i, 1]) / n
-            z = np.linspace(self.cell.z[i, 0] - dz / 2,
-                            self.cell.z[i, 1] + dz / 2, n)
+            z = np.linspace(self.cell.z[i, 0] - dz / 2, self.cell.z[i, 1] + dz / 2, n)
             # update mapping as weighted 3D histogram
-            M[:, :, :, i] = np.histogramdd(sample=np.c_[x, y, z],
-                                           bins=(self.x, self.y, self.z),
-                                           weights=np.ones(n) / n)[0]
+            M[:, :, :, i] = np.histogramdd(
+                sample=np.c_[x, y, z],
+                bins=(self.x, self.y, self.z),
+                weights=np.ones(n) / n,
+            )[0]
 
         return M
 
@@ -1957,28 +2066,28 @@ class LaminarCurrentSourceDensity(LinearModel):
     AttributeError
         inputs ``z`` and ``r`` must be ndarrays of correct shape etc.
     """
+
     def __init__(self, cell, z, r):
         super().__init__(cell=cell)
 
         # check input parameters
-        for varname, var in zip(['z', 'r'], [z, r]):
-            assert type(var) is np.ndarray, 'type({}) != np.ndarray'.format(
-                varname)
-        assert z.ndim == 2, 'z.ndim != 2'
-        assert np.all(np.diff(z, axis=-1) > 0), 'lower edge <= upper edge'
-        assert z.shape[1] == 2, 'z.shape[1] != 2'
-        assert r.ndim == 1, 'r.ndim != 1'
-        assert r.shape[0] == z.shape[0], 'r.shape[0] != z.shape[0]'
-        assert np.all(r > 0), 'r must be greater than 0'
+        for varname, var in zip(["z", "r"], [z, r]):
+            assert type(var) is np.ndarray, "type({}) != np.ndarray".format(varname)
+        assert z.ndim == 2, "z.ndim != 2"
+        assert np.all(np.diff(z, axis=-1) > 0), "lower edge <= upper edge"
+        assert z.shape[1] == 2, "z.shape[1] != 2"
+        assert r.ndim == 1, "r.ndim != 1"
+        assert r.shape[0] == z.shape[0], "r.shape[0] != z.shape[0]"
+        assert np.all(r > 0), "r must be greater than 0"
 
         self.z = z
         self.r = r
 
         # lateral offset of each volume from z-axis
-        self.lateral_offset = np.array([0., 0.])
+        self.lateral_offset = np.array([0.0, 0.0])
 
     def get_transformation_matrix(self):
-        '''
+        """
         Get linear response matrix
 
         Returns
@@ -1990,24 +2099,25 @@ class LaminarCurrentSourceDensity(LinearModel):
         ------
         AttributeError
             if `cell is None`
-        '''
+        """
         if self.cell is None:
-            raise AttributeError(
-                '{}.cell is None'.format(self.__class__.__name__))
+            raise AttributeError("{}.cell is None".format(self.__class__.__name__))
         # initialize transformation matrix
         M = np.zeros((self.z.shape[0], self.cell.totnsegs))
 
         # compute radial distance of segment start and end points to z-axis
-        R = np.sqrt((self.cell.x - self.lateral_offset[0])**2 +
-                    (self.cell.y - self.lateral_offset[1])**2)
+        R = np.sqrt(
+            (self.cell.x - self.lateral_offset[0]) ** 2
+            + (self.cell.y - self.lateral_offset[1]) ** 2
+        )
 
         # Volume of each cylinder
-        V = np.pi * self.r**2 * np.diff(self.z, axis=-1).flatten()
+        V = np.pi * self.r ** 2 * np.diff(self.z, axis=-1).flatten()
 
         # iterate over volumes:
-        for i, (z_i, dz_i, r_i) in enumerate(zip(self.z,
-                                                 np.diff(self.z, axis=-1),
-                                                 self.r)):
+        for i, (z_i, dz_i, r_i) in enumerate(
+            zip(self.z, np.diff(self.z, axis=-1), self.r)
+        ):
             # start point in [z_i, z_i + dz_i]
             ii0 = self.cell.z[:, 0] >= z_i[0]
             jj0 = self.cell.z[:, 0] < z_i[1]
@@ -2028,7 +2138,7 @@ class LaminarCurrentSourceDensity(LinearModel):
 
             # trivial case, start and end point of segment lies within volume
             inds = ll0 & ll1
-            M[i, inds] = 1.
+            M[i, inds] = 1.0
 
             # start point of segment lies within volume
             inds = ll0 & (~ll1)
@@ -2042,13 +2152,18 @@ class LaminarCurrentSourceDensity(LinearModel):
             # iterate over lower, right, upper boundary
             for k in np.where(inds)[0]:
                 for ll in range(3):
-                    Pr, Pz, hit = _PrPz(r0=R[k, 0], z0=self.cell.z[k, 0],
-                                        r1=R[k, 1], z1=self.cell.z[k, 1],
-                                        r2=r2[ll], z2=z2[ll],
-                                        r3=r3[ll], z3=z3[ll])
+                    Pr, Pz, hit = _PrPz(
+                        r0=R[k, 0],
+                        z0=self.cell.z[k, 0],
+                        r1=R[k, 1],
+                        z1=self.cell.z[k, 1],
+                        r2=r2[ll],
+                        z2=z2[ll],
+                        r3=r3[ll],
+                        z3=z3[ll],
+                    )
                     if hit:
-                        L = np.sqrt((Pr - R[k, 0])**2
-                                    + (Pz - self.cell.z[k, 0])**2)
+                        L = np.sqrt((Pr - R[k, 0]) ** 2 + (Pz - self.cell.z[k, 0]) ** 2)
                         M[i, k] = L / self.cell.length[k]
                         continue
 
@@ -2057,13 +2172,18 @@ class LaminarCurrentSourceDensity(LinearModel):
 
             for k in np.where(inds)[0]:
                 for ll in range(3):
-                    Pr, Pz, hit = _PrPz(r0=R[k, 0], z0=self.cell.z[k, 0],
-                                        r1=R[k, 1], z1=self.cell.z[k, 1],
-                                        r2=r2[ll], z2=z2[ll],
-                                        r3=r3[ll], z3=z3[ll])
+                    Pr, Pz, hit = _PrPz(
+                        r0=R[k, 0],
+                        z0=self.cell.z[k, 0],
+                        r1=R[k, 1],
+                        z1=self.cell.z[k, 1],
+                        r2=r2[ll],
+                        z2=z2[ll],
+                        r3=r3[ll],
+                        z3=z3[ll],
+                    )
                     if hit:
-                        L = np.sqrt((Pr - R[k, 1])**2
-                                    + (Pz - self.cell.z[k, 1])**2)
+                        L = np.sqrt((Pr - R[k, 1]) ** 2 + (Pz - self.cell.z[k, 1]) ** 2)
                         M[i, k] = L / self.cell.length[k]
                         continue
 
@@ -2074,14 +2194,12 @@ class LaminarCurrentSourceDensity(LinearModel):
 
 
 def _PrPz(r0, z0, r1, z1, r2, z2, r3, z3):
-    '''intersection point for infinite lines'''
+    """intersection point for infinite lines"""
     # intersection point (Pr, Pz)
-    denom = ((r0 - r1) * (z2 - z3) - (z0 - z1) * (r2 - r3))
-    with np.errstate(divide='ignore', invalid='ignore'):
-        Pr = (((r0 * z1 - z0 * r1) * (r2 - r3)
-               - (r0 - r1) * (r2 * z3 - r3 * z2)) / denom)
-        Pz = (((r0 * z1 - z0 * r1) * (z2 - z3)
-               - (z0 - z1) * (r2 * z3 - r3 * z2)) / denom)
+    denom = (r0 - r1) * (z2 - z3) - (z0 - z1) * (r2 - r3)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        Pr = ((r0 * z1 - z0 * r1) * (r2 - r3) - (r0 - r1) * (r2 * z3 - r3 * z2)) / denom
+        Pz = ((r0 * z1 - z0 * r1) * (z2 - z3) - (z0 - z1) * (r2 * z3 - r3 * z2)) / denom
     # check if intersection point lies on lines
     if (Pr >= r0) & (Pr <= r1) & (Pz >= z0) & (Pz <= z1):
         hit = True

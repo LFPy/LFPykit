@@ -59,11 +59,17 @@ GNU General Public License for more details.
   * lfpcalc
 """
 
-from .version import version as __version__
-
-from .cellgeometry import CellGeometry
-from .models import LinearModel, CurrentDipoleMoment, PointSourcePotential, \
-    LineSourcePotential, RecExtElectrode, RecMEAElectrode, \
-    OneSphereVolumeConductor, LaminarCurrentSourceDensity, \
-    VolumetricCurrentSourceDensity
 from . import eegmegcalc
+from .cellgeometry import CellGeometry
+from .models import (
+    CurrentDipoleMoment,
+    LaminarCurrentSourceDensity,
+    LinearModel,
+    LineSourcePotential,
+    OneSphereVolumeConductor,
+    PointSourcePotential,
+    RecExtElectrode,
+    RecMEAElectrode,
+    VolumetricCurrentSourceDensity,
+)
+from .version import version as __version__
