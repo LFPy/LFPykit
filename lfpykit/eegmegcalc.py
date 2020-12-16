@@ -931,6 +931,7 @@ class MEG(object):
     Define cell object, create synapse, compute current dipole moment:
 
     >>> import LFPy, os, numpy as np, matplotlib.pyplot as plt
+    >>> from lfpykit import CurrentDipoleMoment
     >>> from lfpykit.eegmegcalc import MEG
     >>> # create LFPy.Cell object
     >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
@@ -942,17 +943,23 @@ class MEG(object):
     >>>                    record_current=True)
     >>> syn.set_spike_times_w_netstim()
     >>> # simulate, record current dipole moment
-    >>> cell.simulate(rec_current_dipole_moment=True)
+    >>> cell.simulate(rec_imem=True)
+    >>> # Compute current dipole moment
+    >>> cdp = CurrentDipoleMoment(cell=cell)
+    >>> M_cdp = cdp.get_transformation_matrix()
+    >>> current_dipole_moment = M_cdp @ cell.imem
     >>> # Compute the dipole location as an average of segment locations
     >>> # weighted by membrane area:
-    >>> dipole_location = (cell.area * np.c_[cell.xmid, cell.ymid, cell.zmid].T
+    >>> dipole_location = (cell.area * np.c_[cell.x.mean(axis=-1),
+    >>>                                      cell.y.mean(axis=-1),
+    >>>                                      cell.z.mean(axis=-1)].T
     >>>                    / cell.area.sum()).sum(axis=1)
     >>> # Define sensor site, instantiate MEG object, get transformation matrix
     >>> sensor_locations = np.array([[1E4, 0, 0]])
     >>> meg = MEG(sensor_locations)
     >>> M = meg.get_transformation_matrix(dipole_location)
     >>> # compute the magnetic signal in a single sensor location:
-    >>> H = M @ cell.current_dipole_moment.T
+    >>> H = M @ current_dipole_moment
     >>> # plot output
     >>> plt.figure(figsize=(12, 8), dpi=120)
     >>> plt.subplot(311)
