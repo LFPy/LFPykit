@@ -1206,6 +1206,7 @@ class RecMEAElectrode(RecExtElectrode):
                                  "sigma_G": self.sigma_G,
                                  "sigma_T": self.sigma_T,
                                  "sigma_S": self.sigma_S,
+                                 "z_shift": self.z_shift,
                                  }
 
         if method == 'pointsource':
@@ -1382,11 +1383,6 @@ class RecMEAElectrode(RecExtElectrode):
 
         self._test_cell_extent()
 
-        # Temporarily shift coordinate system so middle layer extends
-        # from z=0 to z=h
-        self.z = self.z - self.z_shift
-        self.cell.z = self.cell.z - self.z_shift
-
         if self.n is not None and self.N is not None and self.r is not None:
             if self.n <= 1:
                 raise ValueError("n = %i must be larger that 1" % self.n)
@@ -1403,11 +1399,6 @@ class RecMEAElectrode(RecExtElectrode):
             if self.verbose:
                 print('calculations finished, %s, %s' % (str(self),
                                                          str(self.cell)))
-
-        # Shift coordinate system back so middle layer extends
-        # from z=z_shift to z=z_shift + h
-        self.z = self.z + self.z_shift
-        self.cell.z = self.cell.z + self.z_shift
 
         return M
 

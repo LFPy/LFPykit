@@ -636,10 +636,17 @@ def calc_lfp_pointsource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     r_limit: np.ndarray
         minimum distance to source current for each compartment
     """
+    cell_z_mid = cell.z.mean(axis=-1)
+    z_ = z
+
+    if "z_shift" in kwargs and kwargs["z_shift"] is not None:
+        # Shifting coordinate system before calculations
+        z_ -= kwargs["z_shift"]
+        cell_z_mid -= kwargs["z_shift"]
 
     dx2 = (x - cell.x.mean(axis=-1))**2
     dy2 = (y - cell.y.mean(axis=-1))**2
-    dz2 = (z - cell.z.mean(axis=-1))**2
+    dz2 = (z_ - cell_z_mid)**2
 
     dL2 = dx2 + dy2
     inds = np.where(dL2 + dz2 < r_limit * r_limit)[0]
@@ -651,16 +658,16 @@ def calc_lfp_pointsource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     WTS = (sigma_T - sigma_S) / (sigma_T + sigma_S)
     WTG = (sigma_T - sigma_G) / (sigma_T + sigma_G)
 
-    mapping = _omega(z - cell.z.mean(axis=-1))
-    mapping += (WTS * _omega(z + cell.z.mean(axis=-1) - 2 * h) +
-                WTG * _omega(z + cell.z.mean(axis=-1)))
+    mapping = _omega(z_ - cell_z_mid)
+    mapping += (WTS * _omega(z_ + cell_z_mid - 2 * h) +
+                WTG * _omega(z_ + cell_z_mid))
 
     n = np.arange(1, steps)
     a = (WTS * WTG)**n[:, None] * (
-        WTS * _omega(z + cell.z.mean(axis=-1) - 2 * (n[:, None] + 1) * h) +
-        WTG * _omega(z + cell.z.mean(axis=-1) + 2 * n[:, None] * h) +
-        _omega(z - cell.z.mean(axis=-1) + 2 * n[:, None] * h) +
-        _omega(z - cell.z.mean(axis=-1) - 2 * n[:, None] * h))
+        WTS * _omega(z_ + cell_z_mid - 2 * (n[:, None] + 1) * h) +
+        WTG * _omega(z_ + cell_z_mid + 2 * n[:, None] * h) +
+        _omega(z_ - cell_z_mid + 2 * n[:, None] * h) +
+        _omega(z_ - cell_z_mid - 2 * n[:, None] * h))
     mapping += np.sum(a, axis=0)
     mapping *= 1 / (4 * np.pi * sigma_T)
 
@@ -698,7 +705,15 @@ def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
         minimum distance to source current for each compartment
     """
 
-    if np.abs(z) > 1e-9:
+    cell_z = cell.z.copy()  # Copy to safely shift coordinate system if needed
+    z_ = z
+
+    if "z_shift" in kwargs and kwargs["z_shift"] is not None:
+        # Shifting coordinate system before calculations
+        z_ -= kwargs["z_shift"]
+        cell_z -= kwargs["z_shift"]
+
+    if np.abs(z_) > 1e-9:
         raise RuntimeError("This method can only handle electrodes "
                            "at the MEA plane z=0")
     if np.abs(sigma_G) > 1e-9:
@@ -709,12 +724,12 @@ def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     xend = cell.x[:, -1]
     ystart = cell.y[:, 0]
     yend = cell.y[:, -1]
-    zstart = cell.z[:, 0]
-    zend = cell.z[:, -1]
-    x0, y0, z0 = cell.x[:, 0], cell.y[:, 0], cell.z[:, 0]
-    x1, y1, z1 = cell.x[:, -1], cell.y[:, -1], cell.z[:, -1]
+    zstart = cell_z[:, 0]
+    zend = cell_z[:, -1]
+    x0, y0, z0 = cell.x[:, 0], cell.y[:, 0], cell_z[:, 0]
+    x1, y1, z1 = cell.x[:, -1], cell.y[:, -1], cell_z[:, -1]
 
-    pos = np.array([x, y, z])
+    pos = np.array([x, y, z_])
     rs, _ = return_dist_from_segments(xstart, ystart, zstart,
                                       xend, yend, zend, pos)
     z0_ = z0.copy()
@@ -732,7 +747,7 @@ def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     den = np.zeros(factor_a.shape)
 
     def _omega(a_z):
-        '''See Rottman integration formula 46) page 137 for explanation'''
+        ''' See Rottman integration formula 46) page 137 for explanation '''
         factor_b = - a_x * dx - a_y * dy - a_z * dz
         factor_c = a_x * a_x + a_y * a_y + a_z * a_z
         b_2_ac = factor_b * factor_b - factor_a * factor_c
@@ -797,7 +812,15 @@ def calc_lfp_root_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
         minimum distance to source current for each compartment
     """
 
-    if np.abs(z) > 1e-9:
+    cell_z = cell.z.copy()  # Copy to safely shift coordinate system if needed
+    z_ = z
+
+    if "z_shift" in kwargs and kwargs["z_shift"] is not None:
+        # Shifting coordinate system before calculations
+        z_ -= kwargs["z_shift"]
+        cell_z -= kwargs["z_shift"]
+
+    if np.abs(z_) > 1e-9:
         raise RuntimeError("This method can only handle electrodes "
                            "at the MEA plane z=0")
     if np.abs(sigma_G) > 1e-9:
@@ -808,12 +831,12 @@ def calc_lfp_root_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     xend = cell.x[:, -1]
     ystart = cell.y[:, 0]
     yend = cell.y[:, -1]
-    zstart = cell.z[:, 0]
-    zend = cell.z[:, -1]
-    x0, y0, z0 = cell.x[:, 0], cell.y[:, 0], cell.z[:, 0]
-    x1, y1, z1 = cell.x[:, -1], cell.y[:, -1], cell.z[:, -1]
+    zstart = cell_z[:, 0]
+    zend = cell_z[:, -1]
+    x0, y0, z0 = cell.x[:, 0], cell.y[:, 0], cell_z[:, 0]
+    x1, y1, z1 = cell.x[:, -1], cell.y[:, -1], cell_z[:, -1]
 
-    pos = np.array([x, y, z])
+    pos = np.array([x, y, z_])
     rs, _ = return_dist_from_segments(xstart, ystart, zstart,
                                       xend, yend, zend, pos)
     z0_ = np.array(z0)
@@ -832,7 +855,7 @@ def calc_lfp_root_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     den = np.zeros(factor_a.shape)
 
     def _omega(a_z):
-        '''See Rottman integration formula 46) page 137 for explanation'''
+        ''' See Rottman integration formula 46) page 137 for explanation '''
         factor_b = - a_x * dx - a_y * dy - a_z * dz
         factor_c = a_x * a_x + a_y * a_y + a_z * a_z
         b_2_ac = factor_b * factor_b - factor_a * factor_c
@@ -870,7 +893,7 @@ def calc_lfp_root_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
 
     dx2 = (x - cell.x[rootinds, :].mean(axis=-1))**2
     dy2 = (y - cell.y[rootinds, :].mean(axis=-1))**2
-    dz2 = (z - cell.z[rootinds, :].mean(axis=-1))**2
+    dz2 = (z_ - cell_z[rootinds, :].mean(axis=-1))**2
 
     dL2 = dx2 + dy2
     inds = np.where(dL2 + dz2 < r_limit[rootinds] * r_limit[rootinds])[0]
@@ -879,17 +902,17 @@ def calc_lfp_root_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     def _omega(dz):
         return 1 / np.sqrt(dL2 + dz * dz)
 
-    mapping[rootinds] = _omega(z - cell.z[rootinds, :].mean(axis=-1))
-    mapping[rootinds] += (W * _omega(cell.z[rootinds, :].mean(axis=-1) - 2 * h
+    mapping[rootinds] = _omega(z_ - cell_z[rootinds, :].mean(axis=-1))
+    mapping[rootinds] += (W * _omega(cell_z[rootinds, :].mean(axis=-1) - 2 * h
                                      )
-                          + _omega(cell.z[rootinds, :].mean(axis=-1)))
+                          + _omega(cell_z[rootinds, :].mean(axis=-1)))
 
     n = np.arange(1, steps)
-    a = (W)**n[:, None] * (W * _omega(cell.z[rootinds, :].mean(axis=-1)
+    a = (W)**n[:, None] * (W * _omega(cell_z[rootinds, :].mean(axis=-1)
                                       - 2 * (n[:, None] + 1) * h)
-                           + 2 * _omega(cell.z[rootinds, :].mean(axis=-1)
+                           + 2 * _omega(cell_z[rootinds, :].mean(axis=-1)
                                         + 2 * n[:, None] * h)
-                           + _omega(cell.z[rootinds, :].mean(axis=-1)
+                           + _omega(cell_z[rootinds, :].mean(axis=-1)
                                     - 2 * n[:, None] * h))
     mapping[rootinds] += np.sum(a, axis=0)
     mapping[rootinds] *= 1 / (4 * np.pi * sigma_T)
