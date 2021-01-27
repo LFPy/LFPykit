@@ -32,16 +32,16 @@ class CellGeometry(object):
     ----------
     x: ndarray of floats
         shape (n_seg x 2) array of start- and end-point coordinates of
-        each compartment along x-axis in units of [um]
+        each compartment along x-axis in units of (µm)
     y: ndarray
         shape (n_seg x 2) array of start- and end-point coordinates of
-        each compartment along y-axis in units of [um]
+        each compartment along y-axis in units of (µm)
     z: ndarray
         shape (n_seg x 2) array of start- and end-point coordinates of
-        each compartment along z-axis in units of [um]
+        each compartment along z-axis in units of (µm)
     d: ndarray
         shape (n_seg) or shape (n_seg x 2) array of compartment
-        diameters in units of [um]. If the 2nd axis is equal to 2,
+        diameters in units of (µm). If the 2nd axis is equal to 2,
         conical frusta is assumed.
 
     Attributes
@@ -50,70 +50,21 @@ class CellGeometry(object):
         number of compartments
     x: ndarray of floats
         shape (totnsegs x 2) array of start- and end-point coordinates of
-        each compartment along x-axis in units of [um]
+        each compartment along x-axis in units of (µm)
     y: ndarray
         shape (totnsegs x 2) array of start- and end-point coordinates of
-        each compartment along y-axis in units of [um]
+        each compartment along y-axis in units of (µm)
     z: ndarray
         shape (totnsegs x 2) array of start- and end-point coordinates of
-        each compartment along z-axis in units of [um]
+        each compartment along z-axis in units of (µm)
     d: ndarray
-        shape (totnsegs) array of compartment diameters in units of [um]
+        shape (totnsegs) array of compartment diameters in units of (µm)
     length: ndarray
         lenght of each compartment in units of um
     area: ndarray
         array of compartment surface areas in units of um^2
     '''
     def __init__(self, x, y, z, d):
-        '''
-        Base class representing the geometry of multicompartment neuron
-        models.
-
-        Assumptions
-            - each compartment is piecewise linear between their
-              start and endpoints
-            - each compartment has a constant diameter
-            - the transmembrane current density is constant along the
-              compartment axis
-
-        Parameters
-        ----------
-        x: ndarray of floats
-            shape (n_seg x 2) array of start- and end-point coordinates of
-            each compartment along x-axis in units of [um]
-        y: ndarray
-            shape (n_seg x 2) array of start- and end-point coordinates of
-            each compartment along y-axis in units of [um]
-        z: ndarray
-            shape (n_seg x 2) array of start- and end-point coordinates of
-            each compartment along z-axis in units of [um]
-        d: ndarray
-            shape (n_seg) or shape (n_seg x 2) array of compartment
-            diameters in units of [um]. If the 2nd axis is equal to 2,
-            conical frusta is assumed.
-
-        Attributes
-        ----------
-        totnsegs: int
-            number of compartments
-        x: ndarray of floats
-            shape (totnsegs x 2) array of start- and end-point coordinates of
-            each compartment along x-axis in units of [um]
-        y: ndarray
-            shape (totnsegs x 2) array of start- and end-point coordinates of
-            each compartment along y-axis in units of [um]
-        z: ndarray
-            shape (totnsegs x 2) array of start- and end-point coordinates of
-            each compartment along z-axis in units of [um]
-        d: ndarray
-            shape (n_seg) or shape (n_seg x 2) array of compartment
-            diameters in units of [um]. If the 2nd axis is equal to 2,
-            conical frusta is assumed.
-        length: ndarray
-            lenght of each compartment in units of um
-        area: ndarray
-            array of compartment surface areas in units of um^2
-        '''
         # check input
         assert np.all([type(x) is np.ndarray,
                        type(y) is np.ndarray,

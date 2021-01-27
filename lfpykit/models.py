@@ -24,15 +24,15 @@ class LinearModel(object):
     '''
     Base class that defines a 2D linear response matrix :math:`\\mathbf{M}`
     between transmembrane currents
-    :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and some
+    :math:`\\mathbf{I}` (nA) of a multicompartment neuron model and some
     measurement :math:`\\mathbf{Y}` as
 
     .. math:: \\mathbf{Y} = \\mathbf{M} \\mathbf{I}
 
-    LinearModel only creates a mapping that returns the currents themselves.
+    ``LinearModel`` only creates a mapping that returns the currents themselves.
     The class is suitable as a base class for other linear model
-    implementations, see for example class CurrentDipoleMoment or
-    PointSourcePotential
+    implementations, see for example class ``CurrentDipoleMoment`` or
+    ``PointSourcePotential``
 
     Parameters
     ----------
@@ -57,7 +57,7 @@ class LinearModel(object):
         Raises
         ------
         AttributeError
-            if `cell is None`
+            if ``cell is None``
         '''
         if self.cell is None:
             raise AttributeError(
@@ -67,34 +67,35 @@ class LinearModel(object):
 
 class CurrentDipoleMoment(LinearModel):
     '''
-    `LinearModel` subclass that defines a 2D linear response matrix
+    ``LinearModel`` subclass that defines a 2D linear response matrix
     :math:`\\mathbf{M}` between transmembrane current array
-    :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
-    corresponding current dipole moment :math:`\\mathbf{P}` [nA um] [1]_ as
+    :math:`\\mathbf{I}` (nA) of a multicompartment neuron model and the
+    corresponding current dipole moment :math:`\\mathbf{P}` (nA µm) [1]_ as
 
     .. math:: \\mathbf{P} = \\mathbf{M} \\mathbf{I}
 
 
     The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps)
-    with unit [nA], and the rows of :math:`\\mathbf{P}` represent the
+    with unit (nA), and the rows of :math:`\\mathbf{P}` represent the
     `x`-, `y`- and `z`-components of the current diple moment for every time
     step.
 
     The current dipole moment can be used to compute distal measures of
     neural activity such as the EEG and MEG using
-    `lfpykit.eegmegcalc.FourSphereVolumeConductor` or
-    `lfpykit.eegmegcalc.MEG`, respectively
+    ``lfpykit.eegmegcalc.FourSphereVolumeConductor`` or
+    ``lfpykit.eegmegcalc.MEG``, respectively
 
     Parameters
     ----------
     cell: object
-        CellGeometry instance or similar.
+        ``CellGeometry`` instance or similar.
 
     See also
     --------
     LinearModel
     eegmegcalc.FourSphereVolumeConductor
     eegmegcalc.MEG
+    eegmegcalc.NYHeadModel
 
     Examples
     --------
@@ -142,7 +143,7 @@ class CurrentDipoleMoment(LinearModel):
         Raises
         ------
         AttributeError
-            if `cell is None`
+            if ``cell is None``
         '''
         if self.cell is None:
             raise AttributeError(
@@ -154,16 +155,16 @@ class CurrentDipoleMoment(LinearModel):
 
 class PointSourcePotential(LinearModel):
     '''
-    `LinearModel` subclass that defines a 2D linear response matrix
+    ``LinearModel`` subclass that defines a 2D linear response matrix
     :math:`\\mathbf{M}` between transmembrane current array
-    :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
+    :math:`\\mathbf{I}` (nA) of a multicompartment neuron model and the
     corresponding extracellular electric potential
-    :math:`\\mathbf{V}_{ex}` [mV] as
+    :math:`\\mathbf{V}_{ex}` (mV) as
 
     .. math:: \\mathbf{V}_{ex} = \\mathbf{M} \\mathbf{I}
 
     The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps)
-    with unit [nA], and each row indexed by :math:`j` of
+    with unit (nA), and each row indexed by :math:`j` of
     :math:`\\mathbf{V}_{ex}` represents the electric potential at each
     measurement site for every time step.
 
@@ -190,15 +191,15 @@ class PointSourcePotential(LinearModel):
     Parameters
     ----------
     cell: object
-        CellGeometry instance or similar.
+        ``CellGeometry`` instance or similar.
     x: ndarray of floats
-        x-position of measurement sites [um]
+        x-position of measurement sites (µm)
     y: ndarray of floats
-        y-position of measurement sites [um]
+        y-position of measurement sites (µm)
     z: ndarray of floats
-        z-position of measurement sites [um]
+        z-position of measurement sites (µm)
     sigma: float > 0
-        scalar extracellular conductivity [S/m]
+        scalar extracellular conductivity (S/m)
 
     See also
     --------
@@ -286,7 +287,7 @@ class PointSourcePotential(LinearModel):
         Raises
         ------
         AttributeError
-            if `cell is None`
+            if ``cell is None``
         '''
         if self.cell is None:
             raise AttributeError(
@@ -308,16 +309,16 @@ class PointSourcePotential(LinearModel):
 
 class LineSourcePotential(LinearModel):
     '''
-    `LinearModel` subclass that defines a 2D linear response matrix
+    ``LinearModel`` subclass that defines a 2D linear response matrix
     :math:`\\mathbf{M}` between transmembrane current array
-    :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
+    :math:`\\mathbf{I}` (nA) of a multicompartment neuron model and the
     corresponding extracellular electric potential
-    :math:`\\mathbf{V}_{ex}` [mV] as
+    :math:`\\mathbf{V}_{ex}` (mV) as
 
     .. math:: \\mathbf{V}_{ex} = \\mathbf{M} \\mathbf{I}
 
     The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps)
-    with unit [nA], and each row indexed by :math:`j` of
+    with unit (nA), and each row indexed by :math:`j` of
     :math:`\\mathbf{V}_{ex}` represents the electric potential at each
     measurement site for every time step.
 
@@ -352,13 +353,13 @@ class LineSourcePotential(LinearModel):
     cell: object
         CellGeometry instance or similar.
     x: ndarray of floats
-        x-position of measurement sites [um]
+        x-position of measurement sites (µm)
     y: ndarray of floats
-        y-position of measurement sites [um]
+        y-position of measurement sites (µm)
     z: ndarray of floats
-        z-position of measurement sites [um]
+        z-position of measurement sites (µm)
     sigma: float > 0
-        scalar extracellular conductivity [S/m]
+        scalar extracellular conductivity (S/m)
 
     See also
     --------
@@ -445,7 +446,7 @@ class LineSourcePotential(LinearModel):
         Raises
         ------
         AttributeError
-            if `cell is None`
+            if ``cell is None``
         '''
         if self.cell is None:
             raise AttributeError(
@@ -471,23 +472,24 @@ class RecExtElectrode(LinearModel):
     Main class that represents an extracellular electric recording devices such
     as a laminar probe.
 
-    This class is a `LinearModel` subclass that defines a 2D linear response
+    This class is a ``LinearModel`` subclass that defines a 2D linear response
     matrix :math:`\\mathbf{M}` between transmembrane current array
-    :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
+    :math:`\\mathbf{I}` (nA) of a multicompartment neuron model and the
     corresponding extracellular electric potential
-    :math:`\\mathbf{V}_{ex}` [mV] as
+    :math:`\\mathbf{V}_{ex}` (mV) as
 
     .. math:: \\mathbf{V}_{ex} = \\mathbf{M} \\mathbf{I}
 
     The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps)
-    with unit [nA], and each row indexed by :math:`j` of
+    with unit (nA), and each row indexed by :math:`j` of
     :math:`\\mathbf{V}_{ex}` represents the electric potential at each
     measurement site for every time step.
 
-    The class differ from `PointSourcePotential` and `LineSourcePotential` by:
+    The class differ from ``PointSourcePotential`` and
+    ``LineSourcePotential`` by:
 
         - supporting anisotropic volume conductors [1]_
-        - supporting probe geometry specifications using the `MEAutility`
+        - supporting probe geometry specifications using ``MEAutility``
           (https://meautility.readthedocs.io/en/latest/,
           https://github.com/alejoe91/MEAutility).
         - supporting electrode contact points with finite extents [2]_, [3]_
@@ -503,21 +505,21 @@ class RecExtElectrode(LinearModel):
     Parameters
     ----------
     cell: object
-        `CellGeometry` instance or similar.
+        ``CellGeometry`` instance or similar.
     sigma: float or list/ndarray of floats
-        extracellular conductivity in units of [S/m]. A scalar value implies an
+        extracellular conductivity in units of (S/m). A scalar value implies an
         isotropic extracellular conductivity. If a length 3 list or array of
         floats is provided, these values corresponds to an anisotropic
         conductor with conductivities :math:`[\\sigma_x,\\sigma_y,\\sigma_z]`.
     probe: MEAutility MEA object or None
         MEAutility probe object
     x, y, z: ndarray
-        coordinates or same length arrays of coordinates in units of [um].
+        coordinates or same length arrays of coordinates in units of (µm).
     N: None or list of lists
         Normal vectors [x, y, z] of each circular electrode contact surface,
         default None
     r: float
-        radius of each contact surface, default None [um]
+        radius of each contact surface, default None (µm)
     n: int
         if N is not None and r > 0, the number of discrete points used to
         compute the n-point average potential on each circular contact point.
@@ -543,14 +545,14 @@ class RecExtElectrode(LinearModel):
 
     >>> import numpy as np
     >>> from lfpykit import CellGeometry, RecExtElectrode
-    >>> # cell geometry with three segments [um]
+    >>> # cell geometry with three segments (µm)
     >>> cell = CellGeometry(x=np.array([[0, 0], [0, 0], [0, 0]]),
     >>>                     y=np.array([[0, 0], [0, 0], [0, 0]]),
     >>>                     z=np.array([[0, 10], [10, 20], [20, 30]]),
     >>>                     d=np.array([1, 1, 1]))
-    >>> # transmembrane currents, three time steps [nA]
+    >>> # transmembrane currents, three time steps (nA)
     >>> I_m = np.array([[0., -1., 1.], [-1., 1., 0.], [1., 0., -1.]])
-    >>> # electrode locations [um]
+    >>> # electrode locations (µm)
     >>> r = np.array([[28.24653166, 8.97563241, 18.9492774, 3.47296614,
     >>>                1.20517729, 9.59849603, 21.91956616, 29.84686727,
     >>>                4.41045505, 3.61146625],
@@ -895,7 +897,7 @@ class RecExtElectrode(LinearModel):
         Raises
         ------
         AttributeError
-            if `cell is None`
+            if ``cell is None``
         '''
         if self.cell is None:
             raise AttributeError(
@@ -1085,18 +1087,18 @@ class RecMEAElectrode(RecExtElectrode):
 
     >>> import numpy as np
     >>> from lfpykit import CellGeometry, RecMEAElectrode
-    >>> # cell geometry with four segments [um]
+    >>> # cell geometry with four segments (µm)
     >>> cell = CellGeometry(
     >>>     x=np.array([[0, 10], [10, 20], [20, 30], [30, 40]]),
     >>>     y=np.array([[0, 0], [0, 0], [0, 0], [0, 0]]),
     >>>     z=np.array([[0, 0], [0, 0], [0, 0], [0, 0]]) + 10,
     >>>     d=np.array([1, 1, 1, 1]))
-    >>> # transmembrane currents, three time steps [nA]
+    >>> # transmembrane currents, three time steps (nA)
     >>> I_m = np.array([[0.25, -1., 1.],
     >>>                 [-1., 1., -0.25],
     >>>                 [1., -0.25, -1.],
     >>>                 [-0.25, 0.25, 0.25]])
-    >>> # electrode locations [um]
+    >>> # electrode locations (µm)
     >>> r = np.stack([np.arange(10)*4 + 2, np.zeros(10), np.zeros(10)])
     >>> # instantiate electrode, get linear response matrix
     >>> el = RecMEAElectrode(cell=cell,
@@ -1375,7 +1377,7 @@ class RecMEAElectrode(RecExtElectrode):
         Raises
         ------
         AttributeError
-            if `cell is None`
+            if ``cell is None``
         '''
         if self.cell is None:
             raise AttributeError(
@@ -1415,32 +1417,32 @@ class OneSphereVolumeConductor(LinearModel):
     point charge in an dielectric sphere embedded in dielectric media [1]_,
     which is mathematically equivalent to a current source in conductive media.
 
-    This class is a `LinearModel` subclass that defines a 2D linear response
+    This class is a ``LinearModel`` subclass that defines a 2D linear response
     matrix :math:`\\mathbf{M}` between transmembrane current array
-    :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
+    :math:`\\mathbf{I}` (nA) of a multicompartment neuron model and the
     corresponding extracellular electric potential
-    :math:`\\mathbf{V}_{ex}` [mV] as
+    :math:`\\mathbf{V}_{ex}` (mV) as
 
     .. math:: \\mathbf{V}_{ex} = \\mathbf{M} \\mathbf{I}
 
     The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps)
-    with unit [nA], and each row indexed by :math:`j` of
+    with unit (nA), and each row indexed by :math:`j` of
     :math:`\\mathbf{V}_{ex}` represents the electric potential at each
     measurement site for every time step.
 
     Parameters
     ----------
     cell: object or None
-        `CellGeometry` instance or similar.
+        ``CellGeometry`` instance or similar.
     r: ndarray, dtype=float
         shape(3, n_points) observation points in space in spherical coordinates
         (radius, theta, phi) relative to the center of the sphere.
     R: float
-        sphere radius [µm]
+        sphere radius (µm)
     sigma_i: float
-        electric conductivity for radius r <= R [S/m]
+        electric conductivity for radius r <= R (S/m)
     sigma_o: float
-        electric conductivity for radius r > R [S/m]
+        electric conductivity for radius r > R (S/m)
 
     References
     ----------
@@ -1504,11 +1506,11 @@ class OneSphereVolumeConductor(LinearModel):
         Parameters
         ----------
         rs: float
-            monopole source location along the horizontal x-axis [µm]
+            monopole source location along the horizontal x-axis (µm)
         current: float or ndarray, dtype float
-            float or shape (n_tsteps, ) array containing source current [nA]
+            float or shape (n_tsteps, ) array containing source current (nA)
         min_distance: None or float
-            minimum distance between source location and observation point [µm]
+            minimum distance between source location and observation point (µm)
             (in order to avoid singularities)
         n_max: int
             Number of elements in polynomial expansion to sum over (see [1]_).
@@ -1523,7 +1525,7 @@ class OneSphereVolumeConductor(LinearModel):
         Phi: ndarray
             shape (n-points, ) ndarray of floats if I is float like. If I is
             an 1D ndarray, and shape (n-points, I.size) ndarray is returned.
-            Unit [mV].
+            Unit (mV).
         """
         assert type(rs) in [int, float, np.float64], \
             'source location rs must be a float value '
@@ -1594,9 +1596,9 @@ class OneSphereVolumeConductor(LinearModel):
 
     def get_transformation_matrix(self, n_max=1000):
         """
-        Compute linear mapping between transmembrane currents of CellGeometry
-        like object instance and extracellular potential in and outside of
-        sphere.
+        Compute linear mapping between transmembrane currents of
+        ``CellGeometry`` like object instance and extracellular potential in
+        and outside of sphere.
 
         Parameters
         ----------
@@ -1612,12 +1614,12 @@ class OneSphereVolumeConductor(LinearModel):
         Raises
         ------
         AttributeError
-            if `cell is None`
+            if ``cell is None``
 
         Examples
         --------
         Compute extracellular potential in one-sphere volume conductor model
-        from LFPy.Cell object:
+        from ``LFPy.Cell`` object:
 
         >>> # import modules
         >>> import LFPy
@@ -1742,20 +1744,21 @@ class VolumetricCurrentSourceDensity(LinearModel):
     parameters ``x``, ``y`` and ``z``.
 
     The implementation assumes piecewise constant current sources similar to
-    LineSourcePotential, and accounts for the fraction of each segment's length
-    within each volume by counting the number of points representing partial
-    segments with max length ``dl`` divided by the number of partial segments.
+    ``LineSourcePotential``, and accounts for the fraction of each segment's
+    length within each volume by counting the number of points representing
+    partial segments with max length ``dl`` divided by the number of partial
+    segments.
 
-    This class is a `LinearModel` subclass that defines a 4D linear response
+    This class is a ``LinearModel`` subclass that defines a 4D linear response
     matrix :math:`\\mathbf{M}` of shape
     ``(x.size-1, y.size-1, z.size-1, n_seg)`` between transmembrane current
-    array :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
-    corresponding CSD :math:`\\mathbf{C}` [nA/µm^3] as
+    array :math:`\\mathbf{I}` (nA) of a multicompartment neuron model and the
+    corresponding CSD :math:`\\mathbf{C}` (nA/µm^3) as
 
     .. math:: \\mathbf{C} = \\mathbf{M} \\mathbf{I}
 
     The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps)
-    with unit [nA], and each row indexed by :math:`j` of
+    with unit (nA), and each row indexed by :math:`j` of
     :math:`\\mathbf{C}` represents the CSD in each bin for every time step
     as the sum of currents divided by the volume.
 
@@ -1767,12 +1770,12 @@ class VolumetricCurrentSourceDensity(LinearModel):
     Parameters
     ----------
     cell: object or None
-        `CellGeometry` instance or similar.
+        ``CellGeometry`` instance or similar.
     x, y, z: ndarray, dtype=float
         shape (n, ) array of bin edges of each volume
-        along each axis in units of [µm]. Must be monotonously increasing.
+        along each axis in units of (µm). Must be monotonously increasing.
     dl: float
-        discretization length of compartments before binning [µm]. Default=1.
+        discretization length of compartments before binning (µm). Default=1.
         Lower values will result in more accurate estimates as each line source
         gets split into more points.
 
@@ -1783,12 +1786,12 @@ class VolumetricCurrentSourceDensity(LinearModel):
 
     >>> import numpy as np
     >>> from lfpykit import CellGeometry, VolumetricCurrentSourceDensity
-    >>> # cell geometry with three segments [um]
+    >>> # cell geometry with three segments (µm)
     >>> cell = CellGeometry(x=np.array([[0, 0], [0, 0], [0, 0]]),
     >>>                     y=np.array([[0, 0], [0, 0], [0, 0]]),
     >>>                     z=np.array([[0, 10], [10, 20], [20, 30]]),
     >>>                     d=np.array([1, 1, 1]))
-    >>> # transmembrane currents, three time steps [nA]
+    >>> # transmembrane currents, three time steps (nA)
     >>> I_m = np.array([[0., -1., 1.], [-1., 1., 0.], [1., 0., -1.]])
     >>> # instantiate probe, get linear response matrix
     >>> csd = VolumetricCurrentSourceDensity(cell=cell,
@@ -1843,7 +1846,7 @@ class VolumetricCurrentSourceDensity(LinearModel):
         Raises
         ------
         AttributeError
-            if `cell is None`
+            if ``cell is None``
         '''
         if self.cell is None:
             raise AttributeError(
@@ -1879,19 +1882,19 @@ class LaminarCurrentSourceDensity(LinearModel):
     in cylindrical volumes aligned with the z-axis based on [1]_ and [2]_.
 
     The implementation assumes piecewise linear current sources similar to
-    LineSourcePotential, and accounts for the fraction of each segment's length
-    within each volume, see Eq. 11 in [2].
+    ``LineSourcePotential``, and accounts for the fraction of each segment's
+    length within each volume, see Eq. 11 in [2].
 
-    This class is a `LinearModel` subclass that defines a 2D linear response
+    This class is a ``LinearModel`` subclass that defines a 2D linear response
     matrix :math:`\\mathbf{M}` between transmembrane current array
-    :math:`\\mathbf{I}` [nA] of a multicompartment neuron model and the
+    :math:`\\mathbf{I}` (nA) of a multicompartment neuron model and the
     corresponding CSD
-    :math:`\\mathbf{C}` [nA/µm^3] as
+    :math:`\\mathbf{C}` (nA/µm^3) as
 
     .. math:: \\mathbf{C} = \\mathbf{M} \\mathbf{I}
 
     The current :math:`\\mathbf{I}` is an ndarray of shape (n_seg, n_tsteps)
-    with unit [nA], and each row indexed by :math:`j` of
+    with unit (nA), and each row indexed by :math:`j` of
     :math:`\\mathbf{C}` represents the CSD in each volume for every time step
     as the sum of currents divided by the volume.
 
@@ -1903,14 +1906,14 @@ class LaminarCurrentSourceDensity(LinearModel):
     Parameters
     ----------
     cell: object or None
-        `CellGeometry` instance or similar.
+        ``CellGeometry`` instance or similar.
     z: ndarray, dtype=float
         shape (n_volumes, 2) array of lower and upper edges of each volume
-        along the z-axis in units of [µm]. The lower edge value must be below
+        along the z-axis in units of (µm). The lower edge value must be below
         the upper edge value.
     r: ndarray, dtype=float
         shape (n_volumes, ) array with assumed radius of each cylindrical
-        volume. Each radius must be greater than zero, and in units of [µm]
+        volume. Each radius must be greater than zero, and in units of (µm)
 
     Examples
     --------
@@ -1919,15 +1922,15 @@ class LaminarCurrentSourceDensity(LinearModel):
 
     >>> import numpy as np
     >>> from lfpykit import CellGeometry, LaminarCurrentSourceDensity
-    >>> # cell geometry with three segments [um]
+    >>> # cell geometry with three segments (µm)
     >>> cell = CellGeometry(x=np.array([[0, 0], [0, 0], [0, 0]]),
     >>>                     y=np.array([[0, 0], [0, 0], [0, 0]]),
     >>>                     z=np.array([[0, 10], [10, 20], [20, 30]]),
     >>>                     d=np.array([1, 1, 1]))
-    >>> # transmembrane currents, three time steps [nA]
+    >>> # transmembrane currents, three time steps (nA)
     >>> I_m = np.array([[0., -1., 1.], [-1., 1., 0.], [1., 0., -1.]])
     >>> # define geometry (z - upper and lower boundary;  r - radius)
-    >>> # of cylindrical volumes aligned with the z-axis [um]
+    >>> # of cylindrical volumes aligned with the z-axis (µm)
     >>> z = np.array([[-10., 0.], [0., 10.], [10., 20.],
     >>>               [20., 30.], [30., 40.]])
     >>> r = np.array([100., 100., 100., 100., 100.])
@@ -1989,7 +1992,7 @@ class LaminarCurrentSourceDensity(LinearModel):
         Raises
         ------
         AttributeError
-            if `cell is None`
+            if ``cell is None``
         '''
         if self.cell is None:
             raise AttributeError(
