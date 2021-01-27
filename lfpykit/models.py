@@ -29,8 +29,8 @@ class LinearModel(object):
 
     .. math:: \\mathbf{Y} = \\mathbf{M} \\mathbf{I}
 
-    ``LinearModel`` only creates a mapping that returns the currents themselves.
-    The class is suitable as a base class for other linear model
+    ``LinearModel`` only creates a mapping that returns the currents
+    themselves. The class is suitable as a base class for other linear model
     implementations, see for example class ``CurrentDipoleMoment`` or
     ``PointSourcePotential``
 
