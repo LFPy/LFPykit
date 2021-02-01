@@ -49,16 +49,16 @@ class FourSphereVolumeConductor(object):
     ----------
     r_electrodes: ndarray, dtype=float
         Shape (n_contacts, 3) array containing n_contacts electrode locations
-        in cartesian coordinates in units of [µm].
+        in cartesian coordinates in units of (µm).
         All ``r_el`` in ``r_electrodes`` must be less than or equal to scalp
         radius and larger than the distance between dipole and sphere
         center: ``|rz| < r_el <= radii[3]``.
     radii: list, dtype=float
-        Len 4 list with the outer radii in units of [µm] for the 4
+        Len 4 list with the outer radii in units of (µm) for the 4
         concentric shells in the four-sphere model: brain, csf, skull and
         scalp, respectively.
     sigmas: list, dtype=float
-        Len 4 list with the electrical conductivity in units of [S/m] of
+        Len 4 list with the electrical conductivity in units of (S/m) of
         the four shells in the four-sphere model: brain, csf, skull and
         scalp, respectively.
     iter_factor: float
@@ -71,16 +71,16 @@ class FourSphereVolumeConductor(object):
 
     >>> from lfpykit.eegmegcalc import FourSphereVolumeConductor
     >>> import numpy as np
-    >>> radii = [79000., 80000., 85000., 90000.]  # [µm]
-    >>> sigmas = [0.3, 1.5, 0.015, 0.3]  # [S/m]
-    >>> r_electrodes = np.array([[0., 0., 90000.], [0., 85000., 0.]]) # [µm]
+    >>> radii = [79000., 80000., 85000., 90000.]  # (µm)
+    >>> sigmas = [0.3, 1.5, 0.015, 0.3]  # (S/m)
+    >>> r_electrodes = np.array([[0., 0., 90000.], [0., 85000., 0.]]) # (µm)
     >>> sphere_model = FourSphereVolumeConductor(r_electrodes, radii,
     >>>                                          sigmas)
     >>> # current dipole moment
-    >>> p = np.array([[10.]*10, [10.]*10, [10.]*10]) # 10 timesteps [nA µm]
-    >>> dipole_location = np.array([0., 0., 78000.])  # [µm]
+    >>> p = np.array([[10.]*10, [10.]*10, [10.]*10]) # 10 timesteps (nA µm)
+    >>> dipole_location = np.array([0., 0., 78000.])  # (µm)
     >>> # compute potential
-    >>> sphere_model.calc_potential(p, dipole_location)  # [mV]
+    >>> sphere_model.calc_potential(p, dipole_location)  # (mV)
     array([[1.06247669e-08, 1.06247669e-08, 1.06247669e-08, 1.06247669e-08,
             1.06247669e-08, 1.06247669e-08, 1.06247669e-08, 1.06247669e-08,
             1.06247669e-08, 1.06247669e-08],
@@ -191,14 +191,14 @@ class FourSphereVolumeConductor(object):
             current dipole moment in units of (nA*µm) for all timesteps.
         dipole_location: ndarray, dtype=float
             Shape (3, ) array containing the position of the current dipole in
-            cartesian coordinates. Units of [µm].
+            cartesian coordinates. Units of (µm).
 
         Returns
         -------
         potential: ndarray, dtype=float
             Shape (n_contacts, n_timesteps) array containing the electric
             potential at contact point(s) FourSphereVolumeConductor.r in units
-            of [mV] for all timesteps of current dipole moment p.
+            of (mV) for all timesteps of current dipole moment p.
 
         """
 
@@ -226,15 +226,15 @@ class FourSphereVolumeConductor(object):
 
     def get_transformation_matrix(self, dipole_location):
         '''
-        Get linear response matrix mapping current dipole moment in [nA µm]
-        located in location `rz` to extracellular potential in [mV]
-        at recording sites `FourSphereVolumeConductor.` [µm]
+        Get linear response matrix mapping current dipole moment in (nA µm)
+        located in location `rz` to extracellular potential in (mV)
+        at recording sites `FourSphereVolumeConductor.` (µm)
 
         parameters
         ----------
         dipole_location: ndarray, dtype=float
             Shape (3, ) array containing the position of the current dipole in
-            cartesian coordinates. Units of [µm].
+            cartesian coordinates. Units of (µm).
 
         Returns
         -------
@@ -282,7 +282,7 @@ class FourSphereVolumeConductor(object):
         potential: ndarray, dtype=float
             Shape (n_contacts, n_timesteps) array containing the extracecllular
             potential at n_contacts contact point(s)
-            FourSphereVolumeConductor.r in units of [mV] for all timesteps
+            FourSphereVolumeConductor.r in units of (mV) for all timesteps
             of p_rad
         """
 
@@ -324,7 +324,7 @@ class FourSphereVolumeConductor(object):
         potential: ndarray, dtype=float
             Shape (n_contacts, n_timesteps) array containing the extracecllular
             potential at n_contacts contact point(s)
-            FourSphereVolumeConductor.r in units of [mV] for all timesteps
+            FourSphereVolumeConductor.r in units of (mV) for all timesteps
             of p_tan
         """
         phi = self._calc_phi(p_tan)
@@ -452,7 +452,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         r: float
-            Distance from origin to brain electrode location in units of [µm]
+            Distance from origin to brain electrode location in units of (µm)
         theta: float
             Polar angle between brain electrode location and
             dipole location vector rzloc in units of (radians)
@@ -485,7 +485,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         r: float
-            Distance from origin to CSF electrode location in units of [µm]
+            Distance from origin to CSF electrode location in units of (µm)
         theta: float
             Polar angle between CSF electrode location and
             dipole location vector rzloc in units of (radians)
@@ -520,7 +520,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         r: float
-            Distance from origin to skull electrode location in units of [µm]
+            Distance from origin to skull electrode location in units of (µm)
         theta: float
             Polar angle between skull electrode location and
             dipole location vector rzloc in units of (radians)
@@ -556,7 +556,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         r: float
-            Distance from origin to scalp electrode location in units of [µm]
+            Distance from origin to scalp electrode location in units of (µm)
         theta: float
             Polar angle between scalp electrode location and
             dipole location vector rzloc in units of (radians)
@@ -592,7 +592,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         r: float
-            Distance from origin to brain electrode location in units of [µm]
+            Distance from origin to brain electrode location in units of (µm)
         theta: float
             Polar angle between brain electrode location and
             dipole location vector rzloc in units of (radians)
@@ -624,7 +624,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         r: float
-            Distance from origin to CSF electrode location in units of [µm]
+            Distance from origin to CSF electrode location in units of (µm)
         theta: float
             Polar angle between CSF electrode location and
             dipole location vector rzloc in units of (radians)
@@ -657,7 +657,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         r: float
-            Distance from origin to skull electrode location in units of [µm]
+            Distance from origin to skull electrode location in units of (µm)
         theta: float
             Polar angle between skull electrode location and
             dipole location vector rzloc in units of (radians)
@@ -690,7 +690,7 @@ class FourSphereVolumeConductor(object):
         Parameters
         ----------
         r: float
-            Distance from origin to scalp electrode location in units of [µm]
+            Distance from origin to scalp electrode location in units of (µm)
         theta: float
             Polar angle between scalp electrode location and
             dipole location vector rzloc in units of (radians)
@@ -830,9 +830,9 @@ class InfiniteVolumeConductor(object):
     >>> from lfpykit.eegmegcalc import InfiniteVolumeConductor
     >>> import numpy as np
     >>> inf_model = InfiniteVolumeConductor(sigma=0.3)
-    >>> p = np.array([[10.], [10.], [10.]])  # [nA µm]
-    >>> r = np.array([[1000., 0., 5000.]])  # [µm]
-    >>> inf_model.get_dipole_potential(p, r)  # [mV]
+    >>> p = np.array([[10.], [10.], [10.]])  # (nA µm)
+    >>> r = np.array([[1000., 0., 5000.]])  # (µm)
+    >>> inf_model.get_dipole_potential(p, r)  # (mV)
     array([[1.20049432e-07]])
     """
 
@@ -859,7 +859,7 @@ class InfiniteVolumeConductor(object):
         potential: ndarray, dtype=float
             Shape (n_contacts, n_timesteps) array containing the electric
             potential at contact point(s) ``r`` in units
-            of [mV] for all timesteps of current dipole moment p
+            of (mV) for all timesteps of current dipole moment p
 
         """
         phi = (r @ p) / (4 * np.pi * self.sigma *
@@ -868,14 +868,14 @@ class InfiniteVolumeConductor(object):
 
     def get_transformation_matrix(self, r):
         '''
-        Get linear response matrix mapping current dipole moment in [nA µm]
-        to extracellular potential in [mV] at recording sites `r` [µm]
+        Get linear response matrix mapping current dipole moment in (nA µm)
+        to extracellular potential in (mV) at recording sites `r` (µm)
 
         parameters
         ----------
         r: ndarray, dtype=float
             Shape (n_contacts, 3) array contaning the displacement vectors
-            from dipole location to measurement location [µm]
+            from dipole location to measurement location (µm)
 
         Returns
         -------
@@ -912,7 +912,7 @@ class MEG(object):
     sensor_locations: ndarray, dtype=float
         shape (n_locations x 3) array with x,y,z-locations of measurement
         devices where magnetic field of current dipole moments is calculated.
-        In unit of [µm]
+        In unit of (µm)
     mu: float
         Permeability. Default is permeability of vacuum
         (:math:`\\mu_0 = 4*\\pi*10^{-7}` T*m/A)
@@ -993,14 +993,14 @@ class MEG(object):
 
     def get_transformation_matrix(self, dipole_location):
         '''
-        Get linear response matrix mapping current dipole moment in [nA µm]
-        located in location ``dipole_location` to magnetic field
+        Get linear response matrix mapping current dipole moment in (nA µm)
+        located in location ``dipole_location`` to magnetic field
         :math:`\\mathbf{H}` in units of (nA/µm) at ``sensor_locations``
 
         parameters
         ----------
         dipole_location: ndarray, dtype=float
-            shape (3, ) array with x,y,z-location of dipole in units of [µm]
+            shape (3, ) array with x,y,z-location of dipole in units of (µm)
 
         Returns
         -------
@@ -1020,7 +1020,7 @@ class MEG(object):
             shape (3, n_timesteps) array with x,y,z-components of current-
             dipole moment time series data in units of (nA µm)
         dipole_location: ndarray, dtype=float
-            shape (3, ) array with x,y,z-location of dipole in units of [µm]
+            shape (3, ) array with x,y,z-location of dipole in units of (µm)
 
         Returns
         -------
@@ -1106,7 +1106,7 @@ class NYHeadModel(object):
 
     >>> # Rotate to be along normal vector of cortex
     >>> p = nyhead.rotate_dipole_to_surface_normal([[0.], [0.], [1.]])
-    >>> eeg = M @ p  # [mV]
+    >>> eeg = M @ p  # (mV)
     """
 
     def __init__(self, nyhead_file=None):
@@ -1315,8 +1315,8 @@ class NYHeadModel(object):
 
     def get_transformation_matrix(self):
         """
-        Get linear response matrix mapping from current dipole moment [nA µm]
-        to EEG signal [mV] at EEG electrodes (n=231)
+        Get linear response matrix mapping from current dipole moment (nA µm)
+        to EEG signal (mV) at EEG electrodes (n=231)
 
         Returns
         -------
