@@ -80,7 +80,7 @@ class FourSphereVolumeConductor(object):
     >>> p = np.array([[10.]*10, [10.]*10, [10.]*10]) # 10 timesteps (nA µm)
     >>> dipole_location = np.array([0., 0., 78000.])  # (µm)
     >>> # compute potential
-    >>> sphere_model.calc_potential(p, dipole_location)  # (mV)
+    >>> sphere_model.get_dipole_potential(p, dipole_location)  # (mV)
     array([[1.06247669e-08, 1.06247669e-08, 1.06247669e-08, 1.06247669e-08,
             1.06247669e-08, 1.06247669e-08, 1.06247669e-08, 1.06247669e-08,
             1.06247669e-08, 1.06247669e-08],

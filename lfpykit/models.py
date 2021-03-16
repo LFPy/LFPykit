@@ -596,7 +596,7 @@ class RecExtElectrode(LinearModel):
     >>>     'Ra': 150,                             # axial resistivity
     >>>     'passive': True,                       # insert passive channels
     >>>     'passive_parameters': {"g_pas":1./3E4,
-    >>>                             "e_pas":-65}, # passive params
+    >>>                            "e_pas":-65}, # passive params
     >>>     'dt': 2**-4,                         # simulation time res
     >>>     'tstart': 0.,                        # start t of simulation
     >>>     'tstop': 50.,                        # end t of simulation
@@ -654,7 +654,7 @@ class RecExtElectrode(LinearModel):
     >>>     'Ra': 150,                             # axial resistivity
     >>>     'passive': True,                       # insert passive channels
     >>>     'passive_parameters': {"g_pas":1./3E4,
-    >>>                             "e_pas":-65}, # passive params
+    >>>                            "e_pas":-65}, # passive params
     >>>     'dt': 2**-4,                         # simulation time res
     >>>     'tstart': 0.,                        # start t of simulation
     >>>     'tstop': 50.,                        # end t of simulation
@@ -712,7 +712,7 @@ class RecExtElectrode(LinearModel):
     >>>     'Ra': 150,                             # axial resistivity
     >>>     'passive': True,                       # insert passive channels
     >>>     'passive_parameters': {"g_pas":1./3E4,
-    >>>                             "e_pas":-65}, # passive params
+    >>>                            "e_pas":-65}, # passive params
     >>>     'dt': 2**-4,                         # simulation time res
     >>>     'tstart': 0.,                        # start t of simulation
     >>>     'tstop': 50.,                        # end t of simulation
@@ -1133,7 +1133,7 @@ class RecMEAElectrode(RecExtElectrode):
     >>>     'Ra': 150,                             # axial resistivity
     >>>     'passive': True,                        # insert passive channels
     >>>     'passive_parameters': {"g_pas":1./3E4,
-    >>>                             "e_pas":-65}, # passive params
+    >>>                            "e_pas":-65}, # passive params
     >>>     'dt': 2**-4,                           # simulation time res
     >>>     'tstart': 0.,                        # start t of simulation
     >>>     'tstop': 50.,                        # end t of simulation
@@ -1463,7 +1463,7 @@ class OneSphereVolumeConductor(LinearModel):
     >>>               np.arctan2(Y, X).flatten(),
     >>>               np.zeros(X.size)])
     >>> # set up class object and compute electric potential in all locations
-    >>> sphere = OneSphereVolumeConductor(r, R=10000.,
+    >>> sphere = OneSphereVolumeConductor(cell=None, r=r, R=10000.,
     >>>                                   sigma_i=0.3, sigma_o=0.03)
     >>> Phi = sphere.calc_potential(rs=8000, current=1.).reshape(X.shape)
     >>> # plot
@@ -1646,14 +1646,9 @@ class OneSphereVolumeConductor(LinearModel):
         >>> r = np.array([np.sqrt(X**2 + Z**2).flatten(),
         >>>               np.arccos(Z / np.sqrt(X**2 + Z**2)).flatten(),
         >>>               np.arctan2(Y, X).flatten()])
-        >>> # instantiate CellGeometry class with cell's geometry
-        >>> cell_geometry = CellGeometry(x=np.c_[cell.xstart, cell.xend],
-        >>>                              y=np.c_[cell.ystart, cell.yend],
-        >>>                              z=np.c_[cell.zstart, cell.zend],
-        >>>                              d=cell.diam)
         >>> # set up class object and compute mapping between segment currents
         >>> # and electric potential in space
-        >>> sphere = OneSphereVolumeConductor(cell_geometry, r=r, R=10000.,
+        >>> sphere = OneSphereVolumeConductor(cell, r=r, R=10000.,
         >>>                                   sigma_i=0.3, sigma_o=0.03)
         >>> M = sphere.get_transformation_matrix(n_max=1000)
         >>> # pick out some time index for the potential and compute potential
