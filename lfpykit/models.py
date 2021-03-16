@@ -584,13 +584,15 @@ class RecExtElectrode(LinearModel):
     Compute extracellular potentials after simulating and storage of
     transmembrane currents with the LFPy.Cell class:
 
+    >>> import os
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> import LFPy
     >>> from lfpykit import CellGeometry, RecExtElectrode
     >>>
     >>> cellParameters = {
-    >>>     'morphology': 'examples/morphologies/L5_Mainen96_LFPy.hoc',
+    >>>     'morphology': os.path.join(LFPy.__path__[0], 'test',
+    >>>                                'ball_and_sticks.hoc'),
     >>>     'v_init': -65,                         # initial voltage
     >>>     'cm': 1.0,                             # membrane capacitance
     >>>     'Ra': 150,                             # axial resistivity
@@ -627,12 +629,7 @@ class RecExtElectrode(LinearModel):
     >>>     'r': 10,
     >>>     'N': N,
     >>> }
-    >>> cell_geometry = CellGeometry(
-    >>>     x=np.c_[cell.xstart, cell.xend],
-    >>>     y=np.c_[cell.ystart, cell.yend],
-    >>>     z=np.c_[cell.zstart, cell.zend],
-    >>>     d=cell.diam)
-    >>> electrode = RecExtElectrode(cell_geometry, **electrodeParameters)
+    >>> electrode = RecExtElectrode(cell, **electrodeParameters)
     >>> M = electrode.get_transformation_matrix()
     >>> V_ex = M @ cell.imem
     >>> plt.matshow(V_ex)
@@ -640,15 +637,17 @@ class RecExtElectrode(LinearModel):
     >>> plt.axis('tight')
     >>> plt.show()
 
-    Compute extracellular potentials during simulation (recommended):
+    Compute extracellular potentials during simulation:
 
+    >>> import os
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> import LFPy
     >>> from lfpykit import CellGeometry, RecExtElectrode
     >>>
     >>> cellParameters = {
-    >>>     'morphology': 'examples/morphologies/L5_Mainen96_LFPy.hoc',
+    >>>     'morphology': os.path.join(LFPy.__path__[0], 'test',
+    >>>                                'ball_and_sticks.hoc'),
     >>>     'v_init': -65,                         # initial voltage
     >>>     'cm': 1.0,                             # membrane capacitance
     >>>     'Ra': 150,                             # axial resistivity
@@ -683,22 +682,16 @@ class RecExtElectrode(LinearModel):
     >>>     'r': 10,
     >>>     'N': N,
     >>> }
-    >>> cell_geometry = CellGeometry(
-    >>>     x=np.c_[cell.xstart, cell.xend],
-    >>>     y=np.c_[cell.ystart, cell.yend],
-    >>>     z=np.c_[cell.zstart, cell.zend],
-    >>>     d=cell.diam)
-    >>> electrode = RecExtElectrode(cell_geometry, **electrodeParameters)
-    >>> M = electrode.get_transformation_matrix()
-    >>> cell.simulate(dotprodcoeffs=[M])
-    >>> V_ex = cell.dotprodresults[0]
-    >>> plt.matshow(V_ex)
+    >>> electrode = RecExtElectrode(cell, **electrodeParameters)
+    >>> cell.simulate(probes=[electrode])
+    >>> plt.matshow(electrode.data)
     >>> plt.colorbar()
     >>> plt.axis('tight')
     >>> plt.show()
 
     Use MEAutility to to handle probes
 
+    >>> import os
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> import MEAutility as mu
@@ -706,7 +699,8 @@ class RecExtElectrode(LinearModel):
     >>> from lfpykit import CellGeometry, RecExtElectrode
     >>>
     >>> cellParameters = {
-    >>>     'morphology': 'examples/morphologies/L5_Mainen96_LFPy.hoc',
+    >>>     'morphology': os.path.join(LFPy.__path__[0], 'test',
+    >>>                                'ball_and_sticks.hoc'),
     >>>     'v_init': -65,                         # initial voltage
     >>>     'cm': 1.0,                             # membrane capacitance
     >>>     'Ra': 150,                             # axial resistivity
@@ -733,12 +727,7 @@ class RecExtElectrode(LinearModel):
     >>> cell.simulate(rec_imem=True)
     >>>
     >>> probe = mu.return_mea('Neuropixels-128')
-    >>> cell_geometry = CellGeometry(
-    >>>     x=np.c_[cell.xstart, cell.xend],
-    >>>     y=np.c_[cell.ystart, cell.yend],
-    >>>     z=np.c_[cell.zstart, cell.zend],
-    >>>     d=cell.diam)
-    >>> electrode = RecExtElectrode(cell_geometry, probe=probe)
+    >>> electrode = RecExtElectrode(cell, probe=probe)
     >>> V_ex = electrode.get_transformation_matrix() @ cell.imem
     >>> mu.plot_mea_recording(V_ex, probe)
     >>> plt.axis('tight')
@@ -1121,13 +1110,15 @@ class RecMEAElectrode(RecExtElectrode):
 
     See also <LFPy>/examples/example_MEA.py
 
+    >>> import os
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> import LFPy
     >>> from lfpykit import CellGeometry, RecMEAElectrode
     >>>
     >>> cellParameters = {
-    >>>     'morphology': 'examples/morphologies/L5_Mainen96_LFPy.hoc',
+    >>>     'morphology': os.path.join(LFPy.__path__[0], 'test',
+    >>>                                'ball_and_sticks.hoc'),
     >>>     'v_init': -65,                          # initial voltage
     >>>     'cm': 1.0,                             # membrane capacitance
     >>>     'Ra': 150,                             # axial resistivity
@@ -1138,18 +1129,18 @@ class RecMEAElectrode(RecExtElectrode):
     >>>     'tstart': 0.,                        # start t of simulation
     >>>     'tstop': 50.,                        # end t of simulation
     >>> }
-    >>> lfpy_cell = LFPy.Cell(**cellParameters)
-    >>> lfpy_cell.set_rotation(x=np.pi/2, z=np.pi/2)
-    >>> lfpy_cell.set_pos(z=100)
+    >>> cell = LFPy.Cell(**cellParameters)
+    >>> cell.set_rotation(x=np.pi/2, z=np.pi/2)
+    >>> cell.set_pos(z=100)
     >>> synapseParameters = {
-    >>>     'idx': lfpy_cell.get_closest_idx(x=800, y=0, z=100), # segment
+    >>>     'idx': cell.get_closest_idx(x=800, y=0, z=100), # segment
     >>>     'e': 0,                                # reversal potential
     >>>     'syntype': 'ExpSyn',                   # synapse type
     >>>     'tau': 2,                              # syn. time constant
     >>>     'weight': 0.01,                       # syn. weight
     >>>     'record_current': True                 # syn. current record
     >>> }
-    >>> synapse = LFPy.Synapse(lfpy_cell, **synapseParameters)
+    >>> synapse = LFPy.Synapse(cell, **synapseParameters)
     >>> synapse.set_spike_times(np.array([10., 15., 20., 25.]))
     >>>
     >>> MEA_electrode_parameters = {
@@ -1163,13 +1154,8 @@ class RecMEAElectrode(RecExtElectrode):
     >>>     "h": 300,
     >>>     "squeeze_cell_factor": 0.5,
     >>> }
-    >>> lfpy_cell.simulate(rec_imem=True)
+    >>> cell.simulate(rec_imem=True)
     >>>
-    >>> cell = CellGeometry(
-    >>>     x=np.c_[lfpy_cell.xstart, lfpy_cell.xend],
-    >>>     y=np.c_[lfpy_cell.ystart, lfpy_cell.yend],
-    >>>     z=np.c_[lfpy_cell.zstart, lfpy_cell.zend],
-    >>>     d=lfpy_cell.diam)
     >>> MEA = RecMEAElectrode(cell, **MEA_electrode_parameters)
     >>> V_ext = MEA.get_transformation_matrix() @ lfpy_cell.imem
     >>>
