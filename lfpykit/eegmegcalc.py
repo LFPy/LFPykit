@@ -1078,12 +1078,17 @@ class SphericallySymmetricVolCondMEG(object):
 
     .. math::
 
-        \\mathbf{H} = \\frac{1}{4 \\pi} \\frac{F\\mathbf{p} \\times \\mathbf{r}_p - (\\mathbf{p} \\times \\mathbf{r}_p \\cdot \\mathbf{r}) \\nabla F (\\mathbf{r}, \\mathbf{r}_p)}{F(\\mathbf{r}, \\mathbf{r}_p)^2}, \\text{ where}
+        \\mathbf{H} = \\frac{1}{4 \\pi} \\frac{F\\mathbf{p} \\times
+        \\mathbf{r}_p - (\\mathbf{p} \\times \\mathbf{r}_p \\cdot
+        \\mathbf{r}) \\nabla F (\\mathbf{r}, \\mathbf{r}_p)}{
+        F(\\mathbf{r}, \\mathbf{r}_p)^2}, \\text{ where}
 
-        F(\\mathbf{r}, \\mathbf{r}_p) = a(ra + r^2 - \\mathbf{r}_p \cdot \\mathbf{r}),
+        F(\\mathbf{r}, \\mathbf{r}_p) = a(ra + r^2 -
+        \\mathbf{r}_p \\cdot \\mathbf{r}),
 
-        \\nabla F (\\mathbf{r}, \\mathbf{r}_p) = (r^{-1}a^2 + a^{-1}\\mathbf{a} \cdot \\mathbf{r} + 2a + 2r)\\mathbf{r}
-                                                -(a + 2r + a^{-1}\\mathbf{a} \cdot \\mathbf{r})\\mathbf{r}_p,
+        \\nabla F (\\mathbf{r}, \\mathbf{r}_p) = (r^{-1}a^2 + a^{-1}\\mathbf{a}
+        \\cdot \\mathbf{r} + 2a + 2r)\\mathbf{r}
+        -(a + 2r + a^{-1}\\mathbf{a} \\cdot \\mathbf{r})\\mathbf{r}_p,
 
         \\mathbf{a} = \\mathbf{r} - \\mathbf{r}_p,
 
@@ -1109,7 +1114,8 @@ class SphericallySymmetricVolCondMEG(object):
     Parameters
     ----------
     r: ndarray
-        sensor locations, shape ``(n, 3)`` where ``n`` denotes number of locations, unit [µm]
+        sensor locations, shape ``(n, 3)`` where ``n`` denotes number of
+        locations, unit [µm]
     mu: float
         Permeability. Default is permeability of vacuum
         (:math:`\\mu_0 = 4*\\pi*10^{-7}` T*m/A)
@@ -1137,7 +1143,8 @@ class SphericallySymmetricVolCondMEG(object):
 
     References
     ----------
-    .. [1] Hämäläinen M., et al., Reviews of Modern Physics, Vol. 65, No. 2, April 1993.
+    .. [1] Hämäläinen M., et al., Reviews of Modern Physics, Vol. 65, No. 2,
+        April 1993.
     .. [2] Sarvas J., Phys.Med. Biol., 1987, Vol. 32, No 1, 11-22.
 
     Raises
@@ -1233,7 +1240,8 @@ class SphericallySymmetricVolCondMEG(object):
         Compute magnetic field B from single current dipole `p` localized
         somewhere in space at `r_p`.
 
-        This function returns the magnetic field :math:`\\mathbf{B}=µ\\mathbf{H}`.
+        This function returns the magnetic
+        field :math:`\\mathbf{B}=µ\\mathbf{H}`.
 
         Parameters
         ----------

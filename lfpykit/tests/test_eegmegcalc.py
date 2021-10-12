@@ -149,7 +149,8 @@ class testInfiniteHomogeneousVolCondMEG(unittest.TestCase):
                                                     dipole_location))
 
     def test_InfiniteHomogeneousVolCondMEG_06(self):
-        '''test eegmegcalc.InfiniteHomogeneousVolCondMEG.get_transformation_matrix()'''
+        '''test
+        eegmegcalc.InfiniteHomogeneousVolCondMEG.get_transformation_matrix()'''
         current_dipole_moment = np.c_[np.eye(3), -np.eye(3)]
 
         dipole_location = np.zeros(3)
@@ -217,15 +218,12 @@ class testSphericallySymmetricVolCondMEG(unittest.TestCase):
 
         np.testing.assert_equal(grad_F, grad_F_gt)
 
-
     def test_SphericallySymmetricVolCondMEG_02(self):
         p = np.eye(3)
         r_p = np.array([0, 0, 1])
         r = np.array([[0, 0, 2]])
 
         a = r[0] - r_p
-        a_norm = np.linalg.norm(a)
-        r_norm = np.linalg.norm(r[0])
 
         m = lfpykit.eegmegcalc.SphericallySymmetricVolCondMEG(r=r)
         M = m.get_transformation_matrix(r_p)
