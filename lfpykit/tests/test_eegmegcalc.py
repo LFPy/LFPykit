@@ -223,8 +223,6 @@ class testSphericallySymmetricVolCondMEG(unittest.TestCase):
         r_p = np.array([0, 0, 1])
         r = np.array([[0, 0, 2]])
 
-        a = r[0] - r_p
-
         m = lfpykit.eegmegcalc.SphericallySymmetricVolCondMEG(r=r)
         M = m.get_transformation_matrix(r_p)
 
