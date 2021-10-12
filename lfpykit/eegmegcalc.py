@@ -885,7 +885,7 @@ class InfiniteVolumeConductor(object):
         return self.get_dipole_potential(np.eye(3), r)
 
 
-class MEG(object):
+class InfiniteHomogeneousVolCondMEG(object):
     """
     Basic class for computing magnetic field from current dipole moment.
     For this purpose we use the Biot-Savart law derived from Maxwell's
@@ -919,6 +919,7 @@ class MEG(object):
 
     See also
     --------
+    SphericallySymmetricVolCondMEG
     FourSphereVolumeConductor
     InfiniteVolumeConductor
 
@@ -1055,6 +1056,201 @@ class MEG(object):
                 / (4 * np.pi * np.sqrt((R**2).sum())**3)
 
         return H
+
+
+class MEG(InfiniteHomogeneousVolCondMEG):
+    def __init__(self, sensor_locations):
+        warn(
+            "class MEG is deprecated and will be removed. Use "
+            "InfiniteHomogeneousVolCondMEG or SphericallySymmetricVolCondMEG "
+            "instead",
+            DeprecationWarning, 2
+        )
+        super().__init__(sensor_locations)
+
+
+class SphericallySymmetricVolCondMEG(object):
+    """Computes magnetic fields from current dipole in s
+    pherically-symmetric volume conductor models.
+
+    This class facilitates calculations according to eq. (34) from [1]_
+    (see also [2]_) defined as:
+
+    .. math::
+
+        \\mathbf{H} = \\frac{1}{4 \\pi} \\frac{F\\mathbf{p} \\times \\mathbf{r}_p - (\\mathbf{p} \\times \\mathbf{r}_p \\cdot \\mathbf{r}) \\nabla F (\\mathbf{r}, \\mathbf{r}_p)}{F(\\mathbf{r}, \\mathbf{r}_p)^2}, \\text{ where}
+
+        F(\\mathbf{r}, \\mathbf{r}_p) = a(ra + r^2 - \\mathbf{r}_p \cdot \\mathbf{r}),
+
+        \\nabla F (\\mathbf{r}, \\mathbf{r}_p) = (r^{-1}a^2 + a^{-1}\\mathbf{a} \cdot \\mathbf{r} + 2a + 2r)\\mathbf{r}
+                                                -(a + 2r + a^{-1}\\mathbf{a} \cdot \\mathbf{r})\\mathbf{r}_p,
+
+        \\mathbf{a} = \\mathbf{r} - \\mathbf{r}_p,
+
+        a = |\\mathbf{a}|,
+
+        r = |\\mathbf{r}| .
+
+    Here,
+    :math:`\\mathbf{p}` is the current dipole moment,
+    :math:`\\mathbf{r}` the measurement location(s) and
+    :math:`\\mathbf{r}_p` the current dipole location
+
+    Note that the magnetic field :math:`\\mathbf{H}` is related to the magnetic
+    field :math:`\\mathbf{B}` as
+
+    .. math:: \\mu_0 \\mathbf{H} = \\mathbf{B}-\\mathbf{M} ,
+
+    where :math:`\\mu_0` denotes the permeability of free space (very close to
+    permebility of biological tissues).
+    :math:`\\mathbf{M}` denotes material
+    magnetization (which is ignored).
+
+    Parameters
+    ----------
+    r: ndarray
+        sensor locations, shape ``(n, 3)`` where ``n`` denotes number of locations, unit [µm]
+    mu: float
+        Permeability. Default is permeability of vacuum
+        (:math:`\\mu_0 = 4*\\pi*10^{-7}` T*m/A)
+
+    See also
+    --------
+    InfiniteHomogeneousVolCondMEG
+
+    Examples
+    --------
+    Compute the magnetic field from a current dipole located
+
+    >>> import numpy as np
+    >>> from lfpykit.eegmegcalc import SphericallySymmetricVolCondMEG
+    >>> p = np.array([[0, 1, 0]]).T  # tangential current dipole (nAµm)
+    >>> r_p = np.array([0, 0, 90000])  # dipole location (µm)
+    >>> r = np.array([[0, 0, 92000]])  # measurement location (µm)
+    >>> m = SphericallySymmetricVolCondMEG(r=r)
+    >>> M = m.get_transformation_matrix(r_p=r_p)
+    >>> H = M @ p
+    >>> H  # magnetic field (nA/µm)
+    array([[[9.73094081e-09],
+            [0.00000000e+00],
+            [0.00000000e+00]]])
+
+    References
+    ----------
+    .. [1] Hämäläinen M., et al., Reviews of Modern Physics, Vol. 65, No. 2, April 1993.
+    .. [2] Sarvas J., Phys.Med. Biol., 1987, Vol. 32, No 1, 11-22.
+
+    Raises
+    ------
+    AssertionError
+        If dimensionality of sensor locations ``r`` is wrong
+    """
+    def __init__(self, r, mu=4 * np.pi * 1E-7):
+        """
+        Initialize class SphericallySymmetricVolCondMEG
+        """
+        assert r.ndim == 2, 'r.ndim != 2'
+        assert r.shape[1] == 3, 'r.shape[1] != 3'
+
+        # set attributes
+        self.r = r
+        self.mu = mu
+
+    def _compute_F(self, r_p, r_i, a_n, r_n):
+        return a_n * (r_n * a_n + r_n**2 - r_p @ r_i.T)
+
+    def _compute_grad_F(self, r_p, r_i, a, a_n, r_n):
+        return ((a_n**2 / r_n + a @ r_i.T / a_n + 2 * a_n + 2 * r_n) * r_i
+                        - (a_n + 2 * r_n + a @ r_i.T / a_n) * r_p)
+
+    def get_transformation_matrix(self, r_p):
+        """
+        Get linear response matrix mapping current dipole moment in (nA µm)
+        located in location ``r_p`` to magnetic field
+        :math:`\\mathbf{H}` in units of (nA/µm) at sensor locations ``r``
+
+        Parameters
+        ----------
+        r_p: ndarray, dtype=float
+            shape (3, ) array with x,y,z-location of dipole in units of (µm)
+
+        Returns
+        -------
+        response_matrix: ndarray
+            shape (n_contacts, 3, 3) ndarray
+
+        """
+        return self.calculate_H(np.eye(3), r_p)
+
+    def calculate_H(self, p, r_p):
+        """
+        Compute magnetic field :math:`\\mathbf{H}` from single current dipole
+        ``p`` localized somewhere in space at ``r_p``
+
+        Parameters
+        ----------
+        p: ndarray, dtype=float
+            shape (3, n_timesteps) array with x,y,z-components of current-
+            dipole moment time series data in units of (nA µm)
+        r_p: ndarray, dtype=float
+            shape (3, ) array with x,y,z-location of dipole in units of (µm)
+
+        Returns
+        -------
+        ndarray, dtype=float
+            shape (n_locations x 3 x n_timesteps) array with x,y,z-components
+            of the magnetic field :math:`\\mathbf{H}` in units of (nA/µm)
+
+        Raises
+        ------
+        AssertionError
+            If dimensionality of current_dipole_moment ``p`` and/or
+            dipole_location ``r_p`` is wrong
+
+        """
+
+        assert p.ndim == 2, \
+            'p.ndim != 2'
+        assert p.shape[0] == 3, \
+            'p.shape[0] != 3'
+        assert r_p.shape == (3, ), \
+            'r_p.shape != (3, )'
+
+        # container
+        H = np.empty((self.r.shape[0], 3, p.shape[1]))
+        for i, r_i in enumerate(self.r):
+            a = r_i - r_p
+            a_n = np.linalg.norm(a)
+            r_n = np.linalg.norm(r_i)
+            F = self._compute_F(r_p, r_i, a_n, r_n)
+            grad_F = self._compute_grad_F(r_p, r_i, a, a_n, r_n)
+            H[i, ] = (F * np.cross(np.eye(3), r_p)
+                      - (np.cross(np.eye(3), r_p) @ r_p) @ grad_F).T / F**2 / 4 / np.pi
+        return H
+
+    def calculate_B(self, p, r_p):
+        """
+        Compute magnetic field B from single current dipole `p` localized
+        somewhere in space at `r_p`.
+
+        This function returns the magnetic field :math:`\\mathbf{B}=µ\\mathbf{H}`.
+
+        Parameters
+        ----------
+        p: ndarray, dtype=float
+            shape (3, n_timesteps) array with x,y,z-components of current-
+            dipole moment time series data in units of (nA µm)
+        r_p: ndarray, dtype=float
+            shape (3, ) array with x,y,z-location of dipole in units of (µm)
+
+        Returns
+        -------
+        ndarray, dtype=float
+            shape (n_locations x 3 x n_timesteps) array with x,y,z-components
+            of the magnetic field :math:`\\mathbf{B}` in units of (nA/µm)
+
+        """
+        return self.mu * self.calculate_H(p, r_p)
 
 
 class NYHeadModel(object):

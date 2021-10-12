@@ -34,13 +34,13 @@ except ImportError:
     test_NYHeadModel = False
 
 
-class testMEG(unittest.TestCase):
+class testInfiniteHomogeneousVolCondMEG(unittest.TestCase):
     """
-    test class eegmegcalc.MEG
+    test class eegmegcalc.InfiniteHomogeneousVolCondMEG
     """
 
-    def test_MEG_00(self):
-        '''test eegmegcalc.MEG.calculate_H()'''
+    def test_InfiniteHomogeneousVolCondMEG_00(self):
+        '''test eegmegcalc.InfiniteHomogeneousVolCondMEG.calculate_H()'''
         current_dipole_moment = np.zeros((3, 11))
         current_dipole_moment[0, :] += 1.
         dipole_location = np.zeros(3)
@@ -53,12 +53,12 @@ class testMEG(unittest.TestCase):
         gt[4, 2, :] = -1. / 4 / np.pi
         gt[5, 1, :] = 1. / 4 / np.pi
 
-        meg = eegmegcalc.MEG(sensor_locations)
+        meg = eegmegcalc.InfiniteHomogeneousVolCondMEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
 
-    def test_MEG_01(self):
-        '''test eegmegcalc.MEG.calculate_H()'''
+    def test_InfiniteHomogeneousVolCondMEG_01(self):
+        '''test eegmegcalc.InfiniteHomogeneousVolCondMEG.calculate_H()'''
         current_dipole_moment = np.zeros((3, 11))
         current_dipole_moment[1, :] += 1.
         dipole_location = np.zeros(3)
@@ -71,12 +71,12 @@ class testMEG(unittest.TestCase):
         gt[3, 2, :] = 1. / 4 / np.pi
         gt[5, 0, :] = -1. / 4 / np.pi
 
-        meg = eegmegcalc.MEG(sensor_locations)
+        meg = eegmegcalc.InfiniteHomogeneousVolCondMEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
 
-    def test_MEG_02(self):
-        '''test eegmegcalc.MEG.calculate_H()'''
+    def test_InfiniteHomogeneousVolCondMEG_02(self):
+        '''test eegmegcalc.InfiniteHomogeneousVolCondMEG.calculate_H()'''
         current_dipole_moment = np.zeros((3, 11))
         current_dipole_moment[2, :] += 1.
         dipole_location = np.zeros(3)
@@ -90,12 +90,12 @@ class testMEG(unittest.TestCase):
         gt[3, 1, :] = -1. / 4 / np.pi
         gt[4, 0, :] = 1. / 4 / np.pi
 
-        meg = eegmegcalc.MEG(sensor_locations)
+        meg = eegmegcalc.InfiniteHomogeneousVolCondMEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
 
-    def test_MEG_03(self):
-        '''test eegmegcalc.MEG.calculate_H()'''
+    def test_InfiniteHomogeneousVolCondMEG_03(self):
+        '''test eegmegcalc.InfiniteHomogeneousVolCondMEG.calculate_H()'''
         current_dipole_moment = np.zeros((3, 1))
         current_dipole_moment[0, :] += 1.
         dipole_location = np.zeros(3)
@@ -108,12 +108,12 @@ class testMEG(unittest.TestCase):
         gt[4, 2, :] = -1. / 4 / np.pi
         gt[5, 1, :] = 1. / 4 / np.pi
 
-        meg = eegmegcalc.MEG(sensor_locations)
+        meg = eegmegcalc.InfiniteHomogeneousVolCondMEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
 
-    def test_MEG_04(self):
-        '''test eegmegcalc.MEG.calculate_H()'''
+    def test_InfiniteHomogeneousVolCondMEG_04(self):
+        '''test eegmegcalc.InfiniteHomogeneousVolCondMEG.calculate_H()'''
         current_dipole_moment = np.zeros((3, 1))
         current_dipole_moment[1, :] += 1.
         dipole_location = np.zeros(3)
@@ -126,12 +126,12 @@ class testMEG(unittest.TestCase):
         gt[3, 2, :] = 1. / 4 / np.pi
         gt[5, 0, :] = -1. / 4 / np.pi
 
-        meg = eegmegcalc.MEG(sensor_locations)
+        meg = eegmegcalc.InfiniteHomogeneousVolCondMEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
 
-    def test_MEG_05(self):
-        '''test eegmegcalc.MEG.calculate_H()'''
+    def test_InfiniteHomogeneousVolCondMEG_05(self):
+        '''test eegmegcalc.InfiniteHomogeneousVolCondMEG.calculate_H()'''
         current_dipole_moment = np.zeros((3, 1))
         current_dipole_moment[2, :] += 1.
         dipole_location = np.zeros(3)
@@ -144,12 +144,12 @@ class testMEG(unittest.TestCase):
         gt[3, 1, :] = -1. / 4 / np.pi
         gt[4, 0, :] = 1. / 4 / np.pi
 
-        meg = eegmegcalc.MEG(sensor_locations)
+        meg = eegmegcalc.InfiniteHomogeneousVolCondMEG(sensor_locations)
         np.testing.assert_equal(gt, meg.calculate_H(current_dipole_moment,
                                                     dipole_location))
 
-    def test_MEG_06(self):
-        '''test eegmegcalc.MEG.get_transformation_matrix()'''
+    def test_InfiniteHomogeneousVolCondMEG_06(self):
+        '''test eegmegcalc.InfiniteHomogeneousVolCondMEG.get_transformation_matrix()'''
         current_dipole_moment = np.c_[np.eye(3), -np.eye(3)]
 
         dipole_location = np.zeros(3)
@@ -174,10 +174,74 @@ class testMEG(unittest.TestCase):
                         [1., 0., 0., -1., 0., 0.],
                         [0., 0., 0., 0., 0., 0.]]]) / 4 / np.pi
 
-        meg = eegmegcalc.MEG(sensor_locations)
+        meg = eegmegcalc.InfiniteHomogeneousVolCondMEG(sensor_locations)
         M = meg.get_transformation_matrix(dipole_location)
 
         np.testing.assert_equal(gt, M @ current_dipole_moment)
+
+
+class testSphericallySymmetricVolCondMEG(unittest.TestCase):
+    """
+    test class eegmegcalc.InfiniteHomogeneousVolCondMEG
+    """
+
+    def test_SphericallySymmetricVolCondMEG_00(self):
+        # p = np.eye(3)
+        r_p = np.array([0, 0, 1])
+        r = np.array([[0, 0, 2]])
+
+        a = r[0] - r_p
+        a_norm = np.linalg.norm(a)
+        r_norm = np.linalg.norm(r[0])
+
+        m = lfpykit.eegmegcalc.SphericallySymmetricVolCondMEG(r=r)
+        F = m._compute_F(r_p, r[0], a_norm, r_norm)
+
+        F_gt = 4
+
+        np.testing.assert_equal(F, F_gt)
+
+    def test_SphericallySymmetricVolCondMEG_01(self):
+        # p = np.eye(3)
+        r_p = np.array([0, 0, 1])
+        r = np.array([[0, 0, 2]])
+
+        a = r[0] - r_p
+        a_norm = np.linalg.norm(a)
+        r_norm = np.linalg.norm(r[0])
+
+        m = lfpykit.eegmegcalc.SphericallySymmetricVolCondMEG(r=r)
+        grad_F = m._compute_grad_F(r_p, r[0], a, a_norm, r_norm)
+
+        grad_F_gt = (1 / 2 + 8) * r[0] - 7 * r_p
+
+        np.testing.assert_equal(grad_F, grad_F_gt)
+
+
+    def test_SphericallySymmetricVolCondMEG_02(self):
+        p = np.eye(3)
+        r_p = np.array([0, 0, 1])
+        r = np.array([[0, 0, 2]])
+
+        a = r[0] - r_p
+        a_norm = np.linalg.norm(a)
+        r_norm = np.linalg.norm(r[0])
+
+        m = lfpykit.eegmegcalc.SphericallySymmetricVolCondMEG(r=r)
+        M = m.get_transformation_matrix(r_p)
+
+        F = 4
+        grad_F = (1 / 2 + 8) * r[0] - 7 * r_p
+        M_gt = (F * np.cross(np.eye(3), r_p)
+                - (np.cross(np.eye(3), r_p) @ r_p) @ grad_F
+                ).T / F**2 / 4 / np.pi
+
+        np.testing.assert_equal(M[0], M_gt)
+
+        H = M @ p
+        H_gt = np.expand_dims(M_gt, 0) @ p
+
+        np.testing.assert_equal(H, H_gt)
 
 
 class testFourSphereVolumeConductor(unittest.TestCase):
