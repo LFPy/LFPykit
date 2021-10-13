@@ -1232,7 +1232,7 @@ class SphericallySymmetricVolCondMEG(object):
             F = self._compute_F(r_p, r_i, a_n, r_n)
             grad_F = self._compute_grad_F(r_p, r_i, a, a_n, r_n)
             H[i, ] = (F * np.cross(np.eye(3), r_p)
-                      - (np.cross(np.eye(3), r_p) @ r_p) @ grad_F
+                      - (np.cross(np.eye(3), r_p) @ r_i) @ grad_F
                       ).T / F**2 / 4 / np.pi
         return H
 
