@@ -229,7 +229,7 @@ class testSphericallySymmetricVolCondMEG(unittest.TestCase):
         F = 4
         grad_F = (1 / 2 + 8) * r[0] - 7 * r_p
         M_gt = (F * np.cross(np.eye(3), r_p)
-                - (np.cross(np.eye(3), r_p) @ r_p) @ grad_F
+                - (np.cross(np.eye(3), r_p) @ r[0]) @ grad_F
                 ).T / F**2 / 4 / np.pi
 
         np.testing.assert_equal(M[0], M_gt)
