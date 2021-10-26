@@ -250,9 +250,9 @@ class testSphericallySymmetricVolCondMEG(unittest.TestCase):
         Q_x, Q_y, Q_z = sp.symbols('Q_x Q_y Q_z', real=True)
         R_x, R_y, R_z = sp.symbols('R_x R_y R_z', real=True)
         r_x, r_y, r_z = sp.symbols('r_x r_y r_z', real=True)
-        Q = sv.matrix_to_vector(sp.Matrix([Q_x, Q_y, Q_z]), N) # current dipole
-        R = sv.matrix_to_vector(sp.Matrix([R_x, R_y, R_z]), N) # dipole loc.
-        r = sv.matrix_to_vector(sp.Matrix([r_x, r_y, r_z]), N) # meas. loc.
+        Q = sv.matrix_to_vector(sp.Matrix([Q_x, Q_y, Q_z]), N)  # dipole moment
+        R = sv.matrix_to_vector(sp.Matrix([R_x, R_y, R_z]), N)  # dipole loc.
+        r = sv.matrix_to_vector(sp.Matrix([r_x, r_y, r_z]), N)  # meas. loc.
 
         # eq. 25 in Sarvas et al. 1986:
         a = r - R
