@@ -18,6 +18,8 @@ GNU General Public License for more details.
 import unittest
 import os
 import numpy as np
+import sympy as sp
+import sympy.vector as sv
 import lfpykit
 from lfpykit import eegmegcalc
 try:
@@ -238,6 +240,87 @@ class testSphericallySymmetricVolCondMEG(unittest.TestCase):
         H_gt = np.expand_dims(M_gt, 0) @ p
 
         np.testing.assert_equal(H, H_gt)
+
+    def test_test_SphericallySymmetricVolCondMEG_03(self):
+        '''compare with (slow) sympy predictions'''
+        # define symbols
+        N = sv.CoordSys3D('')
+        Q_x, Q_y, Q_z = sp.symbols('Q_x Q_y Q_z', real=True)
+        R_x, R_y, R_z = sp.symbols('R_x R_y R_z', real=True)
+        r_x, r_y, r_z = sp.symbols('r_x r_y r_z', real=True)
+        Q = sv.matrix_to_vector(sp.Matrix([Q_x, Q_y, Q_z]), N) # current dipole
+        R = sv.matrix_to_vector(sp.Matrix([R_x, R_y, R_z]), N) # dipole location
+        r = sv.matrix_to_vector(sp.Matrix([r_x, r_y, r_z]), N) # measurement location
+
+        # eq. 25 in Sarvas et al. 1986:
+        a = r - R
+        a_ = sp.sqrt(a.dot(a))
+        r_ = sp.sqrt(r.dot(r))
+        F = a_ * (r_ * a_ + r_**2 - R.dot(r))
+        nabla_F = (a_**2 / r_ + a.dot(r) / a_ + 2 * a_ + 2 * r_) * r - (a_ + 2 * r_ + a.dot(r) / a_) * R
+        H = (F * Q.cross(R) - Q.cross(R).dot(r) * nabla_F) / (4 * sp.pi * F**2)
+
+        # compare sympy pred with our implementation w. unit dipole moments
+        # in different measurement and dipole locations
+        for p_ in np.expand_dims(np.eye(3), 2):
+            for r_p in np.array([[1, 0, 0],
+                                 [0, 1, 0],
+                                 [0, 0, 1],
+                                 [0.5, 0.65, 0.9]]):
+                for r_s in np.array([[2, 0, 0],
+                                     [0, 2, 0],
+                                     [0, 0, 2],
+                                     [0.95, -1.2, 0.75]]):
+
+                    F_gt = float(F.subs({
+                        R_x: r_p[0],
+                        R_y: r_p[1],
+                        R_z: r_p[2],
+                        r_x: r_s[0],
+                        r_y: r_s[1],
+                        r_z: r_s[2],
+                        }))
+                    nabla_F_gt = np.array(nabla_F.evalf(subs={
+                        R_x: r_p[0],
+                        R_y: r_p[1],
+                        R_z: r_p[2],
+                        r_x: r_s[0],
+                        r_y: r_s[1],
+                        r_z: r_s[2],
+                    }).to_matrix(N).tolist()).flatten()
+
+                    H_gt = np.expand_dims(H.evalf(subs={
+                        Q_x: p_[0, 0],
+                        Q_y: p_[1, 0],
+                        Q_z: p_[2, 0],
+                        R_x: r_p[0],
+                        R_y: r_p[1],
+                        R_z: r_p[2],
+                        r_x: r_s[0],
+                        r_y: r_s[1],
+                        r_z: r_s[2],
+                    }).to_matrix(N).tolist(), 0)
+
+                    meg = lfpykit.eegmegcalc.SphericallySymmetricVolCondMEG(r=np.array([r_s]))
+
+                    np.testing.assert_almost_equal(
+                        F_gt,
+                        meg._compute_F(r_p,
+                                       r_s,
+                                       np.linalg.norm(r_s - r_p),
+                                       np.linalg.norm(r_s)))
+                    np.testing.assert_almost_equal(
+                        nabla_F_gt,
+                        meg._compute_grad_F(r_p,
+                                            r_s,
+                                            r_s - r_p,
+                                            np.linalg.norm(r_s - r_p),
+                                            np.linalg.norm(r_s)))
+
+                    np.testing.assert_almost_equal(
+                        H_gt,
+                        meg.calculate_H(p_, r_p)
+                    )
 
 
 class testFourSphereVolumeConductor(unittest.TestCase):
