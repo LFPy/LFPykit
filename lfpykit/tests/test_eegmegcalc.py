@@ -220,6 +220,7 @@ class testSphericallySymmetricVolCondMEG(unittest.TestCase):
 
         np.testing.assert_equal(grad_F, grad_F_gt)
 
+    '''
     def test_SphericallySymmetricVolCondMEG_02(self):
         p = np.eye(3)
         r_p = np.array([0, 0, 1])
@@ -240,8 +241,9 @@ class testSphericallySymmetricVolCondMEG(unittest.TestCase):
         H_gt = np.expand_dims(M_gt, 0) @ p
 
         np.testing.assert_equal(H, H_gt)
+    '''
 
-    def test_test_SphericallySymmetricVolCondMEG_03(self):
+    def test_test_SphericallySymmetricVolCondMEG_02(self):
         '''compare with (slow) sympy predictions'''
         # define symbols
         N = sv.CoordSys3D('')
@@ -249,15 +251,16 @@ class testSphericallySymmetricVolCondMEG(unittest.TestCase):
         R_x, R_y, R_z = sp.symbols('R_x R_y R_z', real=True)
         r_x, r_y, r_z = sp.symbols('r_x r_y r_z', real=True)
         Q = sv.matrix_to_vector(sp.Matrix([Q_x, Q_y, Q_z]), N) # current dipole
-        R = sv.matrix_to_vector(sp.Matrix([R_x, R_y, R_z]), N) # dipole location
-        r = sv.matrix_to_vector(sp.Matrix([r_x, r_y, r_z]), N) # measurement location
+        R = sv.matrix_to_vector(sp.Matrix([R_x, R_y, R_z]), N) # dipole loc.
+        r = sv.matrix_to_vector(sp.Matrix([r_x, r_y, r_z]), N) # meas. loc.
 
         # eq. 25 in Sarvas et al. 1986:
         a = r - R
         a_ = sp.sqrt(a.dot(a))
         r_ = sp.sqrt(r.dot(r))
         F = a_ * (r_ * a_ + r_**2 - R.dot(r))
-        nabla_F = (a_**2 / r_ + a.dot(r) / a_ + 2 * a_ + 2 * r_) * r - (a_ + 2 * r_ + a.dot(r) / a_) * R
+        nabla_F = (a_**2 / r_ + a.dot(r) / a_ + 2 * a_ + 2 * r_
+                   ) * r - (a_ + 2 * r_ + a.dot(r) / a_) * R
         H = (F * Q.cross(R) - Q.cross(R).dot(r) * nabla_F) / (4 * sp.pi * F**2)
 
         # compare sympy pred with our implementation w. unit dipole moments
@@ -301,7 +304,8 @@ class testSphericallySymmetricVolCondMEG(unittest.TestCase):
                         r_z: r_s[2],
                     }).to_matrix(N).tolist(), 0)
 
-                    meg = lfpykit.eegmegcalc.SphericallySymmetricVolCondMEG(r=np.array([r_s]))
+                    meg = lfpykit.eegmegcalc.SphericallySymmetricVolCondMEG(
+                        r=np.array([r_s]))
 
                     np.testing.assert_almost_equal(
                         F_gt,
