@@ -88,6 +88,7 @@ class FourSphereVolumeConductor(object):
             2.39290752e-10, 2.39290752e-10, 2.39290752e-10, 2.39290752e-10,
             2.39290752e-10, 2.39290752e-10]])
     """
+
     def __init__(self,
                  r_electrodes,
                  radii=[79000., 80000., 85000., 90000.],
@@ -981,6 +982,7 @@ class InfiniteHomogeneousVolCondMEG(object):
     AssertionError
         If dimensionality of sensor_locations is wrong
     """
+
     def __init__(self, sensor_locations, mu=4 * np.pi * 1E-7):
         """
         Initialize class MEG
@@ -1152,6 +1154,7 @@ class SphericallySymmetricVolCondMEG(object):
     AssertionError
         If dimensionality of sensor locations ``r`` is wrong
     """
+
     def __init__(self, r, mu=4 * np.pi * 1E-7):
         """
         Initialize class SphericallySymmetricVolCondMEG
@@ -1202,8 +1205,8 @@ class SphericallySymmetricVolCondMEG(object):
                 F = self._compute_F(r_p, r_i, a_n, r_n)
                 grad_F = self._compute_grad_F(r_p, r_i, a, a_n, r_n)
                 M[i, :, j] = ((F * np.cross(p_.T, r_p)
-                          - (np.cross(p_.T, r_p) @ r_i) * grad_F
-                          ).T / F**2 / 4 / np.pi).flatten()
+                              - (np.cross(p_.T, r_p) @ r_i) * grad_F
+                               ).T / F**2 / 4 / np.pi).flatten()
         return M
 
     def calculate_H(self, p, r_p):
@@ -1499,7 +1502,7 @@ class NYHeadModel(object):
         """
         if dipole_pos is None:
             dipole_pos_ = self.dipole_pos_dict['motorsensory_cortex']
-        elif type(dipole_pos) is str:
+        elif isinstance(dipole_pos, str):
             if dipole_pos not in self.dipole_pos_dict:
                 raise RuntimeError("When dipole_pos is string, location must"
                                    "be defined in self.dipole_pos_dict. "
@@ -1522,7 +1525,7 @@ class NYHeadModel(object):
         if loc_error > 2:
             raise RuntimeWarning("Large dipole location error! "
                                  "Given loc: {}; Closest vertex: {}".format(
-                                    dipole_pos_, self.dipole_pos))
+                                     dipole_pos_, self.dipole_pos))
 
         self.cortex_normal_vec = self.cortex_normals[:, self.vertex_idx]
 
