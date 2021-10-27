@@ -252,7 +252,7 @@ class testSphericallySymmetricVolCondMEG(unittest.TestCase):
         R = sv.matrix_to_vector(sp.Matrix([R_x, R_y, R_z]), N)  # dipole loc.
         r = sv.matrix_to_vector(sp.Matrix([r_x, r_y, r_z]), N)  # meas. loc.
 
-        # eq. 25 in Sarvas et al. 1986:
+        # eq. 25 in Sarvas et al. 1987:
         a = r - R
         a_ = sp.sqrt(a.dot(a))
         r_ = sp.sqrt(r.dot(r))
@@ -323,6 +323,53 @@ class testSphericallySymmetricVolCondMEG(unittest.TestCase):
                         H_gt,
                         meg.calculate_H(p_, r_p)
                     )
+
+    def test_SphericallySymmetricVolCondMEG_04(self):
+        '''dipole time series'''
+        # define symbols
+        N = sv.CoordSys3D('')
+        Q_x, Q_y, Q_z = sp.symbols('Q_x Q_y Q_z', real=True)
+        R_x, R_y, R_z = sp.symbols('R_x R_y R_z', real=True)
+        r_x, r_y, r_z = sp.symbols('r_x r_y r_z', real=True)
+        Q = sv.matrix_to_vector(sp.Matrix([Q_x, Q_y, Q_z]), N)  # dipole moment
+        R = sv.matrix_to_vector(sp.Matrix([R_x, R_y, R_z]), N)  # dipole loc.
+        r = sv.matrix_to_vector(sp.Matrix([r_x, r_y, r_z]), N)  # meas. loc.
+
+        # eq. 25 in Sarvas et al. 1987:
+        a = r - R
+        a_ = sp.sqrt(a.dot(a))
+        r_ = sp.sqrt(r.dot(r))
+        F = a_ * (r_ * a_ + r_**2 - R.dot(r))
+        nabla_F = (a_**2 / r_ + a.dot(r) / a_ + 2 * a_ + 2 * r_
+                   ) * r - (a_ + 2 * r_ + a.dot(r) / a_) * R
+        H = (F * Q.cross(R) - Q.cross(R).dot(r) * nabla_F) / (4 * sp.pi * F**2)
+
+        # check some values
+        p = np.c_[np.eye(3), -np.eye(3)]
+        r_p = np.array([0.1, -0.2, 0.9])
+        r_s = np.array([-0.3, 0.1, 1.3])
+
+        H_gt = np.zeros((1, 3, 6))
+
+        for i, p_ in enumerate(p.T):
+            H_gt[0, :, i] = np.array(H.evalf(subs={
+                Q_x: p_[0],
+                Q_y: p_[1],
+                Q_z: p_[2],
+                R_x: r_p[0],
+                R_y: r_p[1],
+                R_z: r_p[2],
+                r_x: r_s[0],
+                r_y: r_s[1],
+                r_z: r_s[2],
+            }).to_matrix(N).tolist()).flatten()
+
+        meg = lfpykit.eegmegcalc.SphericallySymmetricVolCondMEG(
+            r=np.array([r_s]))
+
+        M = meg.get_transformation_matrix(r_p)
+
+        np.testing.assert_almost_equal(M @ p, H_gt)
 
 
 class testFourSphereVolumeConductor(unittest.TestCase):
