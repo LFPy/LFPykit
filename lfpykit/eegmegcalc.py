@@ -934,7 +934,7 @@ class InfiniteHomogeneousVolCondMEG(object):
 
     >>> import LFPy, os, numpy as np, matplotlib.pyplot as plt
     >>> from lfpykit import CurrentDipoleMoment
-    >>> from lfpykit.eegmegcalc import MEG
+    >>> from lfpykit.eegmegcalc import InfiniteHomogeneousVolCondMEG as MEG
     >>> # create LFPy.Cell object
     >>> cell = LFPy.Cell(morphology=os.path.join(LFPy.__path__[0], 'test',
     >>>                                          'ball_and_sticks.hoc'),
@@ -1072,8 +1072,8 @@ class MEG(InfiniteHomogeneousVolCondMEG):
 
 
 class SphericallySymmetricVolCondMEG(object):
-    """Computes magnetic fields from current dipole in s
-    pherically-symmetric volume conductor models.
+    """Computes magnetic fields from current dipole in
+    spherically-symmetric volume conductor models.
 
     This class facilitates calculations according to eq. (34) from [1]_
     (see also [2]_) defined as:

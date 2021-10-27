@@ -261,9 +261,9 @@ class testSphericallySymmetricVolCondMEG(unittest.TestCase):
                    ) * r - (a_ + 2 * r_ + a.dot(r) / a_) * R
         H = (F * Q.cross(R) - Q.cross(R).dot(r) * nabla_F) / (4 * sp.pi * F**2)
 
-        # compare sympy pred with our implementation w. unit dipole moments
-        # in different measurement and dipole locations
-        for p_ in np.expand_dims(np.eye(3), 2):
+        # compare sympy pred with our implementation w. different dipole
+        # moments in different measurement and dipole locations
+        for p_ in np.expand_dims(np.c_[np.eye(3), [0.5, -1.7, 0.74]].T, 2):
             for r_p in np.array([[1, 0, 0],
                                  [0, 1, 0],
                                  [0, 0, 1],
