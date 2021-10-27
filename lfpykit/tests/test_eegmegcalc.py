@@ -220,7 +220,7 @@ class testSphericallySymmetricVolCondMEG(unittest.TestCase):
 
         np.testing.assert_equal(grad_F, grad_F_gt)
 
-    '''
+
     def test_SphericallySymmetricVolCondMEG_02(self):
         p = np.eye(3)
         r_p = np.array([0, 0, 1])
@@ -241,9 +241,9 @@ class testSphericallySymmetricVolCondMEG(unittest.TestCase):
         H_gt = np.expand_dims(M_gt, 0) @ p
 
         np.testing.assert_equal(H, H_gt)
-    '''
 
-    def test_test_SphericallySymmetricVolCondMEG_02(self):
+
+    def test_test_SphericallySymmetricVolCondMEG_03(self):
         '''compare with (slow) sympy predictions'''
         # define symbols
         N = sv.CoordSys3D('')

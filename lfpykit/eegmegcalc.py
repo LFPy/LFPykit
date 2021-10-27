@@ -1187,9 +1187,24 @@ class SphericallySymmetricVolCondMEG(object):
             shape (n_contacts, 3, 3) ndarray
 
         """
-        raise NotImplementedError
+        assert r_p.shape == (3, ), \
+            'r_p.shape != (3, )'
 
-        return self.calculate_H(np.eye(3), r_p)
+        # current dipole along x,y,z-axis
+        p = np.eye(3)
+        M = np.empty((self.r.shape[0], 3, 3))
+        for j, p_ in enumerate(p):
+            p_ = np.expand_dims(p_, 1)
+            for i, r_i in enumerate(self.r):
+                a = r_i - r_p
+                a_n = np.linalg.norm(a)
+                r_n = np.linalg.norm(r_i)
+                F = self._compute_F(r_p, r_i, a_n, r_n)
+                grad_F = self._compute_grad_F(r_p, r_i, a, a_n, r_n)
+                M[i, :, j] = ((F * np.cross(p_.T, r_p)
+                          - (np.cross(p_.T, r_p) @ r_i) * grad_F
+                          ).T / F**2 / 4 / np.pi).flatten()
+        return M
 
     def calculate_H(self, p, r_p):
         """
@@ -1225,18 +1240,9 @@ class SphericallySymmetricVolCondMEG(object):
         assert r_p.shape == (3, ), \
             'r_p.shape != (3, )'
 
-        # container
-        H = np.empty((self.r.shape[0], 3, p.shape[1]))
-        for i, r_i in enumerate(self.r):
-            a = r_i - r_p
-            a_n = np.linalg.norm(a)
-            r_n = np.linalg.norm(r_i)
-            F = self._compute_F(r_p, r_i, a_n, r_n)
-            grad_F = self._compute_grad_F(r_p, r_i, a, a_n, r_n)
-            H[i, ] = (F * np.cross(p.T, r_p)
-                      - (np.cross(p.T, r_p) @ r_i) * grad_F
-                      ).T / F**2 / 4 / np.pi
-        return H
+        M = self.get_transformation_matrix(r_p)
+
+        return M @ p
 
     def calculate_B(self, p, r_p):
         """
