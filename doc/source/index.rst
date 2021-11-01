@@ -116,9 +116,17 @@ class :class:`eegmegcalc.InfiniteVolumeConductor`
     :show-inheritance:
     :undoc-members:
 
-class :class:`eegmegcalc.MEG`
------------------------------
-.. autoclass:: lfpykit.eegmegcalc.MEG
+
+class :class:`eegmegcalc.InfiniteHomogeneousVolCondMEG`
+-------------------------------------------------------
+.. autoclass:: lfpykit.eegmegcalc.InfiniteHomogeneousVolCondMEG
+    :members:
+    :show-inheritance:
+    :undoc-members:
+
+class :class:`eegmegcalc.SphericallySymmetricVolCondMEG`
+--------------------------------------------------------
+.. autoclass:: lfpykit.eegmegcalc.SphericallySymmetricVolCondMEG
     :members:
     :show-inheritance:
     :undoc-members:
