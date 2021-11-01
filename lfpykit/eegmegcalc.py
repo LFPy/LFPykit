@@ -1059,6 +1059,31 @@ class InfiniteHomogeneousVolCondMEG(object):
 
         return H
 
+    def calculate_B(self, p, r_p):
+        """
+        Compute magnetic field B from single current dipole ``p`` localized
+        somewhere in space at ``r_p``.
+
+        This function returns the magnetic
+        field :math:`\\mathbf{B}=µ\\mathbf{H}`.
+
+        Parameters
+        ----------
+        p: ndarray, dtype=float
+            shape (3, n_timesteps) array with x,y,z-components of current-
+            dipole moment time series data in units of (nA µm)
+        r_p: ndarray, dtype=float
+            shape (3, ) array with x,y,z-location of dipole in units of (µm)
+
+        Returns
+        -------
+        ndarray, dtype=float
+            shape (n_locations x 3 x n_timesteps) array with x,y,z-components
+            of the magnetic field :math:`\\mathbf{B}` in units of (nA/µm)
+
+        """
+        return self.mu * self.calculate_H(p, r_p)
+
 
 class MEG(InfiniteHomogeneousVolCondMEG):
     def __init__(self, sensor_locations):
@@ -1258,8 +1283,8 @@ class SphericallySymmetricVolCondMEG(object):
 
     def calculate_B(self, p, r_p):
         """
-        Compute magnetic field B from single current dipole `p` localized
-        somewhere in space at `r_p`.
+        Compute magnetic field B from single current dipole ``p`` localized
+        somewhere in space at ``r_p``.
 
         This function returns the magnetic
         field :math:`\\mathbf{B}=µ\\mathbf{H}`.
