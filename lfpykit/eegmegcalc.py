@@ -985,7 +985,7 @@ class InfiniteHomogeneousVolCondMEG(object):
 
     def __init__(self, sensor_locations, mu=4 * np.pi * 1E-7):
         """
-        Initialize class MEG
+        Initialize class InfiniteHomogeneousVolCondMEG
         """
         assert sensor_locations.ndim == 2, 'sensor_locations.ndim != 2'
         assert sensor_locations.shape[1] == 3, 'sensor_locations.shape[1] != 3'
@@ -1086,14 +1086,14 @@ class InfiniteHomogeneousVolCondMEG(object):
 
 
 class MEG(InfiniteHomogeneousVolCondMEG):
-    def __init__(self, sensor_locations):
+    def __init__(self, sensor_locations, mu=4 * np.pi * 1E-7):
         warn(
             "class MEG is deprecated and will be removed. Use "
             "InfiniteHomogeneousVolCondMEG or SphericallySymmetricVolCondMEG "
             "instead",
             DeprecationWarning, 2
         )
-        super().__init__(sensor_locations)
+        super().__init__(sensor_locations, mu)
 
 
 class SphericallySymmetricVolCondMEG(object):
