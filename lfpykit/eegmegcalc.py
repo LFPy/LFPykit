@@ -1187,11 +1187,20 @@ class SphericallySymmetricVolCondMEG(object):
         Returns
         -------
         response_matrix: ndarray
-            shape (n_contacts, 3, 3) ndarray
+            shape (n_sensors, 3, 3) ndarray
+
+        Raises
+        ------
+        AssertionError
+            If dipole location ``r_p`` has the wrong shape or if its radius
+            is greater than radius to any sensor location in ``<object>.r``
 
         """
         assert r_p.shape == (3, ), \
             'r_p.shape != (3, )'
+
+        assert np.all(np.linalg.norm(self.r, axis=-1) > np.linalg.norm(r_p)), \
+            'the norm |r_p| must be less than that of any |r|'
 
         # current dipole along x,y,z-axis
         p = np.eye(3)

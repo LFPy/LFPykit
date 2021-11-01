@@ -371,6 +371,31 @@ class testSphericallySymmetricVolCondMEG(unittest.TestCase):
 
         np.testing.assert_almost_equal(M @ p, H_gt)
 
+    def test_SphericallySymmetricVolCondMEG_05(self):
+        '''check that AssertionErrors are raised correctly'''
+        try:
+            lfpykit.eegmegcalc.SphericallySymmetricVolCondMEG(
+                r=np.array([1, 2])
+            )
+        except AssertionError:
+            pass
+
+        try:
+            lfpykit.eegmegcalc.SphericallySymmetricVolCondMEG(
+                r=np.array([[1, 2], [3, 4]])
+            )
+        except AssertionError:
+            pass
+
+        m = lfpykit.eegmegcalc.SphericallySymmetricVolCondMEG(
+            r=np.array([[0, 0, 10]])
+        )
+        try:
+            for r_p in [np.array([1, 2]), np.array([3, 4, 11])]:
+                m.get_transformation_matrix(r_p=r_p)
+        except AssertionError:
+            pass
+
 
 class testFourSphereVolumeConductor(unittest.TestCase):
     """
