@@ -1015,7 +1015,7 @@ class InfiniteHomogeneousVolCondMEG(object):
     def calculate_H(self, current_dipole_moment, dipole_location):
         """
         Compute magnetic field H from single current-dipole moment localized
-        somewhere in space
+        in an infinite homogeneous volume conductor.
 
         Parameters
         ----------
@@ -1105,15 +1105,14 @@ class SphericallySymmetricVolCondMEG(object):
 
     .. math::
 
-        \\mathbf{H} = \\frac{1}{4 \\pi} \\frac{F\\mathbf{p} \\times
+        \\mathbf{H} = \\frac{1}{4 \\pi} \\frac{F \\mathbf{p} \\times
         \\mathbf{r}_p - (\\mathbf{p} \\times \\mathbf{r}_p \\cdot
-        \\mathbf{r}) \\nabla F (\\mathbf{r}, \\mathbf{r}_p)}{
-        F(\\mathbf{r}, \\mathbf{r}_p)^2}, \\text{ where}
+        \\mathbf{r}) \\nabla F}{F^2},
+        \\text{ where}
 
-        F(\\mathbf{r}, \\mathbf{r}_p) = a(ra + r^2 -
-        \\mathbf{r}_p \\cdot \\mathbf{r}),
+        F = a(ra + r^2 - \\mathbf{r}_p \\cdot \\mathbf{r}),
 
-        \\nabla F (\\mathbf{r}, \\mathbf{r}_p) = (r^{-1}a^2 + a^{-1}\\mathbf{a}
+        \\nabla F = (r^{-1}a^2 + a^{-1}\\mathbf{a}
         \\cdot \\mathbf{r} + 2a + 2r)\\mathbf{r}
         -(a + 2r + a^{-1}\\mathbf{a} \\cdot \\mathbf{r})\\mathbf{r}_p,
 
@@ -1126,7 +1125,7 @@ class SphericallySymmetricVolCondMEG(object):
     Here,
     :math:`\\mathbf{p}` is the current dipole moment,
     :math:`\\mathbf{r}` the measurement location(s) and
-    :math:`\\mathbf{r}_p` the current dipole location
+    :math:`\\mathbf{r}_p` the current dipole location.
 
     Note that the magnetic field :math:`\\mathbf{H}` is related to the magnetic
     field :math:`\\mathbf{B}` as
@@ -1145,7 +1144,7 @@ class SphericallySymmetricVolCondMEG(object):
         locations, unit [µm]
     mu: float
         Permeability. Default is permeability of vacuum
-        (:math:`\\mu_0 = 4*\\pi*10^{-7}` T*m/A)
+        (:math:`\\mu_0 = 4\\pi 10^{-7}` Tm/A)
 
     See also
     --------
