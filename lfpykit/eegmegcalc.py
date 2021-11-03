@@ -888,7 +888,8 @@ class InfiniteVolumeConductor(object):
 
 class InfiniteHomogeneousVolCondMEG(object):
     """
-    Basic class for computing magnetic field from current dipole moment.
+    Basic class for computing magnetic field from current dipole moment in
+    an infinite homogeneous volume conductor model.
     For this purpose we use the Biot-Savart law derived from Maxwell's
     equations under the assumption of negligible magnetic induction
     effects [1]_:
