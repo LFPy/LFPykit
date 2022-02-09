@@ -197,9 +197,9 @@ class FourSphereVolumeConductor(object):
         Returns
         -------
         potential: ndarray, dtype=float
-            Shape (n_contacts, n_timesteps) array containing the electric
-            potential at contact point(s) FourSphereVolumeConductor.r in units
-            of (mV) for all timesteps of current dipole moment p.
+            Shape ``(n_contacts, n_timesteps)`` array containing the electric
+            potential at contact point(s) ``FourSphereVolumeConductor.rxyz``
+            in units of (mV) for all timesteps of current dipole moment ``p``.
 
         """
 
@@ -228,8 +228,8 @@ class FourSphereVolumeConductor(object):
     def get_transformation_matrix(self, dipole_location):
         '''
         Get linear response matrix mapping current dipole moment in (nA µm)
-        located in location `rz` to extracellular potential in (mV)
-        at recording sites `FourSphereVolumeConductor.` (µm)
+        located in location ``rz`` to extracellular potential in (mV)
+        at recording sites ``FourSphereVolumeConductor.rxyz`` (µm)
 
         parameters
         ----------
