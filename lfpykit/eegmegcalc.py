@@ -371,8 +371,11 @@ class FourSphereVolumeConductor(object):
         """
         cos_theta = (self.rxyz @ self._rzloc) / (
             np.linalg.norm(self.rxyz, axis=1) * np.linalg.norm(self._rzloc))
-        theta = np.arccos(cos_theta)
-        return theta
+        # avoid RuntimeWarning: invalid value encountered in arccos
+        # and resulting NaNs
+        with np.errstate(invalid='ignore'):
+            theta = np.arccos(cos_theta)
+        return np.nan_to_num(theta)
 
     def _calc_phi(self, p_tan):
         """
@@ -396,7 +399,9 @@ class FourSphereVolumeConductor(object):
         """
 
         # project rxyz onto z-axis (rzloc)
-        proj_rxyz_rz = self.rxyz * self._z
+        proj_rxyz_rz = np.outer(np.dot(self.rxyz, self._rzloc) / self._rz,
+                                self._z)
+
         # find projection of rxyz in xy-plane
         rxy = self.rxyz - proj_rxyz_rz
         # define x-axis
