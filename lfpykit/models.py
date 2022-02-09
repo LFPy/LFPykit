@@ -342,7 +342,7 @@ class LineSourcePotential(LinearModel):
 
         - the extracellular conductivity :math:`\\sigma` is infinite,
           homogeneous, frequency independent (linear) and isotropic
-        - each segment is treated as a straigh line source with homogeneous
+        - each segment is treated as a straight line source with homogeneous
           current density between its start and end point coordinate
         - each measurement site :math:`\\mathbf{r}_j = (x_j, y_j, z_j)` is
           treated as a point
