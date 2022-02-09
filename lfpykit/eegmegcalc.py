@@ -399,8 +399,7 @@ class FourSphereVolumeConductor(object):
         """
 
         # project rxyz onto z-axis (rzloc)
-        proj_rxyz_rz = np.outer(np.dot(self.rxyz, self._rzloc) / self._rz,
-                                self._z)
+        proj_rxyz_rz = np.outer(self.rxyz @ self._rzloc / self._rz, self._z)
 
         # find projection of rxyz in xy-plane
         rxy = self.rxyz - proj_rxyz_rz
