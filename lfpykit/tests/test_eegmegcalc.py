@@ -683,9 +683,9 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         sigmas = [0.3, 1.5, 0.015, 0.3]  # (S/m)
 
         # locations in xz-plane along outer layer surface
-        r_e = radii[-1] - 1 # radius for prediction sites (µm)
+        r_e = radii[-1] - 1  # radius for prediction sites (µm)
         theta = np.linspace(0, 2 * np.pi, 72, endpoint=False)  # polar (rad)
-        phi = 0 # azimuth angle (rad)
+        phi = 0  # azimuth angle (rad)
         r_el = r_e * np.c_[np.sin(theta) * np.cos(phi),
                            np.sin(theta) * np.sin(phi),
                            np.cos(theta)]
@@ -695,15 +695,15 @@ class testFourSphereVolumeConductor(unittest.TestCase):
             sigmas=sigmas)
 
         # radial dipole locations in xz-plane
-        r = radii[0] - 1000 # dipole location(µm)
+        r = radii[0] - 1000  # dipole location(µm)
         theta_p = np.linspace(0, 2 * np.pi, 8, endpoint=False)  # polar(rad)
-        phi_p = 0 # azimuth angle (rad)
+        phi_p = 0  # azimuth angle (rad)
         r_p = r * np.c_[np.sin(theta_p) * np.cos(phi_p),
                         np.sin(theta_p) * np.sin(phi_p),
                         np.cos(theta_p)]
 
         # unit radial current dipoles at each location:
-        p = (r_p.T / np.linalg.norm(r_p, axis=-1)).T # (nAµm)
+        p = (r_p.T / np.linalg.norm(r_p, axis=-1)).T  # (nAµm)
 
         def R_y(theta=0):
             '''rotation matrix around y-axis by some angle theta (rad)'''
@@ -711,10 +711,11 @@ class testFourSphereVolumeConductor(unittest.TestCase):
                          [0, 1, 0],
                          [-np.sin(theta), 0, np.cos(theta)]].T
 
-        R_y_45 = R_y(theta=np.pi/4)  # rotate by 45 deg
+        R_y_45 = R_y(theta=np.pi / 4)  # rotate by 45 deg
 
         V_e = np.zeros((theta_p.size, theta.size))
-        for i, (r_p_, p_, theta_p_) in enumerate(zip(r_p, p @ R_y_45, theta_p)):
+        for i, (r_p_, p_, theta_p_) in enumerate(
+                zip(r_p, p @ R_y_45, theta_p)):
             V_e[i] = np.roll(
                 sphere_model.get_dipole_potential(np.expand_dims(p_, -1),
                                                   r_p_).ravel(),
