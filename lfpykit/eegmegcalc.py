@@ -207,17 +207,17 @@ class FourSphereVolumeConductor(object):
         n_contacts = self.r.shape[0]
         n_timesteps = p.shape[1]
 
-        if np.linalg.norm(p) != 0:
+        if np.linalg.norm(p) > 1e-9:
             p_rad, p_tan = self._decompose_dipole(p)
         else:
             p_rad = np.zeros((3, n_timesteps))
             p_tan = np.zeros((3, n_timesteps))
-        if np.linalg.norm(p_rad) != 0.:
+        if np.linalg.norm(p_rad) > 1e-9:
             pot_rad = self._calc_rad_potential(p_rad)
         else:
             pot_rad = np.zeros((n_contacts, n_timesteps))
 
-        if np.linalg.norm(p_tan) != 0.:
+        if np.linalg.norm(p_tan) > 1e-9:
             pot_tan = self._calc_tan_potential(p_tan)
         else:
             pot_tan = np.zeros((n_contacts, n_timesteps))
@@ -411,9 +411,9 @@ class FourSphereVolumeConductor(object):
         # create masks to avoid computing phi when phi is not defined
         mask = np.ones(phi.shape, dtype=bool)
         # phi is not defined when theta= 0,pi or |p_tan| = 0
-        mask[(self._theta == 0) | (self._theta == np.pi)] = np.zeros(
+        mask[(np.abs(self._theta) < 1e-9) | (np.abs(self._theta - np.pi) < 1e-9)] = np.zeros(
             p_tan.shape[1])
-        mask[:, np.abs(np.linalg.norm(p_tan, axis=0)) == 0] = 0
+        mask[:, np.abs(np.linalg.norm(p_tan, axis=0)) < 1e-9] = 0
 
         cos_phi = np.zeros(phi.shape)
         # compute cos_phi using mask to avoid zerodivision
