@@ -422,7 +422,9 @@ class FourSphereVolumeConductor(object):
                        np.linalg.norm(x, axis=1))[mask]
 
         # compute phi in [0, pi]
-        phi[mask] = np.arccos(cos_phi[mask])
+        with np.errstate(invalid='ignore'):
+            phi[mask] = np.nan_to_num(np.arccos(cos_phi[mask]))
+
 
         # nb: phi in [-pi, pi]. since p_tan defines direction of y-axis,
         # phi < 0 when rxy*p_tan < 0
