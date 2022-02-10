@@ -130,3 +130,13 @@ dmypy.json
 
 # MacOS crap
 .DS_Store
+
+# NEURON
+arm64/
+x86_64/
+
+# Sphinx
+doc/source/_build
+
+# examples
+examples/src
