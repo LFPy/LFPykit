@@ -1,2 +1,4 @@
 jupyter
+neuron
 -e git+https://github.com/LFPy/LFPy.git@master#egg=LFPy
+-e git+https://github.com/arbor-sim/arbor.git@v0.6#egg=arbor
