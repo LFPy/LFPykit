@@ -423,10 +423,14 @@ class FourSphereVolumeConductor(object):
             mask[:, np.abs(np.linalg.norm(p_tan, axis=0)) == 0] = False
 
             cos_phi = np.zeros(phi.shape)
-            # compute cos_phi using mask to avoid zerodivision
+            # compute cos_phi using mask to avoid zero division
             cos_phi[mask] = (r_uv @ u.T)[mask] / \
                 np.outer(np.linalg.norm(r_uv, axis=1),
                          np.linalg.norm(u, axis=1))[mask]
+
+            # above linear operations may result in cos_phi outside [-1, +1]
+            cos_phi[cos_phi < -1.] = -1.
+            cos_phi[cos_phi > 1.] = 1.
 
             # compute phi in [0, pi]
             phi[mask] = np.nan_to_num(np.arccos(cos_phi[mask]))
