@@ -207,17 +207,17 @@ class FourSphereVolumeConductor(object):
         n_contacts = self.r.shape[0]
         n_timesteps = p.shape[1]
 
-        if np.linalg.norm(p) != 0:
+        if np.linalg.norm(p) > 0:
             p_rad, p_tan = self._decompose_dipole(p)
         else:
             p_rad = np.zeros((3, n_timesteps))
             p_tan = np.zeros((3, n_timesteps))
-        if np.linalg.norm(p_rad) != 0.:
+        if np.linalg.norm(p_rad) > 0:
             pot_rad = self._calc_rad_potential(p_rad)
         else:
             pot_rad = np.zeros((n_contacts, n_timesteps))
 
-        if np.linalg.norm(p_tan) != 0.:
+        if np.linalg.norm(p_tan) > 0:
             pot_tan = self._calc_tan_potential(p_tan)
         else:
             pot_tan = np.zeros((n_contacts, n_timesteps))
