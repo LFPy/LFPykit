@@ -172,10 +172,11 @@ class FourSphereVolumeConductor(object):
                  'Can be avoided by placing dipole further away from '
                  'brain surface.')
 
-        if any(r < self._rz for r in self.r):
-            raise RuntimeError('Electrode must be farther away from '
-                               'brain center than dipole: r > rz.'
-                               'r = %s, rz = %s', self.r, self._rz)
+        if any(r <= self._rz for r in self.r):
+            mssg = ('Electrode must be farther away from ' +
+                    'brain center than dipole: r > rz.' +
+                    f'r = {self.r}, rz = {self._rz}')
+            raise RuntimeError(mssg)
 
         # compute theta angle between rzloc and rxyz
         self._theta = self._calc_theta()
