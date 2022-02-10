@@ -751,7 +751,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         p = (r_p.T / np.linalg.norm(r_p, axis=-1)).T  # (nAµm)
 
         def R_z(theta=0):
-            '''rotation matrix around y-axis by some angle theta (rad)'''
+            '''rotation matrix around z-axis by some angle theta (rad)'''
             return np.c_[[np.cos(theta), -np.sin(theta), 0],
                          [np.sin(theta), np.cos(theta), 0],
                          [0, 0, 1]].T
@@ -784,7 +784,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
             radii=radii,
             sigmas=sigmas)
 
-        # radial dipole locations in xz-plane
+        # radial dipole locations in yz-plane
         r = radii[0] - 1000  # dipole location(µm)
         theta_p = np.linspace(0, 2 * np.pi, 8, endpoint=False)  # polar(rad)
         phi_p = 0  # azimuth angle (rad)
@@ -796,7 +796,7 @@ class testFourSphereVolumeConductor(unittest.TestCase):
         p = (r_p.T / np.linalg.norm(r_p, axis=-1)).T  # (nAµm)
 
         def R_x(theta=0):
-            '''rotation matrix around y-axis by some angle theta (rad)'''
+            '''rotation matrix around x-axis by some angle theta (rad)'''
             return np.c_[[1, 0, 0],
                          [0, np.cos(theta), -np.sin(theta)],
                          [0, np.sin(theta), np.cos(theta)]].T
