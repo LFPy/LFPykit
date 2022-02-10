@@ -172,10 +172,11 @@ class FourSphereVolumeConductor(object):
                  'Can be avoided by placing dipole further away from '
                  'brain surface.')
 
-        if any(r < self._rz for r in self.r):
-            raise RuntimeError('Electrode must be farther away from '
-                               'brain center than dipole: r > rz.'
-                               'r = %s, rz = %s', self.r, self._rz)
+        if any(r <= self._rz for r in self.r):
+            mssg = ('Electrode must be farther away from ' +
+                    'brain center than dipole: r > rz.' +
+                    f'r = {self.r}, rz = {self._rz}')
+            raise RuntimeError(mssg)
 
         # compute theta angle between rzloc and rxyz
         self._theta = self._calc_theta()
@@ -197,9 +198,9 @@ class FourSphereVolumeConductor(object):
         Returns
         -------
         potential: ndarray, dtype=float
-            Shape (n_contacts, n_timesteps) array containing the electric
-            potential at contact point(s) FourSphereVolumeConductor.r in units
-            of (mV) for all timesteps of current dipole moment p.
+            Shape ``(n_contacts, n_timesteps)`` array containing the electric
+            potential at contact point(s) ``FourSphereVolumeConductor.rxyz``
+            in units of (mV) for all timesteps of current dipole moment ``p``.
 
         """
 
@@ -207,17 +208,17 @@ class FourSphereVolumeConductor(object):
         n_contacts = self.r.shape[0]
         n_timesteps = p.shape[1]
 
-        if np.linalg.norm(p) != 0:
+        if np.linalg.norm(p) > 0:
             p_rad, p_tan = self._decompose_dipole(p)
         else:
             p_rad = np.zeros((3, n_timesteps))
             p_tan = np.zeros((3, n_timesteps))
-        if np.linalg.norm(p_rad) != 0.:
+        if np.linalg.norm(p_rad) > 0:
             pot_rad = self._calc_rad_potential(p_rad)
         else:
             pot_rad = np.zeros((n_contacts, n_timesteps))
 
-        if np.linalg.norm(p_tan) != 0.:
+        if np.linalg.norm(p_tan) > 0:
             pot_tan = self._calc_tan_potential(p_tan)
         else:
             pot_tan = np.zeros((n_contacts, n_timesteps))
@@ -228,8 +229,8 @@ class FourSphereVolumeConductor(object):
     def get_transformation_matrix(self, dipole_location):
         '''
         Get linear response matrix mapping current dipole moment in (nA µm)
-        located in location `rz` to extracellular potential in (mV)
-        at recording sites `FourSphereVolumeConductor.` (µm)
+        located in location ``rz`` to extracellular potential in (mV)
+        at recording sites ``FourSphereVolumeConductor.rxyz`` (µm)
 
         parameters
         ----------
@@ -371,57 +372,72 @@ class FourSphereVolumeConductor(object):
         """
         cos_theta = (self.rxyz @ self._rzloc) / (
             np.linalg.norm(self.rxyz, axis=1) * np.linalg.norm(self._rzloc))
-        theta = np.arccos(cos_theta)
-        return theta
+        # avoid RuntimeWarning: invalid value encountered in arccos
+        # and resulting NaNs
+        with np.errstate(invalid='ignore'):
+            theta = np.arccos(cos_theta)
+        return np.nan_to_num(theta)
 
     def _calc_phi(self, p_tan):
         """
-        Return azimuthal angle between x-axis and contact point locations(s)
+        Return azimuthal angle between u-axis and contact point locations(s)
+        for tangential dipole component ``p_tan``
+
+        w-axis is here defined in the direction of rzloc.
+        v-axis is here defined in the direction of ``p_tan``
+        (orthogonal to ``rzloc``).
+        u-axis is here defined as cross product between `
+        `p_tan`` and ``rzloc``.
 
         Parameters
         ----------
-        p_tan: ndarray, dtype=float
-            Shape (3, n_timesteps) array containing
+        ``p_tan``: ndarray, dtype=float
+            Shape ``(3, n_timesteps)`` array containing
             tangential component of current dipole moment in units of (nA*µm)
 
         Returns
         -------
-        phi: ndarray, dtype=float
-            Shape (n_contacts, n_timesteps) array containing azimuthal angle
-            in units of (radians) between x-axis vector(s) and projection of
-            contact point location vector(s) rxyz into xy-plane.
-            z-axis is defined in the direction of rzloc.
-            y-axis is defined in the direction of p_tan (orthogonal to rzloc).
-            x-axis is defined as cross product between p_tan and rzloc (x).
+        ``phi``: ndarray, dtype=float
+            Shape ``(n_contacts, n_timesteps)`` array containing azimuth angle
+            in units of (radians) between u-axis vector(s) and projection of
+            contact point location vector(s) ``rxyz`` into uv-plane.
         """
 
-        # project rxyz onto z-axis (rzloc)
-        proj_rxyz_rz = self.rxyz * self._z
-        # find projection of rxyz in xy-plane
-        rxy = self.rxyz - proj_rxyz_rz
-        # define x-axis
-        x = np.cross(p_tan.T, self._z)
+        # project rxyz onto w-axis (axis of rzloc)
+        proj_rxyz_rz = np.outer(self.rxyz @ self._rzloc / self._rz, self._z)
 
+        # find projection of rxyz in uv-plane
+        r_uv = self.rxyz - proj_rxyz_rz
+        # define u-axis
+        u = np.cross(p_tan.T, self._z)
+
+        # azimuth angle
         phi = np.zeros((len(self.rxyz), p_tan.shape[1]))
-        # create masks to avoid computing phi when phi is not defined
-        mask = np.ones(phi.shape, dtype=bool)
-        # phi is not defined when theta= 0,pi or |p_tan| = 0
-        mask[(self._theta == 0) | (self._theta == np.pi)] = np.zeros(
-            p_tan.shape[1])
-        mask[:, np.abs(np.linalg.norm(p_tan, axis=0)) == 0] = 0
 
-        cos_phi = np.zeros(phi.shape)
-        # compute cos_phi using mask to avoid zerodivision
-        cos_phi[mask] = (rxy @ x.T)[mask] \
-            / np.outer(np.linalg.norm(rxy, axis=1),
-                       np.linalg.norm(x, axis=1))[mask]
+        if np.linalg.norm(u) > 0:
+            # create masks to avoid computing phi when phi is not defined
+            mask = np.ones(phi.shape, dtype=bool)
+            # phi is not defined when theta= 0, pi or |p_tan| = 0
+            mask[(self._theta == 0) | (self._theta == np.pi)] = np.zeros(
+                p_tan.shape[1])
+            mask[:, np.abs(np.linalg.norm(p_tan, axis=0)) == 0] = False
 
-        # compute phi in [0, pi]
-        phi[mask] = np.arccos(cos_phi[mask])
+            cos_phi = np.zeros(phi.shape)
+            # compute cos_phi using mask to avoid zero division
+            cos_phi[mask] = (r_uv @ u.T)[mask] / \
+                np.outer(np.linalg.norm(r_uv, axis=1),
+                         np.linalg.norm(u, axis=1))[mask]
 
-        # nb: phi in [-pi, pi]. since p_tan defines direction of y-axis,
-        # phi < 0 when rxy*p_tan < 0
-        phi[(rxy @ p_tan) < 0] *= -1
+            # above linear operations may result in cos_phi outside [-1, +1]
+            cos_phi[cos_phi < -1.] = -1.
+            cos_phi[cos_phi > 1.] = 1.
+
+            # compute phi in [0, pi]
+            phi[mask] = np.nan_to_num(np.arccos(cos_phi[mask]))
+
+            # NB: phi in [-pi, pi]. since p_tan defines direction of y-axis,
+            # phi < 0 when r_uv * p_tan < 0
+            phi[(r_uv @ p_tan) < 0] *= -1
 
         return phi
 
