@@ -380,55 +380,62 @@ class FourSphereVolumeConductor(object):
 
     def _calc_phi(self, p_tan):
         """
-        Return azimuthal angle between x-axis and contact point locations(s)
+        Return azimuthal angle between u-axis and contact point locations(s)
+        for tangential dipole component ``p_tan``
+
+        w-axis is here defined in the direction of rzloc.
+        v-axis is here defined in the direction of ``p_tan``
+        (orthogonal to ``rzloc``).
+        u-axis is here defined as cross product between `
+        `p_tan`` and ``rzloc``.
 
         Parameters
         ----------
-        p_tan: ndarray, dtype=float
-            Shape (3, n_timesteps) array containing
+        ``p_tan``: ndarray, dtype=float
+            Shape ``(3, n_timesteps)`` array containing
             tangential component of current dipole moment in units of (nA*µm)
 
         Returns
         -------
-        phi: ndarray, dtype=float
-            Shape (n_contacts, n_timesteps) array containing azimuthal angle
-            in units of (radians) between x-axis vector(s) and projection of
-            contact point location vector(s) rxyz into xy-plane.
-            z-axis is defined in the direction of rzloc.
-            y-axis is defined in the direction of p_tan (orthogonal to rzloc).
-            x-axis is defined as cross product between p_tan and rzloc (x).
+        ``phi``: ndarray, dtype=float
+            Shape ``(n_contacts, n_timesteps)`` array containing azimuth angle
+            in units of (radians) between u-axis vector(s) and projection of
+            contact point location vector(s) ``rxyz`` into uv-plane.
         """
 
-        # project rxyz onto z-axis (rzloc)
+        # project rxyz onto w-axis (axis of rzloc)
         proj_rxyz_rz = np.outer(self.rxyz @ self._rzloc / self._rz, self._z)
 
-        # find projection of rxyz in xy-plane
-        rxy = self.rxyz - proj_rxyz_rz
-        # define x-axis
-        x = np.cross(p_tan.T, self._z)
+        # find projection of rxyz in uv-plane
+        r_uv = self.rxyz - proj_rxyz_rz
+        # define u-axis
+        u = np.cross(p_tan.T, self._z)
 
+        # azimuth angle
         phi = np.zeros((len(self.rxyz), p_tan.shape[1]))
-        # create masks to avoid computing phi when phi is not defined
-        mask = np.ones(phi.shape, dtype=bool)
-        # phi is not defined when theta= 0,pi or |p_tan| = 0
-        mask[(self._theta == 0) | (self._theta == np.pi)] = np.zeros(
-            p_tan.shape[1])
-        mask[:, np.abs(np.linalg.norm(p_tan, axis=0)) == 0] = 0
 
-        cos_phi = np.zeros(phi.shape)
-        # compute cos_phi using mask to avoid zerodivision
-        cos_phi[mask] = (rxy @ x.T)[mask] \
-            / np.outer(np.linalg.norm(rxy, axis=1),
-                       np.linalg.norm(x, axis=1))[mask]
+        if np.linalg.norm(u) > 0:
+            # create masks to avoid computing phi when phi is not defined
+            mask = np.ones(phi.shape, dtype=bool)
+            # phi is not defined when theta= 0, pi or |p_tan| = 0
+            mask[(self._theta == 0) | (self._theta == np.pi)] = np.zeros(
+                p_tan.shape[1])
+            mask[:, np.abs(np.linalg.norm(p_tan, axis=0)) == 0] = False
 
-        # compute phi in [0, pi]
-        with np.errstate(invalid='ignore'):
-            phi[mask] = np.nan_to_num(np.arccos(cos_phi[mask]))
+            cos_phi = np.zeros(phi.shape)
+            # compute cos_phi using mask to avoid zerodivision
+            cos_phi[mask] = (r_uv @ u.T)[mask] / \
+                np.outer(np.linalg.norm(r_uv, axis=1),
+                         np.linalg.norm(u, axis=1))[mask]
+
+            # compute phi in [0, pi]
+            with np.errstate(invalid='ignore'):
+                phi[mask] = np.nan_to_num(np.arccos(cos_phi[mask]))
 
 
-        # nb: phi in [-pi, pi]. since p_tan defines direction of y-axis,
-        # phi < 0 when rxy*p_tan < 0
-        phi[(rxy @ p_tan) < 0] *= -1
+            # nb: phi in [-pi, pi]. since p_tan defines direction of y-axis,
+            # phi < 0 when r_uv*p_tan < 0
+            phi[(r_uv @ p_tan) < 0] *= -1
 
         return phi
 
