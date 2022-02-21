@@ -159,12 +159,12 @@ def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma, r_limit):
     [iiii] = np.where(np.bitwise_and(4 * a * c - b * b > 1e-6,
                                      np.abs(b) > 1e-6))
 
-    if len(i) + len(iia) + len(iib) + len(iii) + len(iiii) != cell.totnsegs:
+    if len(i) + len(iia) + len(iib) + len(iii) + len(iiii) != xstart.size:
         print(a, b, c)
         print(i, iia, iib, iii, iiii)
         raise RuntimeError
 
-    mapping = np.zeros(cell.totnsegs)
+    mapping = np.zeros(xstart.size)
     mapping[i] = _anisotropic_line_source_case_i(a[i], c[i])
     mapping[iia] = _anisotropic_line_source_case_iia(a[iia], c[iia])
     mapping[iib] = _anisotropic_line_source_case_iib(a[iib], b[iib], c[iib])
@@ -271,12 +271,12 @@ def calc_lfp_root_as_point_anisotropic(cell, x, y, z, sigma, r_limit):
     [iiii] = np.where(np.bitwise_and(4 * a * c - b * b > 1e-6,
                                      np.abs(b) > 1e-6))
 
-    if len(i) + len(iia) + len(iib) + len(iii) + len(iiii) != cell.totnsegs:
+    if len(i) + len(iia) + len(iib) + len(iii) + len(iiii) != xstart.size:
         print(a, b, c)
         print(i, iia, iib, iii, iiii)
         raise RuntimeError
 
-    mapping = np.zeros(cell.totnsegs)
+    mapping = np.zeros(xstart.size)
     mapping[i] = _anisotropic_line_source_case_i(a[i], c[i])
     mapping[iia] = _anisotropic_line_source_case_iia(a[iia], c[iia])
     mapping[iib] = _anisotropic_line_source_case_iib(a[iib], b[iib], c[iib])
@@ -468,7 +468,7 @@ def calc_lfp_root_as_point(cell, x, y, z, sigma, r_limit,
     iii = np.where(hposi & lposi)
 
     # Sum all potential contributions
-    mapping = np.zeros(cell.totnsegs)
+    mapping = np.zeros(xstart.size)
     mapping[rootinds] = 1 / r_root
     deltaS[rootinds] = 1.
 
