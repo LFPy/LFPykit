@@ -13,6 +13,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 """
 
+import numba
 import sys
 from copy import deepcopy
 import numpy as np
@@ -451,19 +452,33 @@ class LineSourcePotential(LinearModel):
         if self.cell is None:
             raise AttributeError(
                 '{}.cell is None'.format(self.__class__.__name__))
-        M = np.empty((self.x.size, self.cell.totnsegs))
         if self.cell.d.ndim == 2:
             r_limit = self.cell.d.mean(axis=-1) / 2
         else:
             r_limit = self.cell.d / 2
-        for j in range(self.x.size):
-            M[j, :] = lfpcalc.calc_lfp_linesource(self.cell,
-                                                  x=self.x[j],
-                                                  y=self.y[j],
-                                                  z=self.z[j],
-                                                  sigma=self.sigma,
-                                                  r_limit=r_limit)
-        return M
+
+        @numba.njit(nogil=True, cache=True, fastmath=False, parallel=True)
+        def _get_transform(cell_x, cell_y, cell_z, x, y, z, sigma, r_limit):
+            M = np.empty((x.size, cell_x.shape[0]))
+            for j in numba.prange(x.size):
+                M[j, :] = lfpcalc.calc_lfp_linesource(cell_x=cell_x,
+                                                      cell_y=cell_y,
+                                                      cell_z=cell_z,
+                                                      x=x[j],
+                                                      y=y[j],
+                                                      z=z[j],
+                                                      sigma=sigma,
+                                                      r_limit=r_limit)
+            return M
+
+        return _get_transform(cell_x=self.cell.x,
+                              cell_y=self.cell.y,
+                              cell_z=self.cell.z,
+                              x=self.x,
+                              y=self.y,
+                              z=self.z,
+                              sigma=self.sigma,
+                              r_limit=r_limit)
 
 
 class RecExtElectrode(LinearModel):

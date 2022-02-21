@@ -14,7 +14,7 @@ GNU General Public License for more details.
 
 """
 
-import numba
+from numba import njit
 import numpy as np
 
 
@@ -343,14 +343,19 @@ def _anisotropic_line_source_case_iiii(a, b, c):
             np.arcsinh(b / np.sqrt(4 * a * c - b * b)))
 
 
-def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
+@njit(nogil=True, cache=True, fastmath=False)
+def calc_lfp_linesource(cell_x, cell_y, cell_z, x, y, z, sigma, r_limit):
     """Calculate electric field potential using the line-source method, all
     segments treated as line sources.
 
     Parameters
     ----------
-    cell: obj
-        `GeometryCell` instance or similar
+    cell_x: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.x`` datas
+    cell_y: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.y`` datas
+    cell_z: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.z`` datas
     x: float
         extracellular position, x-axis
     y: float
@@ -364,17 +369,17 @@ def calc_lfp_linesource(cell, x, y, z, sigma, r_limit):
     """
 
     # some variables for h, r2, r_root calculations
-    xstart = cell.x[:, 0]
-    xend = cell.x[:, -1]
-    ystart = cell.y[:, 0]
-    yend = cell.y[:, -1]
-    zstart = cell.z[:, 0]
-    zend = cell.z[:, -1]
+    xstart = cell_x[:, 0]
+    xend = cell_x[:, -1]
+    ystart = cell_y[:, 0]
+    yend = cell_y[:, -1]
+    zstart = cell_z[:, 0]
+    zend = cell_z[:, -1]
 
     return _calc_lfp_linesource(xstart, xend, ystart, yend, zstart, zend, x, y, z, sigma, r_limit)
 
 
-@numba.jit(nopython=True, nogil=True, cache=True, fastmath=False)
+@njit(nogil=True, cache=True, fastmath=False)
 def _calc_lfp_linesource(xstart, xend, ystart, yend, zstart, zend, x, y, z, sigma, r_limit):
     deltaS = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
     h = _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
@@ -479,7 +484,7 @@ def calc_lfp_root_as_point(cell, x, y, z, sigma, r_limit,
     return 1 / (4 * np.pi * sigma * deltaS) * mapping
 
 
-@numba.jit(nopython=True, nogil=True, cache=True, fastmath=True)
+@njit(nogil=True, cache=True, fastmath=True)
 def _linesource_calc_case1(l_i, r2_i, h_i):
     """Calculates linesource contribution for case i"""
     bb = np.sqrt(h_i * h_i + r2_i) - h_i
@@ -488,7 +493,7 @@ def _linesource_calc_case1(l_i, r2_i, h_i):
     return dd
 
 
-@numba.jit(nopython=True, nogil=True, cache=True, fastmath=True)
+@njit(nogil=True, cache=True, fastmath=True)
 def _linesource_calc_case2(l_ii, r2_ii, h_ii):
     """Calculates linesource contribution for case ii"""
     bb = np.sqrt(h_ii * h_ii + r2_ii) - h_ii
@@ -497,7 +502,7 @@ def _linesource_calc_case2(l_ii, r2_ii, h_ii):
     return dd
 
 
-@numba.jit(nopython=True, nogil=True, cache=True, fastmath=True)
+@njit(nogil=True, cache=True, fastmath=True)
 def _linesource_calc_case3(l_iii, r2_iii, h_iii):
     """Calculates linesource contribution for case iii"""
     bb = np.sqrt(l_iii * l_iii + r2_iii) + l_iii
@@ -506,7 +511,7 @@ def _linesource_calc_case3(l_iii, r2_iii, h_iii):
     return dd
 
 
-@numba.jit(nopython=True, nogil=True, cache=True, fastmath=True)
+@njit(nogil=True, cache=True, fastmath=True)
 def _deltaS_calc(xstart, xend, ystart, yend, zstart, zend):
     """Returns length of each segment"""
     deltaS = np.sqrt((xstart - xend)**2 + (ystart - yend)**2 +
@@ -514,7 +519,7 @@ def _deltaS_calc(xstart, xend, ystart, yend, zstart, zend):
     return deltaS
 
 
-@numba.jit(nopython=True, nogil=True, cache=True, fastmath=True)
+@njit(nogil=True, cache=True, fastmath=True)
 def _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z):
     """Subroutine used by calc_lfp_*()"""
     ccX = (x - xend) * (xend - xstart)
@@ -526,7 +531,7 @@ def _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z):
     return hh
 
 
-@numba.jit(nopython=True, nogil=True, cache=True, fastmath=True)
+@njit(nogil=True, cache=True, fastmath=True)
 def _r2_calc(xend, yend, zend, x, y, z, h):
     """Subroutine used by calc_lfp_*()"""
     r2 = (x - xend)**2 + (y - yend)**2 + (z - zend)**2 - h**2
