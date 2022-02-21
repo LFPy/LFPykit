@@ -509,8 +509,7 @@ def _linesource_calc_case1(l_i: numba.double[:],
     """Calculates linesource contribution for case i"""
     bb = np.sqrt(h_i * h_i + r2_i) - h_i
     cc = np.sqrt(l_i * l_i + r2_i) - l_i
-    dd = np.log(bb / cc)
-    return dd
+    return np.log(bb / cc)
 
 
 @njit(nogil=True, cache=True, fastmath=True)
@@ -520,8 +519,7 @@ def _linesource_calc_case2(l_ii: numba.double[:],
     """Calculates linesource contribution for case ii"""
     bb = np.sqrt(h_ii * h_ii + r2_ii) - h_ii
     cc = (l_ii + np.sqrt(l_ii * l_ii + r2_ii)) / r2_ii
-    dd = np.log(bb * cc)
-    return dd
+    return np.log(bb * cc)
 
 
 @njit(nogil=True, cache=True, fastmath=True)
@@ -531,8 +529,7 @@ def _linesource_calc_case3(l_iii: numba.double[:],
     """Calculates linesource contribution for case iii"""
     bb = np.sqrt(l_iii * l_iii + r2_iii) + l_iii
     cc = np.sqrt(h_iii * h_iii + r2_iii) + h_iii
-    dd = np.log(bb / cc)
-    return dd
+    return np.log(bb / cc)
 
 
 @njit(nogil=True, cache=True, fastmath=True)
@@ -543,7 +540,8 @@ def _deltaS_calc(xstart: numba.double[:],
                  zstart: numba.double[:],
                  zend: numba.double[:]):
     """Returns length of each segment"""
-    deltaS = np.sqrt((xstart - xend)**2 + (ystart - yend)**2 +
+    deltaS = np.sqrt((xstart - xend)**2 +
+                     (ystart - yend)**2 +
                      (zstart - zend)**2)
     return deltaS
 
@@ -565,8 +563,7 @@ def _h_calc(xstart: numba.double[:],
     ccZ = (z - zend) * (zend - zstart)
     cc = ccX + ccY + ccZ
 
-    hh = cc / deltaS
-    return hh
+    return cc / deltaS
 
 
 @njit(nogil=True, cache=True, fastmath=True)
@@ -578,7 +575,7 @@ def _r2_calc(xend: numba.double[:],
              z: numba.double,
              h: numba.double[:]):
     """Subroutine used by calc_lfp_*()"""
-    r2 = (x - xend)**2 + (y - yend)**2 + (z - zend)**2 - h**2
+    r2 = (xend - x)**2 + (yend - y)**2 + (zend - z)**2 - h**2
     return np.abs(r2)
 
 
