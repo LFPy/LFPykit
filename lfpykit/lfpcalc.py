@@ -507,9 +507,11 @@ def _deltaS_calc(xstart, xend, ystart, yend, zstart, zend):
 
 def _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z):
     """Subroutine used by calc_lfp_*()"""
-    aa = np.array([x - xend, y - yend, z - zend])
-    bb = np.array([xend - xstart, yend - ystart, zend - zstart])
-    cc = np.sum(aa * bb, axis=0)
+    ccX = (x - xend) * (xend - xstart)
+    ccY = (y - yend) * (yend - ystart)
+    ccZ = (z - zend) * (zend - zstart)
+    cc = ccX + ccY + ccZ
+
     hh = cc / deltaS
     return hh
 
@@ -517,7 +519,7 @@ def _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z):
 def _r2_calc(xend, yend, zend, x, y, z, h):
     """Subroutine used by calc_lfp_*()"""
     r2 = (x - xend)**2 + (y - yend)**2 + (z - zend)**2 - h**2
-    return abs(r2)
+    return np.abs(r2)
 
 
 def _r_root_calc(xmid, ymid, zmid, x, y, z):
