@@ -44,9 +44,9 @@ setuptools.setup(
     python_requires='>=3.6',
     install_requires=[
         'numpy>=1.15.2',
+        'numba',
         'scipy',
-        'meautility'
-        ],
+        'meautility',        ],
     package_data={'lfpykit': [os.path.join('tests', '*.npz'),
                               os.path.join('tests', '*.py')]},
     include_package_data=True,
