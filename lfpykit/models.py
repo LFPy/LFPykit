@@ -293,21 +293,41 @@ class PointSourcePotential(LinearModel):
         if self.cell is None:
             raise AttributeError(
                 '{}.cell is None'.format(self.__class__.__name__))
-        M = np.empty((self.x.size, self.cell.totnsegs))
         if self.cell.d.ndim == 2:
             r_limit = self.cell.d.mean(axis=-1) / 2
         else:
             r_limit = self.cell.d / 2
-        for j in range(self.x.size):
-            M[j, :] = lfpcalc.calc_lfp_pointsource(cell_x=self.cell.x,
-                                                   cell_y=self.cell.y,
-                                                   cell_z=self.cell.z,
-                                                   x=self.x[j],
-                                                   y=self.y[j],
-                                                   z=self.z[j],
-                                                   sigma=self.sigma,
-                                                   r_limit=r_limit)
-        return M
+
+        def _get_transform(cell_x: numba.double[:, :],
+                           cell_y: numba.double[:, :],
+                           cell_z: numba.double[:, :],
+                           x: numba.double,
+                           y: numba.double,
+                           z: numba.double,
+                           sigma: numba.double,
+                           r_limit: numba.double[:]):
+            M = np.empty((x.size, cell_x.shape[0]))
+            for j in range(x.size):
+                M[j, :] = lfpcalc.calc_lfp_pointsource(cell_x=cell_x,
+                                                       cell_y=cell_y,
+                                                       cell_z=cell_z,
+                                                       x=x[j],
+                                                       y=y[j],
+                                                       z=z[j],
+                                                       sigma=sigma,
+                                                       r_limit=r_limit)
+            return M
+
+        return _get_transform(cell_x=self.cell.x,
+                              cell_y=self.cell.y,
+                              cell_z=self.cell.z,
+                              x=self.x,
+                              y=self.y,
+                              z=self.z,
+                              sigma=self.sigma,
+                              r_limit=r_limit)
+
+
 
 
 class LineSourcePotential(LinearModel):

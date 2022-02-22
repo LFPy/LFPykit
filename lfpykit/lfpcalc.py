@@ -14,7 +14,7 @@ GNU General Public License for more details.
 
 """
 
-from numba import njit
+from numba import njit, jit
 import numba
 import numpy as np
 
@@ -681,7 +681,7 @@ def calc_lfp_pointsource_anisotropic(cell_x, cell_y, cell_z,
     mapping = 1 / (4 * np.pi * sigma_r)
     return mapping
 
-
+@njit(nogil=True, cache=True, fastmath=True)
 def _check_rlimit_point(r2, r_limit):
     """Correct r2 so that r2 >= r_limit**2 for all values"""
     inds = r2 < r_limit * r_limit
