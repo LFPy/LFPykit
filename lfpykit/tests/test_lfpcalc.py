@@ -49,7 +49,7 @@ class testLfpCalc(unittest.TestCase):
         sigma = 0.3
         cell = DummyCell()
         np.testing.assert_equal(1. / (4 * np.pi * sigma),
-                                lfpcalc.calc_lfp_pointsource(cell,
+                                lfpcalc.calc_lfp_pointsource(cell.x, cell.y, cell.z,
                                                              x=0.5, y=0, z=1,
                                                              sigma=sigma,
                                                              r_limit=cell.d / 2
@@ -67,10 +67,10 @@ class testLfpCalc(unittest.TestCase):
         steps = 20
         cell = DummyCell(np.array([[h / 2, h / 2]]))
 
-        in_vivo = lfpcalc.calc_lfp_pointsource(cell,
+        in_vivo = lfpcalc.calc_lfp_pointsource(cell.x, cell.y, cell.z,
                                                x=0.5, y=0, z=1, sigma=sigma_T,
                                                r_limit=cell.d / 2)
-        in_vitro = lfpcalc.calc_lfp_pointsource_moi(cell,
+        in_vitro = lfpcalc.calc_lfp_pointsource_moi(cell.x, cell.y, cell.z,
                                                     x=0.5, y=0, z=1,
                                                     sigma_T=sigma_T,
                                                     sigma_G=sigma_G,
@@ -104,7 +104,7 @@ class testLfpCalc(unittest.TestCase):
             source_scaling / np.abs(z - (2 * h - cell.z.mean(axis=-1)[0]))
         )
 
-        moi_method_lfpy = lfpcalc.calc_lfp_pointsource_moi(cell,
+        moi_method_lfpy = lfpcalc.calc_lfp_pointsource_moi(cell.x, cell.y, cell.z,
                                                            x=0., y=0, z=z,
                                                            sigma_T=sigma_T,
                                                            sigma_G=sigma_G,
@@ -126,11 +126,11 @@ class testLfpCalc(unittest.TestCase):
         steps = 20
         cell = DummyCell(z=np.array([[h / 2, h / 2]]))
 
-        in_vivo = lfpcalc.calc_lfp_pointsource(cell,
+        in_vivo = lfpcalc.calc_lfp_pointsource(cell.x, cell.y, cell.z,
                                                x=0.5, y=0, z=h / 2,
                                                sigma=sigma_T,
                                                r_limit=cell.d / 2)
-        in_vitro = lfpcalc.calc_lfp_pointsource_moi(cell,
+        in_vitro = lfpcalc.calc_lfp_pointsource_moi(cell.x, cell.y, cell.z,
                                                     x=0.5, y=0, z=h / 2,
                                                     sigma_T=sigma_T,
                                                     sigma_G=sigma_G,
@@ -154,10 +154,10 @@ class testLfpCalc(unittest.TestCase):
         steps = 20
         cell = DummyCell()
 
-        in_vivo = lfpcalc.calc_lfp_linesource(cell,
+        in_vivo = lfpcalc.calc_lfp_linesource(cell.x, cell.y, cell.z,
                                               x=0.5, y=0, z=0, sigma=sigma_T,
                                               r_limit=cell.d / 2)
-        in_vitro = lfpcalc.calc_lfp_linesource_moi(cell,
+        in_vitro = lfpcalc.calc_lfp_linesource_moi(cell.x, cell.y, cell.z,
                                                    x=0.5, y=0, z=0,
                                                    sigma_T=sigma_T,
                                                    sigma_G=sigma_G,
@@ -180,11 +180,11 @@ class testLfpCalc(unittest.TestCase):
         steps = 20
         cell = DummyCell()
 
-        in_vivo = lfpcalc.calc_lfp_root_as_point(cell,
+        in_vivo = lfpcalc.calc_lfp_root_as_point(cell.x, cell.y, cell.z,
                                                  x=0.0, y=0, z=0,
                                                  sigma=sigma_T,
                                                  r_limit=cell.d / 2)
-        in_vitro = lfpcalc.calc_lfp_root_as_point_moi(cell,
+        in_vitro = lfpcalc.calc_lfp_root_as_point_moi(cell.x, cell.y, cell.z,
                                                       x=0.0, y=0, z=0,
                                                       sigma_T=sigma_T,
                                                       sigma_G=sigma_G,
@@ -202,7 +202,7 @@ class testLfpCalc(unittest.TestCase):
         sigma_T = 0.3
         cell = DummyCell()
 
-        in_vivo = lfpcalc.calc_lfp_linesource(cell,
+        in_vivo = lfpcalc.calc_lfp_linesource(cell.x, cell.y, cell.z,
                                               x=0.5, y=0.0, z=0, sigma=sigma_T,
                                               r_limit=cell.d / 2)[0]
         np.testing.assert_array_less(in_vivo, 1e12)
@@ -220,11 +220,11 @@ class testLfpCalc(unittest.TestCase):
 
         cell = DummyCell(z=np.array([[50, 50]]))
 
-        in_vivo = lfpcalc.calc_lfp_pointsource(cell,
+        in_vivo = lfpcalc.calc_lfp_pointsource(cell.x, cell.y, cell.z,
                                                x=50., y=0, z=0,
                                                sigma=sigma_T,
                                                r_limit=cell.d / 2)
-        in_vitro = lfpcalc.calc_lfp_pointsource_moi(cell,
+        in_vitro = lfpcalc.calc_lfp_pointsource_moi(cell.x, cell.y, cell.z,
                                                     x=50, y=0, z=0,
                                                     sigma_T=sigma_T,
                                                     sigma_G=sigma_G,
@@ -248,11 +248,11 @@ class testLfpCalc(unittest.TestCase):
 
         cell = DummyCell(z=np.array([[50, 50]]))
 
-        in_vivo = lfpcalc.calc_lfp_linesource(cell,
+        in_vivo = lfpcalc.calc_lfp_linesource(cell.x, cell.y, cell.z,
                                               x=50., y=0, z=0,
                                               sigma=sigma_T,
                                               r_limit=cell.d / 2)
-        in_vitro = lfpcalc.calc_lfp_linesource_moi(cell,
+        in_vitro = lfpcalc.calc_lfp_linesource_moi(cell.x, cell.y, cell.z,
                                                    x=50, y=0, z=0,
                                                    sigma_T=sigma_T,
                                                    sigma_G=sigma_G,
@@ -276,11 +276,11 @@ class testLfpCalc(unittest.TestCase):
 
         cell = DummyCell(z=np.array([[50, 50]]))
 
-        in_vivo = lfpcalc.calc_lfp_root_as_point(cell,
+        in_vivo = lfpcalc.calc_lfp_root_as_point(cell.x, cell.y, cell.z,
                                                  x=50., y=0, z=0,
                                                  sigma=sigma_T,
                                                  r_limit=cell.d / 2)
-        in_vitro = lfpcalc.calc_lfp_root_as_point_moi(cell,
+        in_vitro = lfpcalc.calc_lfp_root_as_point_moi(cell.x, cell.y, cell.z,
                                                       x=50, y=0, z=0,
                                                       sigma_T=sigma_T,
                                                       sigma_G=sigma_G,
@@ -303,7 +303,7 @@ class testLfpCalc(unittest.TestCase):
 
         cell = DummyCell(z=np.array([[100, 100]]))
 
-        with_saline = lfpcalc.calc_lfp_pointsource_moi(cell,
+        with_saline = lfpcalc.calc_lfp_pointsource_moi(cell.x, cell.y, cell.z,
                                                        x=0, y=0, z=0,
                                                        sigma_T=sigma_T,
                                                        sigma_G=sigma_G,
@@ -312,7 +312,7 @@ class testLfpCalc(unittest.TestCase):
                                                        h=h,
                                                        steps=steps)
 
-        without_saline = lfpcalc.calc_lfp_pointsource_moi(cell,
+        without_saline = lfpcalc.calc_lfp_pointsource_moi(cell.x, cell.y, cell.z,
                                                           x=0, y=0, z=0,
                                                           sigma_T=sigma_T,
                                                           sigma_G=sigma_G,
@@ -335,7 +335,7 @@ class testLfpCalc(unittest.TestCase):
 
         cell = DummyCell(z=np.array([[100, 100]]))
 
-        with_saline = lfpcalc.calc_lfp_linesource_moi(cell,
+        with_saline = lfpcalc.calc_lfp_linesource_moi(cell.x, cell.y, cell.z,
                                                       x=0, y=0, z=0,
                                                       sigma_T=sigma_T,
                                                       sigma_G=sigma_G,
@@ -344,7 +344,7 @@ class testLfpCalc(unittest.TestCase):
                                                       h=h,
                                                       steps=steps)
 
-        without_saline = lfpcalc.calc_lfp_linesource_moi(cell,
+        without_saline = lfpcalc.calc_lfp_linesource_moi(cell.x, cell.y, cell.z,
                                                          x=0, y=0, z=0,
                                                          sigma_T=sigma_T,
                                                          sigma_G=sigma_G,
@@ -367,7 +367,7 @@ class testLfpCalc(unittest.TestCase):
 
         cell = DummyCell(z=np.array([[100, 100]]))
 
-        with_saline = lfpcalc.calc_lfp_root_as_point_moi(cell,
+        with_saline = lfpcalc.calc_lfp_root_as_point_moi(cell.x, cell.y, cell.z,
                                                          x=0, y=0, z=0,
                                                          sigma_T=sigma_T,
                                                          sigma_G=sigma_G,
@@ -376,7 +376,7 @@ class testLfpCalc(unittest.TestCase):
                                                          h=h,
                                                          steps=steps)
 
-        without_saline = lfpcalc.calc_lfp_root_as_point_moi(cell,
+        without_saline = lfpcalc.calc_lfp_root_as_point_moi(cell.x, cell.y, cell.z,
                                                             x=0, y=0, z=0,
                                                             sigma_T=sigma_T,
                                                             sigma_G=sigma_G,
@@ -402,7 +402,7 @@ class testLfpCalc(unittest.TestCase):
 
         cell = DummyCell(x=np.array([[0., -200.]]), z=np.array(([[0., 220.]])))
 
-        calculated = lfpcalc.calc_lfp_pointsource_moi(cell,
+        calculated = lfpcalc.calc_lfp_pointsource_moi(cell.x, cell.y, cell.z,
                                                       x=100, y=0, z=0,
                                                       sigma_T=sigma_T,
                                                       sigma_G=sigma_G,
@@ -429,7 +429,7 @@ class testLfpCalc(unittest.TestCase):
         cell = DummyCell(x=np.array([[-100, 50]]),
                          z=np.array([[0, 110]]))
 
-        calculated = lfpcalc.calc_lfp_linesource_moi(cell,
+        calculated = lfpcalc.calc_lfp_linesource_moi(cell.x, cell.y, cell.z,
                                                      x=100, y=0, z=0,
                                                      sigma_T=sigma_T,
                                                      sigma_G=sigma_G,
@@ -457,7 +457,7 @@ class testLfpCalc(unittest.TestCase):
                          y=np.array([[0., 0.]]),
                          z=np.array([[0, 220]]))
 
-        calculated = lfpcalc.calc_lfp_root_as_point_moi(cell,
+        calculated = lfpcalc.calc_lfp_root_as_point_moi(cell.x, cell.y, cell.z,
                                                         x=100, y=0, z=0,
                                                         sigma_T=sigma_T,
                                                         sigma_G=sigma_G,
@@ -480,7 +480,7 @@ class testLfpCalc(unittest.TestCase):
 
         cell = DummyCell(z=np.array([[100, 100]]))
 
-        with_saline = lfpcalc.calc_lfp_pointsource_moi(cell,
+        with_saline = lfpcalc.calc_lfp_pointsource_moi(cell.x, cell.y, cell.z,
                                                        x=0, y=0, z=50,
                                                        sigma_T=sigma_T,
                                                        sigma_G=sigma_G,
@@ -489,7 +489,7 @@ class testLfpCalc(unittest.TestCase):
                                                        h=h,
                                                        steps=steps)
 
-        without_saline = lfpcalc.calc_lfp_pointsource_moi(cell,
+        without_saline = lfpcalc.calc_lfp_pointsource_moi(cell.x, cell.y, cell.z,
                                                           x=0, y=0, z=50,
                                                           sigma_T=sigma_T,
                                                           sigma_G=sigma_G,
@@ -512,7 +512,7 @@ class testLfpCalc(unittest.TestCase):
 
         cell = DummyCell(z=np.array([[100, 100]]))
 
-        with_saline = lfpcalc.calc_lfp_linesource_moi(cell,
+        with_saline = lfpcalc.calc_lfp_linesource_moi(cell.x, cell.y, cell.z,
                                                       x=0, y=0, z=0,
                                                       sigma_T=sigma_T,
                                                       sigma_G=sigma_G,
@@ -521,7 +521,7 @@ class testLfpCalc(unittest.TestCase):
                                                       h=h,
                                                       steps=steps)
 
-        without_saline = lfpcalc.calc_lfp_linesource_moi(cell,
+        without_saline = lfpcalc.calc_lfp_linesource_moi(cell.x, cell.y, cell.z,
                                                          x=0, y=0, z=0,
                                                          sigma_T=sigma_T,
                                                          sigma_G=sigma_G,
@@ -544,7 +544,7 @@ class testLfpCalc(unittest.TestCase):
 
         cell = DummyCell(z=np.array([[100, 100]]))
 
-        with_saline = lfpcalc.calc_lfp_root_as_point_moi(cell,
+        with_saline = lfpcalc.calc_lfp_root_as_point_moi(cell.x, cell.y, cell.z,
                                                          x=0, y=0, z=0,
                                                          sigma_T=sigma_T,
                                                          sigma_G=sigma_G,
@@ -553,7 +553,7 @@ class testLfpCalc(unittest.TestCase):
                                                          h=h,
                                                          steps=steps)
 
-        without_saline = lfpcalc.calc_lfp_root_as_point_moi(cell,
+        without_saline = lfpcalc.calc_lfp_root_as_point_moi(cell.x, cell.y, cell.z,
                                                             x=0, y=0, z=0,
                                                             sigma_T=sigma_T,
                                                             sigma_G=sigma_G,
@@ -579,7 +579,7 @@ class testLfpCalc(unittest.TestCase):
         phi_analytic = 1. / (4 * np.pi * sigma_r)
         np.testing.assert_equal(
             phi_analytic, lfpcalc.calc_lfp_pointsource_anisotropic(
-                cell, x=0, y=0, z=0, sigma=sigma, r_limit=cell.d / 2))
+                cell.x, cell.y, cell.z, x=0, y=0, z=0, sigma=sigma, r_limit=cell.d / 2))
 
     def test_deltaS_calc(self):
         cell = DummyCell(y=np.array([[0, 5]]))

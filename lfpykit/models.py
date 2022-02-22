@@ -299,7 +299,9 @@ class PointSourcePotential(LinearModel):
         else:
             r_limit = self.cell.d / 2
         for j in range(self.x.size):
-            M[j, :] = lfpcalc.calc_lfp_pointsource(self.cell,
+            M[j, :] = lfpcalc.calc_lfp_pointsource(cell_x=self.cell.x,
+                                                   cell_y=self.cell.y,
+                                                   cell_z=self.cell.z,
                                                    x=self.x[j],
                                                    y=self.y[j],
                                                    z=self.z[j],
@@ -940,7 +942,9 @@ class RecExtElectrode(LinearModel):
         else:
             r_limit = self.cell.d / 2
         for i in range(self.x.size):
-            M[i, :] = self.lfp_method(self.cell,
+            M[i, :] = self.lfp_method(cell_x=self.cell.x,
+                                      cell_y=self.cell.y,
+                                      cell_z=self.cell.z,
                                       x=self.x[i],
                                       y=self.y[i],
                                       z=self.z[i],
@@ -965,7 +969,9 @@ class RecExtElectrode(LinearModel):
             else:
                 r_limit = self.cell.d / 2
             for j in range(self.n):
-                tmp = self.lfp_method(self.cell,
+                tmp = self.lfp_method(cell_x=self.cell.x,
+                                      cell_y=self.cell.y,
+                                      cell_z=self.cell.z,
                                       x=points[j, 0],
                                       y=points[j, 1],
                                       z=points[j, 2],
@@ -993,7 +999,9 @@ class RecExtElectrode(LinearModel):
             else:
                 r_limit = self.cell.d / 2
             for i, (x, y, z) in enumerate(zip(self.x, self.y, self.z)):
-                M[i, ] = self.lfp_method(self.cell,
+                M[i, ] = self.lfp_method(cell_x=self.cell.x,
+                                         cell_y=self.cell.y,
+                                         cell_z=self.cell.z,
                                          x=x,
                                          y=y,
                                          z=z,

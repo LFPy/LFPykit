@@ -64,14 +64,19 @@ def return_dist_from_segments(xstart, ystart, zstart, xend, yend, zend, p):
     return dist, closest_point
 
 
-def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma, r_limit):
+def calc_lfp_linesource_anisotropic(cell_x, cell_y, cell_z,
+                                    x, y, z, sigma, r_limit):
     """Calculate electric field potential using the line-source method, all
     segments treated as line sources.
 
     Parameters
     ----------
-    cell: obj
-        `GeometryCell instance or similar
+    cell_x: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.x`` datas
+    cell_y: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.y`` datas
+    cell_z: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.z`` datas
     x: float
         extracellular position, x-axis
     y: float
@@ -85,12 +90,12 @@ def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma, r_limit):
     """
 
     # some variables for h, r2, r_root calculations
-    xstart = cell.x[:, 0]
-    xend = cell.x[:, -1]
-    ystart = cell.y[:, 0]
-    yend = cell.y[:, -1]
-    zstart = cell.z[:, 0]
-    zend = cell.z[:, -1]
+    xstart = cell_x[:, 0]
+    xend = cell_x[:, -1]
+    ystart = cell_y[:, 0]
+    yend = cell_y[:, -1]
+    zstart = cell_z[:, 0]
+    zend = cell_z[:, -1]
     l_vecs = np.array([xend - xstart,
                        yend - ystart,
                        zend - zstart])
@@ -179,14 +184,19 @@ def calc_lfp_linesource_anisotropic(cell, x, y, z, sigma, r_limit):
     return 1 / (4 * np.pi) * mapping / np.sqrt(a)
 
 
-def calc_lfp_root_as_point_anisotropic(cell, x, y, z, sigma, r_limit):
+def calc_lfp_root_as_point_anisotropic(cell_x, cell_y, cell_z,
+                                       x, y, z, sigma, r_limit):
     """Calculate electric field potential, root is treated as point source, all
     segments except root are treated as line sources.
 
     Parameters
     ----------
-    cell: obj
-        `GeometryCell` instance or similar
+    cell_x: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.x`` datas
+    cell_y: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.y`` datas
+    cell_z: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.z`` datas
     x: float
         extracellular position, x-axis
     y: float
@@ -199,12 +209,12 @@ def calc_lfp_root_as_point_anisotropic(cell, x, y, z, sigma, r_limit):
         minimum distance to source current for each compartment
     """
 
-    xstart = cell.x[:, 0]
-    xend = cell.x[:, -1]
-    ystart = cell.y[:, 0]
-    yend = cell.y[:, -1]
-    zstart = cell.z[:, 0]
-    zend = cell.z[:, -1]
+    xstart = cell_x[:, 0]
+    xend = cell_x[:, -1]
+    ystart = cell_y[:, 0]
+    yend = cell_y[:, -1]
+    zstart = cell_z[:, 0]
+    zend = cell_z[:, -1]
     l_vecs = np.array([xend - xstart, yend - ystart, zend - zstart])
 
     pos = np.array([x, y, z])
@@ -294,9 +304,9 @@ def calc_lfp_root_as_point_anisotropic(cell, x, y, z, sigma, r_limit):
     # sources)
     rootinds = np.array([0])
 
-    dx2_root = (cell.x[rootinds, :].mean(axis=-1) - x)**2
-    dy2_root = (cell.y[rootinds, :].mean(axis=-1) - y)**2
-    dz2_root = (cell.z[rootinds, :].mean(axis=-1) - z)**2
+    dx2_root = (cell_x[rootinds, :].mean(axis=-1) - x)**2
+    dy2_root = (cell_y[rootinds, :].mean(axis=-1) - y)**2
+    dz2_root = (cell_z[rootinds, :].mean(axis=-1) - z)**2
 
     r2_root = dx2_root + dy2_root + dz2_root
 
@@ -427,15 +437,19 @@ def _calc_lfp_linesource(xstart: numba.double[:],
     return 1 / (4 * np.pi * sigma * deltaS) * mapping
 
 
-def calc_lfp_root_as_point(cell, x, y, z, sigma, r_limit,
+def calc_lfp_root_as_point(cell_x, cell_y, cell_z, x, y, z, sigma, r_limit,
                            rootinds=np.array([0])):
     """Calculate electric field potential using the line-source method,
     root is treated as point/sphere source
 
     Parameters
     ----------
-    cell: obj
-        `GeometryCell` instance or similar
+    cell_x: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.x`` datas
+    cell_y: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.y`` datas
+    cell_z: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.z`` datas
     x: float
         extracellular position, x-axis
     y: float
@@ -450,15 +464,15 @@ def calc_lfp_root_as_point(cell, x, y, z, sigma, r_limit,
         indices of root segment(s). Defaults to np.array([0])
     """
     # some variables for h, r2, r_root calculations
-    xstart = cell.x[:, 0]
-    xmid = cell.x[rootinds, :].mean(axis=-1)
-    xend = cell.x[:, -1]
-    ystart = cell.y[:, 0]
-    ymid = cell.y[rootinds, :].mean(axis=-1)
-    yend = cell.y[:, -1]
-    zstart = cell.z[:, 0]
-    zmid = cell.z[rootinds, :].mean(axis=-1)
-    zend = cell.z[:, -1]
+    xstart = cell_x[:, 0]
+    xmid = cell_x[rootinds, :].mean(axis=-1)
+    xend = cell_x[:, -1]
+    ystart = cell_y[:, 0]
+    ymid = cell_y[rootinds, :].mean(axis=-1)
+    yend = cell_y[:, -1]
+    zstart = cell_z[:, 0]
+    zmid = cell_z[rootinds, :].mean(axis=-1)
+    zend = cell_z[:, -1]
 
     deltaS = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
     h = _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
@@ -585,14 +599,18 @@ def _r_root_calc(xmid, ymid, zmid, x, y, z):
     return r_root
 
 
-def calc_lfp_pointsource(cell, x, y, z, sigma, r_limit):
+def calc_lfp_pointsource(cell_x, cell_y, cell_z, x, y, z, sigma, r_limit):
     """Calculate extracellular potentials using the point-source
     equation on all compartments
 
     Parameters
     ----------
-    cell: obj
-        `GeometryCell` instance or similar
+    cell_x: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.x`` datas
+    cell_y: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.y`` datas
+    cell_z: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.z`` datas
     x: float
         extracellular position, x-axis
     y: float
@@ -605,22 +623,27 @@ def calc_lfp_pointsource(cell, x, y, z, sigma, r_limit):
         minimum distance to source current for each compartment
     """
 
-    r2 = (cell.x.mean(axis=-1) - x)**2 + \
-         (cell.y.mean(axis=-1) - y)**2 + \
-         (cell.z.mean(axis=-1) - z)**2
+    r2 = (cell_x.mean(axis=-1) - x)**2 + \
+         (cell_y.mean(axis=-1) - y)**2 + \
+         (cell_z.mean(axis=-1) - z)**2
     r2 = _check_rlimit_point(r2, r_limit)
     mapping = 1 / (4 * np.pi * sigma * np.sqrt(r2))
     return mapping
 
 
-def calc_lfp_pointsource_anisotropic(cell, x, y, z, sigma, r_limit):
+def calc_lfp_pointsource_anisotropic(cell_x, cell_y, cell_z,
+                                     x, y, z, sigma, r_limit):
     """Calculate extracellular potentials using the anisotropic point-source
     equation on all compartments
 
     Parameters
     ----------
-    cell: obj
-        `GeometryCell` instance or similar
+    cell_x: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.x`` datas
+    cell_y: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.y`` datas
+    cell_z: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.z`` datas
     x: float
         extracellular position, x-axis
     y: float
@@ -633,9 +656,9 @@ def calc_lfp_pointsource_anisotropic(cell, x, y, z, sigma, r_limit):
         minimum distance to source current for each compartment
     """
 
-    dx2 = (cell.x.mean(axis=-1) - x)**2
-    dy2 = (cell.y.mean(axis=-1) - y)**2
-    dz2 = (cell.z.mean(axis=-1) - z)**2
+    dx2 = (cell_x.mean(axis=-1) - x)**2
+    dy2 = (cell_y.mean(axis=-1) - y)**2
+    dz2 = (cell_z.mean(axis=-1) - z)**2
 
     r2 = dx2 + dy2 + dz2
     if (np.abs(r2) < 1e-6).any():
@@ -666,15 +689,21 @@ def _check_rlimit_point(r2, r_limit):
     return r2
 
 
-def calc_lfp_pointsource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
+def calc_lfp_pointsource_moi(cell_x, cell_y, cell_z,
+                             x, y, z,
+                             sigma_T, sigma_S, sigma_G,
                              steps, h, r_limit, **kwargs):
     """Calculate extracellular potentials using the point-source
     equation on all compartments for in vitro Microelectrode Array (MEA) slices
 
     Parameters
     ----------
-    cell: obj
-        `GeometryCell` instance or similar
+    cell_x: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.x`` datas
+    cell_y: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.y`` datas
+    cell_z: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.z`` datas
     x: float
         extracellular position, x-axis
     y: float
@@ -695,7 +724,7 @@ def calc_lfp_pointsource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     r_limit: np.ndarray
         minimum distance to source current for each compartment
     """
-    cell_z_mid = cell.z.mean(axis=-1)
+    cell_z_mid = cell_z.mean(axis=-1)
     z_ = z
 
     if "z_shift" in kwargs and kwargs["z_shift"] is not None:
@@ -703,8 +732,8 @@ def calc_lfp_pointsource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
         z_ -= kwargs["z_shift"]
         cell_z_mid -= kwargs["z_shift"]
 
-    dx2 = (x - cell.x.mean(axis=-1))**2
-    dy2 = (y - cell.y.mean(axis=-1))**2
+    dx2 = (x - cell_x.mean(axis=-1))**2
+    dy2 = (y - cell_y.mean(axis=-1))**2
     dz2 = (z_ - cell_z_mid)**2
 
     dL2 = dx2 + dy2
@@ -733,15 +762,21 @@ def calc_lfp_pointsource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     return mapping
 
 
-def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
+def calc_lfp_linesource_moi(cell_x, cell_y, cell_z,
+                            x, y, z,
+                            sigma_T, sigma_S, sigma_G,
                             steps, h, r_limit, **kwargs):
     """Calculate extracellular potentials using the line-source
     equation on all compartments for in vitro Microelectrode Array (MEA) slices
 
     Parameters
     ----------
-    cell: obj
-        `GeometryCell` instance or similar
+    cell_x: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.x`` datas
+    cell_y: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.y`` datas
+    cell_z: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.z`` datas
     x: float
         extracellular position, x-axis
     y: float
@@ -764,7 +799,7 @@ def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
         minimum distance to source current for each compartment
     """
 
-    cell_z = cell.z.copy()  # Copy to safely shift coordinate system if needed
+    cell_z = cell_z.copy()  # Copy to safely shift coordinate system if needed
     z_ = z
 
     if "z_shift" in kwargs and kwargs["z_shift"] is not None:
@@ -779,14 +814,14 @@ def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
         raise RuntimeError("This method can only handle sigma_G=0, i.e.,"
                            "a non-conducting MEA glass electrode plane.")
 
-    xstart = cell.x[:, 0]
-    xend = cell.x[:, -1]
-    ystart = cell.y[:, 0]
-    yend = cell.y[:, -1]
+    xstart = cell_x[:, 0]
+    xend = cell_x[:, -1]
+    ystart = cell_y[:, 0]
+    yend = cell_y[:, -1]
     zstart = cell_z[:, 0]
     zend = cell_z[:, -1]
-    x0, y0, z0 = cell.x[:, 0], cell.y[:, 0], cell_z[:, 0]
-    x1, y1, z1 = cell.x[:, -1], cell.y[:, -1], cell_z[:, -1]
+    x0, y0, z0 = cell_x[:, 0], cell_y[:, 0], cell_z[:, 0]
+    x1, y1, z1 = cell_x[:, -1], cell_y[:, -1], cell_z[:, -1]
 
     pos = np.array([x, y, z_])
     rs, _ = return_dist_from_segments(xstart, ystart, zstart,
@@ -839,7 +874,9 @@ def calc_lfp_linesource_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     return mapping
 
 
-def calc_lfp_root_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
+def calc_lfp_root_as_point_moi(cell_x, cell_y, cell_z,
+                               x, y, z,
+                               sigma_T, sigma_S, sigma_G,
                                steps, h, r_limit, **kwargs):
     """Calculate extracellular potentials for in vitro
     Microelectrode Array (MEA) slices, where root (compartment zero) is
@@ -847,8 +884,12 @@ def calc_lfp_root_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
 
     Parameters
     ----------
-    cell: obj
-        `GeometryCell` instance or similar
+    cell_x: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.x`` datas
+    cell_y: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.y`` datas
+    cell_z: ndarray
+        shape ``(totnsegs, 2)`` array with ``CellGeometry.z`` datas
     x: float
         extracellular position, x-axis
     y: float
@@ -871,7 +912,7 @@ def calc_lfp_root_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
         minimum distance to source current for each compartment
     """
 
-    cell_z = cell.z.copy()  # Copy to safely shift coordinate system if needed
+    cell_z = cell_z.copy()  # Copy to safely shift coordinate system if needed
     z_ = z
 
     if "z_shift" in kwargs and kwargs["z_shift"] is not None:
@@ -886,14 +927,14 @@ def calc_lfp_root_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
         raise RuntimeError("This method can only handle sigma_G=0, i.e.,"
                            "a non-conducting MEA glass electrode plane.")
 
-    xstart = cell.x[:, 0]
-    xend = cell.x[:, -1]
-    ystart = cell.y[:, 0]
-    yend = cell.y[:, -1]
+    xstart = cell_x[:, 0]
+    xend = cell_x[:, -1]
+    ystart = cell_y[:, 0]
+    yend = cell_y[:, -1]
     zstart = cell_z[:, 0]
     zend = cell_z[:, -1]
-    x0, y0, z0 = cell.x[:, 0], cell.y[:, 0], cell_z[:, 0]
-    x1, y1, z1 = cell.x[:, -1], cell.y[:, -1], cell_z[:, -1]
+    x0, y0, z0 = cell_x[:, 0], cell_y[:, 0], cell_z[:, 0]
+    x1, y1, z1 = cell_x[:, -1], cell_y[:, -1], cell_z[:, -1]
 
     pos = np.array([x, y, z_])
     rs, _ = return_dist_from_segments(xstart, ystart, zstart,
@@ -950,8 +991,8 @@ def calc_lfp_root_as_point_moi(cell, x, y, z, sigma_T, sigma_S, sigma_G,
     # sources)
     rootinds = np.array([0])
 
-    dx2 = (x - cell.x[rootinds, :].mean(axis=-1))**2
-    dy2 = (y - cell.y[rootinds, :].mean(axis=-1))**2
+    dx2 = (x - cell_x[rootinds, :].mean(axis=-1))**2
+    dy2 = (y - cell_y[rootinds, :].mean(axis=-1))**2
     dz2 = (z_ - cell_z[rootinds, :].mean(axis=-1))**2
 
     dL2 = dx2 + dy2
