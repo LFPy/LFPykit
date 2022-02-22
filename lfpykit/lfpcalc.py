@@ -599,7 +599,8 @@ def _r_root_calc(xmid, ymid, zmid, x, y, z):
     return r_root
 
 
-def calc_lfp_pointsource(cell_x, cell_y, cell_z, x, y, z, sigma, r_limit):
+def calc_lfp_pointsource(cell_x, cell_y, cell_z,
+                         x, y, z, sigma, r_limit):
     """Calculate extracellular potentials using the point-source
     equation on all compartments
 
@@ -622,12 +623,11 @@ def calc_lfp_pointsource(cell_x, cell_y, cell_z, x, y, z, sigma, r_limit):
     r_limit: np.ndarray
         minimum distance to source current for each compartment
     """
-
     r2 = (cell_x.mean(axis=-1) - x)**2 + \
          (cell_y.mean(axis=-1) - y)**2 + \
          (cell_z.mean(axis=-1) - z)**2
     r2 = _check_rlimit_point(r2, r_limit)
-    mapping = 1 / (4 * np.pi * sigma * np.sqrt(r2))
+    mapping = 1. / (4. * np.pi * sigma * np.sqrt(r2))
     return mapping
 
 
@@ -681,7 +681,6 @@ def calc_lfp_pointsource_anisotropic(cell_x, cell_y, cell_z,
     mapping = 1 / (4 * np.pi * sigma_r)
     return mapping
 
-@njit(nogil=True, cache=True, fastmath=True)
 def _check_rlimit_point(r2, r_limit):
     """Correct r2 so that r2 >= r_limit**2 for all values"""
     inds = r2 < r_limit * r_limit
