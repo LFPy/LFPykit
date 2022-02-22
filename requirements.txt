@@ -1,6 +1,5 @@
 # pip requirements file
 numpy>=1.15.2
-numba
 scipy
 sympy
 MEAutility

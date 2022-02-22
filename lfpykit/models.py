@@ -13,7 +13,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 """
 
-import numba
 import sys
 from copy import deepcopy
 import numpy as np
@@ -460,17 +459,10 @@ class LineSourcePotential(LinearModel):
         else:
             r_limit = self.cell.d / 2
 
-        @numba.njit(nogil=True, cache=True, fastmath=False, parallel=True)
-        def _get_transform(cell_x: numba.double[:, :],
-                           cell_y: numba.double[:, :],
-                           cell_z: numba.double[:, :],
-                           x: numba.double,
-                           y: numba.double,
-                           z: numba.double,
-                           sigma: numba.double,
-                           r_limit: numba.double[:]):
+        def _get_transform(cell_x, cell_y, cell_z,
+                           x, y, z, sigma, r_limit):
             M = np.empty((x.size, cell_x.shape[0]))
-            for j in numba.prange(x.size):
+            for j in range(x.size):
                 M[j, :] = lfpcalc.calc_lfp_linesource(cell_x=cell_x,
                                                       cell_y=cell_y,
                                                       cell_z=cell_z,
@@ -1838,6 +1830,7 @@ class VolumetricCurrentSourceDensity(LinearModel):
     ------
 
     """
+
     def __init__(self, cell, x=None, y=None, z=None, dl=1.):
         super().__init__(cell=cell)
 
@@ -1972,13 +1965,14 @@ class LaminarCurrentSourceDensity(LinearModel):
     AttributeError
         inputs ``z`` and ``r`` must be ndarrays of correct shape etc.
     """
+
     def __init__(self, cell, z, r):
         super().__init__(cell=cell)
 
         # check input parameters
         for varname, var in zip(['z', 'r'], [z, r]):
-            assert type(var) is np.ndarray, 'type({}) != np.ndarray'.format(
-                varname)
+            assert isinstance(
+                var, np.ndarray), 'type({}) != np.ndarray'.format(varname)
         assert z.ndim == 2, 'z.ndim != 2'
         assert np.all(np.diff(z, axis=-1) > 0), 'lower edge <= upper edge'
         assert z.shape[1] == 2, 'z.shape[1] != 2'

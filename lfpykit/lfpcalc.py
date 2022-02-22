@@ -14,8 +14,6 @@ GNU General Public License for more details.
 
 """
 
-from numba import njit, jit
-import numba
 import numpy as np
 
 
@@ -354,15 +352,8 @@ def _anisotropic_line_source_case_iiii(a, b, c):
             np.arcsinh(b / np.sqrt(4 * a * c - b * b)))
 
 
-@njit(nogil=True, cache=True, fastmath=False)
-def calc_lfp_linesource(cell_x: numba.double[:, :],
-                        cell_y: numba.double[:, :],
-                        cell_z: numba.double[:, :],
-                        x: numba.double,
-                        y: numba.double,
-                        z: numba.double,
-                        sigma: numba.double,
-                        r_limit: numba.double[:]):
+def calc_lfp_linesource(cell_x, cell_y, cell_z,
+                        x, y, z, sigma, r_limit):
     """Calculate electric field potential using the line-source method, all
     segments treated as line sources.
 
@@ -394,21 +385,31 @@ def calc_lfp_linesource(cell_x: numba.double[:, :],
     zstart = cell_z[:, 0]
     zend = cell_z[:, 1]
 
-    return _calc_lfp_linesource(xstart, xend, ystart, yend, zstart, zend, x, y, z, sigma, r_limit)
+    return _calc_lfp_linesource(
+        xstart,
+        xend,
+        ystart,
+        yend,
+        zstart,
+        zend,
+        x,
+        y,
+        z,
+        sigma,
+        r_limit)
 
 
-@njit(nogil=True, cache=True, fastmath=False)
-def _calc_lfp_linesource(xstart: numba.double[:],
-                         xend: numba.double[:],
-                         ystart: numba.double[:],
-                         yend: numba.double[:],
-                         zstart: numba.double[:],
-                         zend: numba.double[:],
-                         x: numba.double,
-                         y: numba.double,
-                         z: numba.double,
-                         sigma: numba.double,
-                         r_limit: numba.double[:]):
+def _calc_lfp_linesource(xstart,
+                         xend,
+                         ystart,
+                         yend,
+                         zstart,
+                         zend,
+                         x,
+                         y,
+                         z,
+                         sigma,
+                         r_limit):
     deltaS = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
     h = _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
     r2 = _r2_calc(xend, yend, zend, x, y, z, h)
@@ -516,43 +517,39 @@ def calc_lfp_root_as_point(cell_x, cell_y, cell_z, x, y, z, sigma, r_limit,
     return 1 / (4 * np.pi * sigma * deltaS) * mapping
 
 
-@njit(nogil=True, cache=True, fastmath=True)
-def _linesource_calc_case1(l_i: numba.double[:],
-                           r2_i: numba.double[:],
-                           h_i: numba.double[:]):
+def _linesource_calc_case1(l_i,
+                           r2_i,
+                           h_i):
     """Calculates linesource contribution for case i"""
     bb = np.sqrt(h_i * h_i + r2_i) - h_i
     cc = np.sqrt(l_i * l_i + r2_i) - l_i
     return np.log(bb / cc)
 
 
-@njit(nogil=True, cache=True, fastmath=True)
-def _linesource_calc_case2(l_ii: numba.double[:],
-                           r2_ii: numba.double[:],
-                           h_ii: numba.double[:]):
+def _linesource_calc_case2(l_ii,
+                           r2_ii,
+                           h_ii):
     """Calculates linesource contribution for case ii"""
     bb = np.sqrt(h_ii * h_ii + r2_ii) - h_ii
     cc = (l_ii + np.sqrt(l_ii * l_ii + r2_ii)) / r2_ii
     return np.log(bb * cc)
 
 
-@njit(nogil=True, cache=True, fastmath=True)
-def _linesource_calc_case3(l_iii: numba.double[:],
-                           r2_iii: numba.double[:],
-                           h_iii: numba.double[:]):
+def _linesource_calc_case3(l_iii,
+                           r2_iii,
+                           h_iii):
     """Calculates linesource contribution for case iii"""
     bb = np.sqrt(l_iii * l_iii + r2_iii) + l_iii
     cc = np.sqrt(h_iii * h_iii + r2_iii) + h_iii
     return np.log(bb / cc)
 
 
-@njit(nogil=True, cache=True, fastmath=True)
-def _deltaS_calc(xstart: numba.double[:],
-                 xend: numba.double[:],
-                 ystart: numba.double[:],
-                 yend: numba.double[:],
-                 zstart: numba.double[:],
-                 zend: numba.double[:]):
+def _deltaS_calc(xstart,
+                 xend,
+                 ystart,
+                 yend,
+                 zstart,
+                 zend):
     """Returns length of each segment"""
     deltaS = np.sqrt((xstart - xend)**2 +
                      (ystart - yend)**2 +
@@ -560,17 +557,16 @@ def _deltaS_calc(xstart: numba.double[:],
     return deltaS
 
 
-@njit(nogil=True, cache=True, fastmath=True)
-def _h_calc(xstart: numba.double[:],
-            xend: numba.double[:],
-            ystart: numba.double[:],
-            yend: numba.double[:],
-            zstart: numba.double[:],
-            zend: numba.double[:],
-            deltaS: numba.double[:],
-            x: numba.double,
-            y: numba.double,
-            z: numba.double):
+def _h_calc(xstart,
+            xend,
+            ystart,
+            yend,
+            zstart,
+            zend,
+            deltaS,
+            x,
+            y,
+            z):
     """Subroutine used by calc_lfp_*()"""
     ccX = (x - xend) * (xend - xstart)
     ccY = (y - yend) * (yend - ystart)
@@ -580,14 +576,13 @@ def _h_calc(xstart: numba.double[:],
     return cc / deltaS
 
 
-@njit(nogil=True, cache=True, fastmath=True)
-def _r2_calc(xend: numba.double[:],
-             yend: numba.double[:],
-             zend: numba.double[:],
-             x: numba.double,
-             y: numba.double,
-             z: numba.double,
-             h: numba.double[:]):
+def _r2_calc(xend,
+             yend,
+             zend,
+             x,
+             y,
+             z,
+             h):
     """Subroutine used by calc_lfp_*()"""
     r2 = (xend - x)**2 + (yend - y)**2 + (zend - z)**2 - h**2
     return np.abs(r2)
@@ -680,6 +675,7 @@ def calc_lfp_pointsource_anisotropic(cell_x, cell_y, cell_z,
 
     mapping = 1 / (4 * np.pi * sigma_r)
     return mapping
+
 
 def _check_rlimit_point(r2, r_limit):
     """Correct r2 so that r2 >= r_limit**2 for all values"""
