@@ -67,3 +67,4 @@ from .models import LinearModel, CurrentDipoleMoment, PointSourcePotential, \
     OneSphereVolumeConductor, LaminarCurrentSourceDensity, \
     VolumetricCurrentSourceDensity
 from . import eegmegcalc
+from . import linesource

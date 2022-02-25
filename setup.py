@@ -6,6 +6,16 @@
 
 import os
 import setuptools
+import numpy
+from Cython.Distutils import build_ext
+
+cmdclass = {'build_ext': build_ext}
+ext_modules = [
+    setuptools.Extension('lfpykit.linesource',
+              ['lfpykit/linesource.pyx'],
+              include_dirs=[numpy.get_include()],
+              compiler_directives={'language_level' : "3"}),
+]
 
 d = {}
 exec(open(os.path.join('lfpykit', 'version.py')).read(), None, d)
@@ -45,9 +55,11 @@ setuptools.setup(
     install_requires=[
         'numpy>=1.15.2',
         'scipy',
+        'cython',
         'meautility',        ],
     package_data={'lfpykit': [os.path.join('tests', '*.npz'),
-                              os.path.join('tests', '*.py')]},
+                              os.path.join('tests', '*.py'),
+                              '*.pyx']},
     include_package_data=True,
     extras_require={'tests': ['pytest', 'sympy'],
                     'docs': ['sphinx', 'numpydoc', 'sphinx_rtd_theme',
@@ -55,5 +67,8 @@ setuptools.setup(
                     },
     dependency_links=[],
     provides=['lfpykit'],
-    zip_safe=False
+    zip_safe=False,
+    cmdclass=cmdclass,
+    ext_modules=ext_modules,
+
 )
