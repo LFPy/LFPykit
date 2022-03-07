@@ -45,7 +45,7 @@ setuptools.setup(
     install_requires=[
         'numpy>=1.15.2',
         'scipy',
-        'meautility',        ],
+        'meautility'],
     package_data={'lfpykit': [os.path.join('tests', '*.npz'),
                               os.path.join('tests', '*.py')]},
     include_package_data=True,
