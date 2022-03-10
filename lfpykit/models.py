@@ -1838,6 +1838,7 @@ class VolumetricCurrentSourceDensity(LinearModel):
     ------
 
     """
+
     def __init__(self, cell, x=None, y=None, z=None, dl=1.):
         super().__init__(cell=cell)
 
@@ -1972,13 +1973,14 @@ class LaminarCurrentSourceDensity(LinearModel):
     AttributeError
         inputs ``z`` and ``r`` must be ndarrays of correct shape etc.
     """
+
     def __init__(self, cell, z, r):
         super().__init__(cell=cell)
 
         # check input parameters
         for varname, var in zip(['z', 'r'], [z, r]):
-            assert type(var) is np.ndarray, 'type({}) != np.ndarray'.format(
-                varname)
+            assert isinstance(
+                var, np.ndarray), 'type({}) != np.ndarray'.format(varname)
         assert z.ndim == 2, 'z.ndim != 2'
         assert np.all(np.diff(z, axis=-1) > 0), 'lower edge <= upper edge'
         assert z.shape[1] == 2, 'z.shape[1] != 2'
