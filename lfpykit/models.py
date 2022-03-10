@@ -292,13 +292,16 @@ class PointSourcePotential(LinearModel):
         if self.cell is None:
             raise AttributeError(
                 '{}.cell is None'.format(self.__class__.__name__))
-        M = np.empty((self.x.size, self.cell.totnsegs))
         if self.cell.d.ndim == 2:
             r_limit = self.cell.d.mean(axis=-1) / 2
         else:
             r_limit = self.cell.d / 2
+
+        M = np.empty((self.x.size, self.cell.x.shape[0]))
         for j in range(self.x.size):
-            M[j, :] = lfpcalc.calc_lfp_pointsource(self.cell,
+            M[j, :] = lfpcalc.calc_lfp_pointsource(cell_x=self.cell.x,
+                                                   cell_y=self.cell.y,
+                                                   cell_z=self.cell.z,
                                                    x=self.x[j],
                                                    y=self.y[j],
                                                    z=self.z[j],
@@ -451,19 +454,33 @@ class LineSourcePotential(LinearModel):
         if self.cell is None:
             raise AttributeError(
                 '{}.cell is None'.format(self.__class__.__name__))
-        M = np.empty((self.x.size, self.cell.totnsegs))
         if self.cell.d.ndim == 2:
             r_limit = self.cell.d.mean(axis=-1) / 2
         else:
             r_limit = self.cell.d / 2
-        for j in range(self.x.size):
-            M[j, :] = lfpcalc.calc_lfp_linesource(self.cell,
-                                                  x=self.x[j],
-                                                  y=self.y[j],
-                                                  z=self.z[j],
-                                                  sigma=self.sigma,
-                                                  r_limit=r_limit)
-        return M
+
+        def _get_transform(cell_x, cell_y, cell_z,
+                           x, y, z, sigma, r_limit):
+            M = np.empty((x.size, cell_x.shape[0]))
+            for j in range(x.size):
+                M[j, :] = lfpcalc.calc_lfp_linesource(cell_x=cell_x,
+                                                      cell_y=cell_y,
+                                                      cell_z=cell_z,
+                                                      x=x[j],
+                                                      y=y[j],
+                                                      z=z[j],
+                                                      sigma=sigma,
+                                                      r_limit=r_limit)
+            return M
+
+        return _get_transform(cell_x=self.cell.x,
+                              cell_y=self.cell.y,
+                              cell_z=self.cell.z,
+                              x=self.x,
+                              y=self.y,
+                              z=self.z,
+                              sigma=self.sigma,
+                              r_limit=r_limit)
 
 
 class RecExtElectrode(LinearModel):
@@ -918,7 +935,9 @@ class RecExtElectrode(LinearModel):
         else:
             r_limit = self.cell.d / 2
         for i in range(self.x.size):
-            M[i, :] = self.lfp_method(self.cell,
+            M[i, :] = self.lfp_method(cell_x=self.cell.x,
+                                      cell_y=self.cell.y,
+                                      cell_z=self.cell.z,
                                       x=self.x[i],
                                       y=self.y[i],
                                       z=self.z[i],
@@ -943,7 +962,9 @@ class RecExtElectrode(LinearModel):
             else:
                 r_limit = self.cell.d / 2
             for j in range(self.n):
-                tmp = self.lfp_method(self.cell,
+                tmp = self.lfp_method(cell_x=self.cell.x,
+                                      cell_y=self.cell.y,
+                                      cell_z=self.cell.z,
                                       x=points[j, 0],
                                       y=points[j, 1],
                                       z=points[j, 2],
@@ -971,7 +992,9 @@ class RecExtElectrode(LinearModel):
             else:
                 r_limit = self.cell.d / 2
             for i, (x, y, z) in enumerate(zip(self.x, self.y, self.z)):
-                M[i, ] = self.lfp_method(self.cell,
+                M[i, ] = self.lfp_method(cell_x=self.cell.x,
+                                         cell_y=self.cell.y,
+                                         cell_z=self.cell.z,
                                          x=x,
                                          y=y,
                                          z=z,
@@ -1807,6 +1830,7 @@ class VolumetricCurrentSourceDensity(LinearModel):
     ------
 
     """
+
     def __init__(self, cell, x=None, y=None, z=None, dl=1.):
         super().__init__(cell=cell)
 
@@ -1941,13 +1965,14 @@ class LaminarCurrentSourceDensity(LinearModel):
     AttributeError
         inputs ``z`` and ``r`` must be ndarrays of correct shape etc.
     """
+
     def __init__(self, cell, z, r):
         super().__init__(cell=cell)
 
         # check input parameters
         for varname, var in zip(['z', 'r'], [z, r]):
-            assert type(var) is np.ndarray, 'type({}) != np.ndarray'.format(
-                varname)
+            assert isinstance(
+                var, np.ndarray), 'type({}) != np.ndarray'.format(varname)
         assert z.ndim == 2, 'z.ndim != 2'
         assert np.all(np.diff(z, axis=-1) > 0), 'lower edge <= upper edge'
         assert z.shape[1] == 2, 'z.shape[1] != 2'
