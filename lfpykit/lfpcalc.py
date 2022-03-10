@@ -14,7 +14,7 @@ GNU General Public License for more details.
 
 """
 
-from numba import njit, jit
+from numba import njit
 import numba
 import numpy as np
 
@@ -394,7 +394,8 @@ def calc_lfp_linesource(cell_x: numba.double[:, :],
     zstart = cell_z[:, 0]
     zend = cell_z[:, 1]
 
-    return _calc_lfp_linesource(xstart, xend, ystart, yend, zstart, zend, x, y, z, sigma, r_limit)
+    return _calc_lfp_linesource(xstart, xend, ystart, yend, zstart, zend,
+                                x, y, z, sigma, r_limit)
 
 
 @njit(nogil=True, cache=True, fastmath=False)
