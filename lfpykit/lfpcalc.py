@@ -153,17 +153,13 @@ def calc_lfp_linesource_anisotropic(cell_x, cell_y, cell_z,
                   sigma[0] * sigma[2] * (p_[1] - ystart[idx])**2 +
                   sigma[0] * sigma[1] * (p_[2] - zstart[idx])**2)
 
-    [i] = np.where(np.abs(b) <= 1e-6)
-    [iia] = np.where(np.bitwise_and(np.abs(4 * a * c - b * b) < 1e-6,
-                                    np.abs(a - c) < 1e-6))
-    [iib] = np.where(np.bitwise_and(np.abs(4 * a * c - b * b) < 1e-6,
-                                    np.abs(a - c) >= 1e-6))
-    [iii] = np.where(np.bitwise_and(4 * a * c - b * b < -1e-6,
-                                    np.abs(b) > 1e-6))
-    [iiii] = np.where(np.bitwise_and(4 * a * c - b * b > 1e-6,
-                                     np.abs(b) > 1e-6))
+    i = np.abs(b) <= 1e-6
+    iia = (np.abs(4 * a * c - b * b) < 1e-6) & (np.abs(a - c) < 1e-6)
+    iib = (np.abs(4 * a * c - b * b) < 1e-6) & (np.abs(a - c) >= 1e-6)
+    iii = (4 * a * c - b * b < -1e-6) & (np.abs(b) > 1e-6)
+    iiii = (4 * a * c - b * b > 1e-6) & (np.abs(b) > 1e-6)
 
-    if len(i) + len(iia) + len(iib) + len(iii) + len(iiii) != xstart.size:
+    if (i + iia + iib + iii + iiii).sum() != xstart.size:
         print(a, b, c)
         print(i, iia, iib, iii, iiii)
         raise RuntimeError
@@ -270,17 +266,13 @@ def calc_lfp_root_as_point_anisotropic(cell_x, cell_y, cell_z,
                   sigma[0] * sigma[2] * (p_[1] - ystart[idx])**2 +
                   sigma[0] * sigma[1] * (p_[2] - zstart[idx])**2)
 
-    [i] = np.where(np.abs(b) <= 1e-6)
-    [iia] = np.where(np.bitwise_and(np.abs(4 * a * c - b * b) < 1e-6,
-                                    np.abs(a - c) < 1e-6))
-    [iib] = np.where(np.bitwise_and(np.abs(4 * a * c - b * b) < 1e-6,
-                                    np.abs(a - c) >= 1e-6))
-    [iii] = np.where(np.bitwise_and(4 * a * c - b * b < -1e-6,
-                                    np.abs(b) > 1e-6))
-    [iiii] = np.where(np.bitwise_and(4 * a * c - b * b > 1e-6,
-                                     np.abs(b) > 1e-6))
+    i = np.abs(b) <= 1e-6
+    iia = (np.abs(4 * a * c - b * b) < 1e-6) & (np.abs(a - c) < 1e-6)
+    iib = (np.abs(4 * a * c - b * b) < 1e-6) & (np.abs(a - c) >= 1e-6)
+    iii = (4 * a * c - b * b < -1e-6) & (np.abs(b) > 1e-6)
+    iiii = (4 * a * c - b * b > 1e-6) & (np.abs(b) > 1e-6)
 
-    if len(i) + len(iia) + len(iib) + len(iii) + len(iiii) != xstart.size:
+    if (i + iia + iib + iii + iiii).sum() != xstart.size:
         print(a, b, c)
         print(i, iia, iib, iii, iiii)
         raise RuntimeError
@@ -414,7 +406,7 @@ def _calc_lfp_linesource(xstart,
     h = _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
     r2 = _r2_calc(xend, yend, zend, x, y, z, h)
 
-    too_close_idxs = np.where(r2 < r_limit * r_limit)[0]
+    too_close_idxs = r2 < (r_limit * r_limit)
     r2[too_close_idxs] = r_limit[too_close_idxs]**2
     l_ = h + deltaS
 
@@ -426,11 +418,11 @@ def _calc_lfp_linesource(xstart,
     mapping = np.zeros(xstart.size)
 
     # case i, h < 0, l < 0, see Eq. C.13 in Gary Holt's thesis, 1998.
-    [i] = np.where(hnegi & lnegi)
+    i = hnegi & lnegi
     # case ii, h < 0, l >= 0
-    [ii] = np.where(hnegi & lposi)
+    ii = hnegi & lposi
     # case iii, h >= 0, l >= 0
-    [iii] = np.where(hposi & lposi)
+    iii = hposi & lposi
 
     mapping[i] = _linesource_calc_case1(l_[i], r2[i], h[i])
     mapping[ii] = _linesource_calc_case2(l_[ii], r2[ii], h[ii])
@@ -499,11 +491,11 @@ def calc_lfp_root_as_point(cell_x, cell_y, cell_z, x, y, z, sigma, r_limit,
 
     # Line sources
     # case i,  h < 0,  l < 0
-    i = np.where(hnegi & lnegi)
+    i = hnegi & lnegi
     # case ii,  h < 0,  l >= 0
-    ii = np.where(hnegi & lposi)
+    ii = hnegi & lposi
     # case iii,  h >= 0,  l >= 0
-    iii = np.where(hposi & lposi)
+    iii = hposi & lposi
 
     # Sum all potential contributions
     mapping = np.zeros(xstart.size)
@@ -732,7 +724,8 @@ def calc_lfp_pointsource_moi(cell_x, cell_y, cell_z,
     dz2 = (z_ - cell_z_mid)**2
 
     dL2 = dx2 + dy2
-    inds = np.where(dL2 + dz2 < r_limit * r_limit)[0]
+    # inds = np.where(dL2 + dz2 < r_limit * r_limit)[0]
+    inds = (dL2 + dz2) < (r_limit * r_limit)
     dL2[inds] = r_limit[inds] * r_limit[inds] - dz2[inds]
 
     def _omega(dz):
@@ -822,7 +815,9 @@ def calc_lfp_linesource_moi(cell_x, cell_y, cell_z,
     rs, _ = return_dist_from_segments(xstart, ystart, zstart,
                                       xend, yend, zend, pos)
     z0_ = z0.copy()
-    z0_[np.where(rs < r_limit)] = r_limit[np.where(rs < r_limit)]
+    # z0_[np.where(rs < r_limit)] = r_limit[np.where(rs < r_limit)]
+    inds = rs < r_limit
+    z0_[inds] = r_limit[inds]
 
     ds = _deltaS_calc(xstart, xend, ystart, yend, zstart, zend)
     factor_a = ds * ds
@@ -841,13 +836,13 @@ def calc_lfp_linesource_moi(cell_x, cell_y, cell_z,
         factor_c = a_x * a_x + a_y * a_y + a_z * a_z
         b_2_ac = factor_b * factor_b - factor_a * factor_c
 
-        case1_idxs = np.where(np.abs(b_2_ac) <= 1e-12)
-        case2_idxs = np.where(np.abs(b_2_ac) > 1e-12)
+        case1_idxs = np.abs(b_2_ac) <= 1e-12
+        case2_idxs = np.abs(b_2_ac) > 1e-12
 
-        if not len(case1_idxs) == 0:
+        if case1_idxs.sum() > 0:
             num[case1_idxs] = factor_a[case1_idxs] + factor_b[case1_idxs]
             den[case1_idxs] = factor_b[case1_idxs]
-        if not len(case2_idxs) == 0:
+        if case2_idxs.sum() > 0:
             num[case2_idxs] = (factor_a[case2_idxs] + factor_b[case2_idxs]
                                + ds[case2_idxs]
                                * np.sqrt(factor_a[case2_idxs]
@@ -955,13 +950,13 @@ def calc_lfp_root_as_point_moi(cell_x, cell_y, cell_z,
         factor_c = a_x * a_x + a_y * a_y + a_z * a_z
         b_2_ac = factor_b * factor_b - factor_a * factor_c
 
-        case1_idxs = np.where(np.abs(b_2_ac) <= 1e-12)
-        case2_idxs = np.where(np.abs(b_2_ac) > 1e-12)
+        case1_idxs = np.abs(b_2_ac) <= 1e-12
+        case2_idxs = np.abs(b_2_ac) > 1e-12
 
-        if len(case1_idxs) != 0:
+        if case1_idxs.sum() > 0:
             num[case1_idxs] = factor_a[case1_idxs] + factor_b[case1_idxs]
             den[case1_idxs] = factor_b[case1_idxs]
-        if len(case2_idxs) != 0:
+        if case2_idxs.sum() > 0:
             num[case2_idxs] = (factor_a[case2_idxs] + factor_b[case2_idxs] +
                                + ds[case2_idxs]
                                * np.sqrt(factor_a[case2_idxs]
