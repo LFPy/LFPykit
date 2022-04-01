@@ -414,7 +414,7 @@ def _calc_lfp_linesource(xstart: numba.double[:],
     h = _h_calc(xstart, xend, ystart, yend, zstart, zend, deltaS, x, y, z)
     r2 = _r2_calc(xend, yend, zend, x, y, z, h)
 
-    too_close_idxs = np.where(r2 < r_limit * r_limit)[0]
+    too_close_idxs = r2 < (r_limit * r_limit)
     r2[too_close_idxs] = r_limit[too_close_idxs]**2
     l_ = h + deltaS
 
@@ -426,11 +426,11 @@ def _calc_lfp_linesource(xstart: numba.double[:],
     mapping = np.zeros(xstart.size)
 
     # case i, h < 0, l < 0, see Eq. C.13 in Gary Holt's thesis, 1998.
-    [i] = np.where(hnegi & lnegi)
+    i = hnegi & lnegi
     # case ii, h < 0, l >= 0
-    [ii] = np.where(hnegi & lposi)
+    ii = hnegi & lposi
     # case iii, h >= 0, l >= 0
-    [iii] = np.where(hposi & lposi)
+    iii = hposi & lposi
 
     mapping[i] = _linesource_calc_case1(l_[i], r2[i], h[i])
     mapping[ii] = _linesource_calc_case2(l_[ii], r2[ii], h[ii])
