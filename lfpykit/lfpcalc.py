@@ -988,7 +988,7 @@ def calc_lfp_root_as_point_moi(cell_x, cell_y, cell_z,
     dL2 = dx2 + dy2
     # avoid denominator approaching 0
     inds = (dL2 + dz2) < (r_limit[rootinds] * r_limit[rootinds])
-    dL2[inds] = r_limit[inds] * r_limit[inds] - dz2[inds]
+    dL2[inds] = r_limit[rootinds][inds] * r_limit[rootinds][inds] - dz2[inds]
 
     def _omega(dz):
         return 1 / np.sqrt(dL2 + dz * dz)
