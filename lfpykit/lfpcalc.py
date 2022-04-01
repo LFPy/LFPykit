@@ -117,7 +117,7 @@ def calc_lfp_linesource_anisotropic(cell_x, cell_y, cell_z,
          sigma[0] * sigma[2] * (y - ystart)**2 +
          sigma[0] * sigma[1] * (z - zstart)**2)
 
-    # this looks bizarre:
+    # this looks not optimal:
     for idx in np.where(rs < r_limit)[0]:
         r = rs[idx]
         closest_point = closest_points[:, idx]
@@ -231,7 +231,7 @@ def calc_lfp_root_as_point_anisotropic(cell_x, cell_y, cell_z,
          sigma[0] * sigma[2] * (y - ystart)**2 +
          sigma[0] * sigma[1] * (z - zstart)**2)
 
-    # this looks bizarre:
+    # this looks not optimal:
     for idx in np.where(rs < r_limit)[0]:
         r = rs[idx]
         closest_point = closest_points[:, idx]
