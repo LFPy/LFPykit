@@ -1263,7 +1263,8 @@ class RecMEAElectrode(RecExtElectrode):
             bad_comps, reason = self._return_comp_outside_slice()
             msg = ("Compartments {} of cell ({}) has cell.{} slice. "
                    "Increase squeeze_cell_factor, move or rotate cell."
-                   ).format(cell.get_idx()[bad_comps], self.cell, reason)
+                   ).format(np.arange(self.cell.totnsegs)[bad_comps],
+                            self.cell, reason)
 
             raise RuntimeError(msg)
 
@@ -1321,7 +1322,8 @@ class RecMEAElectrode(RecExtElectrode):
                 bad_comps, reason = self._return_comp_outside_slice()
                 msg = ("Compartments {} of cell ({}) has cell.{} slice "
                        "and argument squeeze_cell_factor is None."
-                       ).format(cell.get_idx()[bad_comps], self.cell, reason)
+                       ).format(np.arange(self.cell.totnsegs)[bad_comps],
+                                self.cell, reason)
                 raise RuntimeError(msg)
         else:
             if self.verbose:
