@@ -163,7 +163,7 @@ def calc_lfp_linesource_anisotropic(cell_x, cell_y, cell_z,
     if (i + iia + iib + iii + iiii).sum() != xstart.size:
         print(a, b, c)
         print(i, iia, iib, iii, iiii)
-        raise RuntimeError
+        raise RuntimeError  # WHY?
 
     mapping = np.zeros(xstart.size)
     mapping[i] = _anisotropic_line_source_case_i(a[i], c[i])
@@ -276,7 +276,7 @@ def calc_lfp_root_as_point_anisotropic(cell_x, cell_y, cell_z,
     if (i + iia + iib + iii + iiii).sum() != xstart.size:
         print(a, b, c)
         print(i, iia, iib, iii, iiii)
-        raise RuntimeError
+        raise RuntimeError  # WHY?
 
     mapping = np.zeros(xstart.size)
     mapping[i] = _anisotropic_line_source_case_i(a[i], c[i])
