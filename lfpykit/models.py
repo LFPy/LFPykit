@@ -1263,7 +1263,8 @@ class RecMEAElectrode(RecExtElectrode):
             bad_comps, reason = self._return_comp_outside_slice()
             msg = ("Compartments {} of cell ({}) has cell.{} slice. "
                    "Increase squeeze_cell_factor, move or rotate cell."
-                   ).format(bad_comps, self.cell, reason)
+                   ).format(np.arange(self.cell.totnsegs)[bad_comps],
+                            self.cell, reason)
 
             raise RuntimeError(msg)
 
@@ -1281,18 +1282,18 @@ class RecMEAElectrode(RecExtElectrode):
             Numpy array with the compartments that are outside the slice,
             and a string with additional information on the problem.
         """
-        zstart_above = np.where(self.cell.z[:, 0] > self.z_shift + self.h)[0]
-        zend_above = np.where(self.cell.z[:, -1] > self.z_shift + self.h)[0]
-        zend_below = np.where(self.cell.z[:, -1] < self.z_shift)[0]
-        zstart_below = np.where(self.cell.z[:, 0] < self.z_shift)[0]
+        zstart_above = self.cell.z[:, 0] > (self.z_shift + self.h)
+        zend_above = self.cell.z[:, -1] > (self.z_shift + self.h)
+        zend_below = self.cell.z[:, -1] < self.z_shift
+        zstart_below = self.cell.z[:, 0] < self.z_shift
 
-        if len(zstart_above) > 0:
+        if zstart_above.sum() > 0:
             return zstart_above, "zstart above"
-        if len(zstart_below) > 0:
+        if zstart_below.sum() > 0:
             return zstart_below, "zstart below"
-        if len(zend_above) > 0:
+        if zend_above.sum() > 0:
             return zend_above, "zend above"
-        if len(zend_below) > 0:
+        if zend_below.sum() > 0:
             return zend_below, "zend below"
         raise RuntimeError("This function should only be called if cell"
                            "extends outside slice")
@@ -1321,7 +1322,8 @@ class RecMEAElectrode(RecExtElectrode):
                 bad_comps, reason = self._return_comp_outside_slice()
                 msg = ("Compartments {} of cell ({}) has cell.{} slice "
                        "and argument squeeze_cell_factor is None."
-                       ).format(bad_comps, self.cell, reason)
+                       ).format(np.arange(self.cell.totnsegs)[bad_comps],
+                                self.cell, reason)
                 raise RuntimeError(msg)
         else:
             if self.verbose:

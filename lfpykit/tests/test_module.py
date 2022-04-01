@@ -581,25 +581,29 @@ class TestSuite(unittest.TestCase):
         stick.z[true_bad_comp, 0] = 1000
         bad_comp, reason = MEA._return_comp_outside_slice()
         np.testing.assert_equal(reason, "zstart above")
-        np.testing.assert_equal(true_bad_comp, bad_comp)
+        np.testing.assert_equal(true_bad_comp,
+                                np.arange(stick.totnsegs)[bad_comp])
         stick.z[true_bad_comp, 0] = 100
 
         stick.z[true_bad_comp, 0] = -1000
         bad_comp, reason = MEA._return_comp_outside_slice()
         np.testing.assert_equal(reason, "zstart below")
-        np.testing.assert_equal(true_bad_comp, bad_comp)
+        np.testing.assert_equal(true_bad_comp,
+                                np.arange(stick.totnsegs)[bad_comp])
         stick.z[true_bad_comp, 0] = 100
 
         stick.z[true_bad_comp, -1] = 1000
         bad_comp, reason = MEA._return_comp_outside_slice()
         np.testing.assert_equal(reason, "zend above")
-        np.testing.assert_equal(true_bad_comp, bad_comp)
+        np.testing.assert_equal(true_bad_comp,
+                                np.arange(stick.totnsegs)[bad_comp])
         stick.z[true_bad_comp, -1] = 100
 
         stick.z[true_bad_comp, -1] = -1000
         bad_comp, reason = MEA._return_comp_outside_slice()
         np.testing.assert_equal(reason, "zend below")
-        np.testing.assert_equal(true_bad_comp, bad_comp)
+        np.testing.assert_equal(true_bad_comp,
+                                np.arange(stick.totnsegs)[bad_comp])
         stick.z[true_bad_comp, -1] = 100
 
     def test_RecMEAElectrode_03(self):

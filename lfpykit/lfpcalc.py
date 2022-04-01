@@ -117,6 +117,7 @@ def calc_lfp_linesource_anisotropic(cell_x, cell_y, cell_z,
          sigma[0] * sigma[2] * (y - ystart)**2 +
          sigma[0] * sigma[1] * (z - zstart)**2)
 
+    # this looks not optimal:
     for idx in np.where(rs < r_limit)[0]:
         r = rs[idx]
         closest_point = closest_points[:, idx]
@@ -162,7 +163,7 @@ def calc_lfp_linesource_anisotropic(cell_x, cell_y, cell_z,
     if (i + iia + iib + iii + iiii).sum() != xstart.size:
         print(a, b, c)
         print(i, iia, iib, iii, iiii)
-        raise RuntimeError
+        raise RuntimeError  # WHY?
 
     mapping = np.zeros(xstart.size)
     mapping[i] = _anisotropic_line_source_case_i(a[i], c[i])
@@ -230,6 +231,7 @@ def calc_lfp_root_as_point_anisotropic(cell_x, cell_y, cell_z,
          sigma[0] * sigma[2] * (y - ystart)**2 +
          sigma[0] * sigma[1] * (z - zstart)**2)
 
+    # this looks not optimal:
     for idx in np.where(rs < r_limit)[0]:
         r = rs[idx]
         closest_point = closest_points[:, idx]
@@ -252,9 +254,8 @@ def calc_lfp_root_as_point_anisotropic(cell_x, cell_y, cell_z,
             p_[:] = pos + (pos - closest_point) * (r_limit[idx] - r) / r
 
         if np.sqrt(np.sum((p_ - closest_point)**2)) - r_limit[idx] > 1e-9:
-            print(p_, closest_point)
-
-            raise RuntimeError("Segment adjustment not working")
+            raise RuntimeError(f"Adjustment failed for segment {idx}",
+                               p_, closest_point)
 
         b[idx] = -2 * ((sigma[1] * sigma[2] * (p_[0] - xstart[idx])
                         * (xend[idx] - xstart[idx])) +
@@ -275,7 +276,7 @@ def calc_lfp_root_as_point_anisotropic(cell_x, cell_y, cell_z,
     if (i + iia + iib + iii + iiii).sum() != xstart.size:
         print(a, b, c)
         print(i, iia, iib, iii, iiii)
-        raise RuntimeError
+        raise RuntimeError  # WHY?
 
     mapping = np.zeros(xstart.size)
     mapping[i] = _anisotropic_line_source_case_i(a[i], c[i])
@@ -301,19 +302,17 @@ def calc_lfp_root_as_point_anisotropic(cell_x, cell_y, cell_z,
     r2_root = dx2_root + dy2_root + dz2_root
 
     # Go through and correct all (if any) root idxs that are too close
-    for close_idx in np.where(np.abs(r2_root) < 1e-6)[0]:
-        dx2_root[close_idx] += 0.001
-        r2_root[close_idx] += 0.001
+    close_idx = r2_root < 1e-6
+    dx2_root[close_idx] += 0.001
+    r2_root[close_idx] += 0.001
 
-    for close_idx in np.where(r2_root < r_limit[rootinds]**2)[0]:
-        # For anisotropic media, the direction in which to move points matter.
-        # Radial distance between point source and electrode is scaled to r_lim
-        r2_scale_factor = r_limit[rootinds[close_idx]
-                                  ] * r_limit[rootinds[close_idx]
-                                              ] / r2_root[close_idx]
-        dx2_root[close_idx] *= r2_scale_factor
-        dy2_root[close_idx] *= r2_scale_factor
-        dz2_root[close_idx] *= r2_scale_factor
+    close_idx = r2_root < r_limit[rootinds]**2
+    r2_scale_factor = r_limit[rootinds[close_idx]
+                              ] * r_limit[rootinds[close_idx]
+                                          ] / r2_root[close_idx]
+    dx2_root[close_idx] *= r2_scale_factor
+    dy2_root[close_idx] *= r2_scale_factor
+    dz2_root[close_idx] *= r2_scale_factor
 
     mapping[rootinds] = 1 / np.sqrt(sigma[1] * sigma[2] * dx2_root
                                     + sigma[0] * sigma[2] * dy2_root
@@ -476,7 +475,8 @@ def calc_lfp_root_as_point(cell_x, cell_y, cell_z, x, y, z, sigma, r_limit,
         r_root[r_root < r_limit[rootinds]
                ] = r_limit[rootinds][r_root < r_limit[rootinds]]
 
-    too_close_idxs = np.where(r2 < r_limit * r_limit)[0]
+    # avoid denominator approaching 0
+    too_close_idxs = r2 < (r_limit * r_limit)
     r2[too_close_idxs] = r_limit[too_close_idxs]**2
     l_ = h + deltaS
 
@@ -724,7 +724,7 @@ def calc_lfp_pointsource_moi(cell_x, cell_y, cell_z,
     dz2 = (z_ - cell_z_mid)**2
 
     dL2 = dx2 + dy2
-    # inds = np.where(dL2 + dz2 < r_limit * r_limit)[0]
+    # avoid denominator approaching 0
     inds = (dL2 + dz2) < (r_limit * r_limit)
     dL2[inds] = r_limit[inds] * r_limit[inds] - dz2[inds]
 
@@ -815,7 +815,7 @@ def calc_lfp_linesource_moi(cell_x, cell_y, cell_z,
     rs, _ = return_dist_from_segments(xstart, ystart, zstart,
                                       xend, yend, zend, pos)
     z0_ = z0.copy()
-    # z0_[np.where(rs < r_limit)] = r_limit[np.where(rs < r_limit)]
+    # avoid denominator approaching 0
     inds = rs < r_limit
     z0_[inds] = r_limit[inds]
 
@@ -986,8 +986,9 @@ def calc_lfp_root_as_point_moi(cell_x, cell_y, cell_z,
     dz2 = (z_ - cell_z[rootinds, :].mean(axis=-1))**2
 
     dL2 = dx2 + dy2
-    inds = np.where(dL2 + dz2 < r_limit[rootinds] * r_limit[rootinds])[0]
-    dL2[inds] = r_limit[inds] * r_limit[inds] - dz2[inds]
+    # avoid denominator approaching 0
+    inds = (dL2 + dz2) < (r_limit[rootinds] * r_limit[rootinds])
+    dL2[inds] = r_limit[rootinds][inds] * r_limit[rootinds][inds] - dz2[inds]
 
     def _omega(dz):
         return 1 / np.sqrt(dL2 + dz * dz)
