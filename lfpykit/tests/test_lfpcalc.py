@@ -51,10 +51,10 @@ class testLfpCalc(unittest.TestCase):
         np.testing.assert_equal(1. / (4 * np.pi * sigma),
                                 lfpcalc.calc_lfp_pointsource(
                                     cell.x, cell.y, cell.z,
-            x=0.5, y=0, z=1,
-            sigma=sigma,
-            r_limit=cell.d / 2
-        ))
+                                    x=0.5, y=0, z=1,
+                                    sigma=sigma,
+                                    r_limit=cell.d / 2
+                                    ))
 
     def test_lfpcalc_calc_lfp_pointsource_moi_00(self):
         """
@@ -68,19 +68,17 @@ class testLfpCalc(unittest.TestCase):
         steps = 20
         cell = DummyCell(np.array([[h / 2, h / 2]]))
 
-        in_vivo = lfpcalc.calc_lfp_pointsource(
-            cell.x, cell.y, cell.z,
-            x=0.5, y=0, z=1, sigma=sigma_T,
-            r_limit=cell.d / 2)
-        in_vitro = lfpcalc.calc_lfp_pointsource_moi(
-            cell.x, cell.y, cell.z,
-            x=0.5, y=0, z=1,
-            sigma_T=sigma_T,
-            sigma_G=sigma_G,
-            sigma_S=sigma_S,
-            r_limit=cell.d / 2,
-            h=h,
-            steps=steps)
+        in_vivo = lfpcalc.calc_lfp_pointsource(cell.x, cell.y, cell.z,
+                                               x=0.5, y=0, z=1, sigma=sigma_T,
+                                               r_limit=cell.d / 2)
+        in_vitro = lfpcalc.calc_lfp_pointsource_moi(cell.x, cell.y, cell.z,
+                                                    x=0.5, y=0, z=1,
+                                                    sigma_T=sigma_T,
+                                                    sigma_G=sigma_G,
+                                                    sigma_S=sigma_S,
+                                                    r_limit=cell.d / 2,
+                                                    h=h,
+                                                    steps=steps)
 
         np.testing.assert_equal(in_vivo, in_vitro)
 
@@ -315,6 +313,7 @@ class testLfpCalc(unittest.TestCase):
                                                        r_limit=cell.d / 2,
                                                        h=h,
                                                        steps=steps)
+
 
         without_saline = lfpcalc.calc_lfp_pointsource_moi(
             cell.x, cell.y, cell.z,

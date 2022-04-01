@@ -13,6 +13,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 """
 
+import numba
 import sys
 from copy import deepcopy
 import numpy as np
@@ -459,10 +460,17 @@ class LineSourcePotential(LinearModel):
         else:
             r_limit = self.cell.d / 2
 
-        def _get_transform(cell_x, cell_y, cell_z,
-                           x, y, z, sigma, r_limit):
+        @numba.njit(nogil=True, cache=True, fastmath=False, parallel=True)
+        def _get_transform(cell_x: numba.double[:, :],
+                           cell_y: numba.double[:, :],
+                           cell_z: numba.double[:, :],
+                           x: numba.double,
+                           y: numba.double,
+                           z: numba.double,
+                           sigma: numba.double,
+                           r_limit: numba.double[:]):
             M = np.empty((x.size, cell_x.shape[0]))
-            for j in range(x.size):
+            for j in numba.prange(x.size):
                 M[j, :] = lfpcalc.calc_lfp_linesource(cell_x=cell_x,
                                                       cell_y=cell_y,
                                                       cell_z=cell_z,
