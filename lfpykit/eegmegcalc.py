@@ -23,7 +23,6 @@ import numpy as np
 from warnings import warn
 
 
-
 class Model(abc.ABC):
     __metaclass__ = abc.ABCMeta
 
