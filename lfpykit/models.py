@@ -13,6 +13,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 """
 
+import abc
 import sys
 from copy import deepcopy
 import numpy as np
@@ -20,7 +21,19 @@ from . import lfpcalc
 import MEAutility as mu
 
 
-class LinearModel(object):
+class Model(abc.ABC):
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def __init__(self, cell):
+        pass
+
+    @abc.abstractmethod
+    def get_transformation_matrix(self):
+        pass
+
+
+class LinearModel(Model):
     '''
     Base class that defines a 2D linear response matrix :math:`\\mathbf{M}`
     between transmembrane currents

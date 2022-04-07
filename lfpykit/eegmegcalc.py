@@ -14,6 +14,7 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 """
+import abc
 import os
 import sys
 import math
@@ -22,7 +23,19 @@ import numpy as np
 from warnings import warn
 
 
-class FourSphereVolumeConductor(object):
+class Model(abc.ABC):
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def __init__(self):
+        pass
+
+    @abc.abstractmethod
+    def get_transformation_matrix(self):
+        pass
+
+
+class FourSphereVolumeConductor(Model):
     """
     Main class for computing extracellular potentials in a four-sphere
     volume conductor model that assumes homogeneous, isotropic, linear
@@ -817,7 +830,7 @@ class FourSphereVolumeConductor(object):
         return term2
 
 
-class InfiniteVolumeConductor(object):
+class InfiniteVolumeConductor(Model):
     """
     Main class for computing extracellular potentials with current dipole
     moment :math:`\\mathbf{P}` in an infinite 3D volume conductor model that
@@ -902,7 +915,7 @@ class InfiniteVolumeConductor(object):
         return self.get_dipole_potential(np.eye(3), r)
 
 
-class InfiniteHomogeneousVolCondMEG(object):
+class InfiniteHomogeneousVolCondMEG(Model):
     """
     Basic class for computing magnetic field from current dipole moment in
     an infinite homogeneous volume conductor model.
@@ -1113,7 +1126,7 @@ class MEG(InfiniteHomogeneousVolCondMEG):
         super().__init__(sensor_locations, mu)
 
 
-class SphericallySymmetricVolCondMEG(object):
+class SphericallySymmetricVolCondMEG(Model):
     """Computes magnetic fields from current dipole in
     spherically-symmetric volume conductor models.
 
@@ -1323,7 +1336,7 @@ class SphericallySymmetricVolCondMEG(object):
         return self.mu * self.calculate_H(p, r_p)
 
 
-class NYHeadModel(object):
+class NYHeadModel(Model):
     """
     Main class for computing EEG signals from current dipole
     moment :math:`\\mathbf{P}` in New York Head Model [1]_, [2]_
