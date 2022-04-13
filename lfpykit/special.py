@@ -1,3 +1,17 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Copyright (C) 2022 Computational Neuroscience Group, NMBU.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+"""
 import abc
 import numpy as np
 from .cellgeometry import CellGeometry
@@ -200,6 +214,7 @@ class CurrentDipoleMoment(models.CurrentDipoleMoment):
     --------
     lfpykit.CurrentDipoleMoment
     '''
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -247,6 +262,7 @@ class LineSourcePotential(models.LineSourcePotential):
     --------
     lfpykit.LineSourcePotential
     '''
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -268,7 +284,7 @@ class LineSourcePotential(models.LineSourcePotential):
         return M
 
 
-class PointSourcePotential(models.LineSourcePotential):
+class PointSourcePotential(models.PointSourcePotential):
     '''subclass of ``lfpykit.PointSourcePotential`` modified for
     instances of ``lfpykit.special.CellGeometry*``.
     Each compartment may consist of several segments, and this implementation
@@ -293,6 +309,7 @@ class PointSourcePotential(models.LineSourcePotential):
     --------
     lfpykit.PointSourcePotential
     '''
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
