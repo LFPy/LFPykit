@@ -119,10 +119,10 @@ to extracellular measurements:
   To compute extracellular potentials in infinite volume conductor
   from current dipole moment
 * `eegmegcalc.InfiniteHomogeneousVolCondMEG`:
-  Class for computing magnetic field from current dipole moments under assumption
+  Class for computing magnetic field from current dipole moments under the assumption
   of infinite homogeneous volume conductor model
 * `eegmegcalc.SphericallySymmetricVolCondMEG`:
-  Class for computing magnetic field from current dipole moments under assumption
+  Class for computing magnetic field from current dipole moments under the assumption
   of a spherically symmetric volume conductor model
 * `eegmegcalc.NYHeadModel`:
   Class for computing extracellular potentials in detailed head volume
@@ -254,8 +254,8 @@ Notes on physical units used in `LFPykit`:
   the first dimension of the input; that is, the number of segments in case of
   transmembrane currents or 3 in case of current dipole moments.
 
-- predicted signals (except magnetic fields using `eegmegcalc.MEG`) have shape
-  `(n_points, n_timesteps)`
+- predicted signals (except magnetic fields using `eegmegcalc.InfiniteHomogeneousVolCondMEG` or
+  `eegmegcalc.SphericallySymmetricVolCondMEG`) have shape `(n_points, n_timesteps)`
 
 
 ## Documentation
