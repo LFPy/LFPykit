@@ -61,14 +61,15 @@ GNU General Public License for more details.
   * models
   * eegmegcalc
   * lfpcalc
+  * special
 """
 
 from .version import version as __version__
 
-from .cellgeometry import CellGeometry, CellGeometryArbor, \
-    CellGeometryNeuron, CellGeometryLFPyPt3d
+from .cellgeometry import CellGeometry
 from .models import LinearModel, CurrentDipoleMoment, PointSourcePotential, \
     LineSourcePotential, RecExtElectrode, RecMEAElectrode, \
     OneSphereVolumeConductor, LaminarCurrentSourceDensity, \
     VolumetricCurrentSourceDensity
 from . import eegmegcalc
+from . import special
