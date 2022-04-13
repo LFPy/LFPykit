@@ -1115,17 +1115,6 @@ class InfiniteHomogeneousVolCondMEG(Model):
         return self.mu * self.calculate_H(p, r_p)
 
 
-class MEG(InfiniteHomogeneousVolCondMEG):
-    def __init__(self, sensor_locations, mu=4 * np.pi * 1E-7):
-        warn(
-            "class MEG is deprecated and will be removed. Use "
-            "InfiniteHomogeneousVolCondMEG or SphericallySymmetricVolCondMEG "
-            "instead",
-            DeprecationWarning, 2
-        )
-        super().__init__(sensor_locations, mu)
-
-
 class SphericallySymmetricVolCondMEG(Model):
     """Computes magnetic fields from current dipole in
     spherically-symmetric volume conductor models.

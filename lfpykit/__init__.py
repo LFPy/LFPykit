@@ -46,8 +46,12 @@ GNU General Public License for more details.
   * eegmegcalc.InfiniteVolumeConductor:
         To compute extracellular potentials with current
         dipole moments in infinite volume conductor
-  * eegmegcalc.MEG:
+  * eegmegcalc.InfiniteHomogeneousVolCondMEG:
         Class for computing magnetic field from current dipole moments
+        assuming an infinite homogeneous volume conductor
+  * eegmegcalc.SphericallySymmetricVolCondMEG:
+        Class for computing magnetic field from current dipole moments
+        assuming a spherically symmetric volume conductor
   * `eegmegcalc.NYHeadModel`:
         Class for computing extracellular potentials in detailed head volume
         conductor model (https://www.parralab.org/nyhead)
