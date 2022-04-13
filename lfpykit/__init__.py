@@ -65,7 +65,8 @@ GNU General Public License for more details.
 
 from .version import version as __version__
 
-from .cellgeometry import CellGeometry
+from .cellgeometry import CellGeometry, CellGeometryArbor, \
+    CellGeometryNeuron, CellGeometryLFPyPt3d
 from .models import LinearModel, CurrentDipoleMoment, PointSourcePotential, \
     LineSourcePotential, RecExtElectrode, RecMEAElectrode, \
     OneSphereVolumeConductor, LaminarCurrentSourceDensity, \
