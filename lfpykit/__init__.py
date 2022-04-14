@@ -64,12 +64,12 @@ GNU General Public License for more details.
   * special
 """
 
-from .version import version as __version__
+from .version import version as __version__  # noqa: F401
 
-from .cellgeometry import CellGeometry
+from .cellgeometry import CellGeometry  # noqa: F401
 from .models import LinearModel, CurrentDipoleMoment, PointSourcePotential, \
     LineSourcePotential, RecExtElectrode, RecMEAElectrode, \
     OneSphereVolumeConductor, LaminarCurrentSourceDensity, \
-    VolumetricCurrentSourceDensity
-from . import eegmegcalc
-from . import special
+    VolumetricCurrentSourceDensity  # noqa: F401
+from . import eegmegcalc  # noqa: F401
+from . import special  # noqa: F401
