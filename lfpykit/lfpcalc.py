@@ -99,42 +99,49 @@ def calc_lfp_linesource_anisotropic(cell_x, cell_y, cell_z,
     px = xend - xstart
     py = yend - ystart
     pz = zend - zstart
-    delta = px * px + py * py + pz * pz
     pos = np.array([x, y, z])
     rs, closest_points = return_dist_from_segments(xstart, ystart, zstart,
                                                    xend, yend, zend, pos)
 
     # If measurement point is too close we move it further away
-    # We only move points that lie within the length-wise range of the
-    # compartment, and not points located 'before' or 'after'
-    # the compartment start- or end-point (0 <= u <= 1)
-    p_ = pos.copy()
-    u = ((p_[0] - xstart) * px + (p_[1] - ystart) * py +
-         (p_[2] - zstart) * pz) / delta
-    idxs = (rs < r_limit) & (u >= 0) & (u <= 1)
+    dr_ = np.array([pos[0] - xstart,  pos[1] - ystart, pos[2] - zstart])
+    r0_ = np.array([xstart, ystart, zstart])
+    displace_vecs = np.zeros((3, len(xstart)))
 
-    if np.any(idxs):
-        closest_comp_idx = np.argmin(rs)
-        closest_point = closest_points[:, closest_comp_idx]
-        if np.any(rs < atol):
-            # The measurement point must be moved in a given direction, and if
-            # measurement point is exactly on the line we assign a direction
-            displace_vec = np.array([1., 0., 0.])
-        else:
-            # we move point in radial direction from the line segment
-            displace_vec = (p_ - closest_point) / np.linalg.norm(p_ -
-                                                                 closest_point)
-        p_ = closest_point + displace_vec * r_limit[closest_comp_idx]
+    idxs_1 = (rs < r_limit) & (rs >= atol)
+    idxs_2 = (rs < r_limit) & (rs < atol) & (np.abs(px) <= atol)
+    idxs_3 = (rs < r_limit) & (rs < atol) & (np.abs(px) > atol)
 
-    a = (sigma[1] * sigma[2] * (xend - xstart)**2
-         + sigma[0] * sigma[2] * (yend - ystart)**2
-         + sigma[0] * sigma[1] * (zend - zstart)**2)
-    b = -2 * (sigma[1] * sigma[2] * (p_[0] - xstart) * (xend - xstart) +
-              sigma[0] * sigma[2] * (p_[1] - ystart) * (yend - ystart) +
-              sigma[0] * sigma[1] * (p_[2] - zstart) * (zend - zstart))
-    c = (sigma[1] * sigma[2] * (p_[0] - xstart)**2 +
-         sigma[0] * sigma[2] * (p_[1] - ystart)**2 +
-         sigma[0] * sigma[1] * (p_[2] - zstart)**2)
+    if np.any(idxs_1):
+        # move point in radial direction from the line segment
+        displace_vecs[:, idxs_1] = (pos[:, None] - closest_points[:, idxs_1])
+    if np.any(idxs_2):
+        # point is directly on line-segment, and we move it in a perpendicular
+        # direction. If px is zero, perpendicular direction is found from y,z
+        displace_vecs[:, idxs_2] = np.array([np.zeros(np.sum(idxs_2)),
+                                             pz[idxs_2],
+                                             -py[idxs_2]])
+    if np.any(idxs_3):
+        # point is directly on line-segment, and we move it in a perpendicular
+        # direction. Perpendicular direction is found from x,y
+        displace_vecs[:, idxs_3] = np.array([-py[idxs_3],
+                                             px[idxs_3],
+                                             np.zeros(np.sum(idxs_3))])
+
+    idxs = idxs_1 + idxs_2 + idxs_3
+    displace_vecs[:, idxs] /= np.linalg.norm(displace_vecs[:, idxs], axis=0)
+    dr_[:, idxs] = (closest_points[:, idxs] +
+                    displace_vecs[:, idxs] * r_limit[idxs] - r0_[:, idxs])
+
+    a = (sigma[1] * sigma[2] * px**2
+         + sigma[0] * sigma[2] * py**2
+         + sigma[0] * sigma[1] * pz**2)
+    b = -2 * (sigma[1] * sigma[2] * dr_[0, :] * px +
+              sigma[0] * sigma[2] * dr_[1, :] * py +
+              sigma[0] * sigma[1] * dr_[2, :] * pz)
+    c = (sigma[1] * sigma[2] * dr_[0, :]**2 +
+         sigma[0] * sigma[2] * dr_[1, :]**2 +
+         sigma[0] * sigma[1] * dr_[2, :]**2)
 
     i = np.abs(b) <= atol
     iia = (np.abs(4 * a * c - b * b) < atol) & (np.abs(a - c) < atol)
@@ -197,42 +204,50 @@ def calc_lfp_root_as_point_anisotropic(cell_x, cell_y, cell_z,
     px = xend - xstart
     py = yend - ystart
     pz = zend - zstart
-    delta = px * px + py * py + pz * pz
     # First we do line sources
     pos = np.array([x, y, z])
     rs, closest_points = return_dist_from_segments(xstart, ystart, zstart,
                                                    xend, yend, zend, pos)
 
     # If measurement point is too close we move it further away
-    # We only move points that lie within the length-wise range of the
-    # compartment, and not points located 'before' or 'after'
-    # the compartment start- or end-point (0 <= u <= 1)
-    p_ = pos.copy()
-    u = ((p_[0] - xstart) * px + (p_[1] - ystart) * py +
-         (p_[2] - zstart) * pz) / delta
-    idxs = (rs < r_limit - atol) & (u >= 0) & (u <= 1)
-    if np.any(idxs):
-        closest_comp_idx = np.argmin(rs)
-        closest_point = closest_points[:, closest_comp_idx]
-        if np.any(rs < atol):
-            # The measurement point must be moved in a given direction,
-            # if measurement point is exactly on the line we assign a direction
-            displace_vec = np.array([1., 0., 0.])
-        else:
-            # we move the point in the radial direction
-            displace_vec = (p_ - closest_point) / np.linalg.norm(p_ -
-                                                                 closest_point)
-        p_ = closest_point + displace_vec * r_limit[closest_comp_idx]
+    dr_ = np.array([pos[0] - xstart,  pos[1] - ystart, pos[2] - zstart])
+    r0_ = np.array([xstart, ystart, zstart])
+    displace_vecs = np.zeros((3, len(xstart)))
 
-    a = (sigma[1] * sigma[2] * (xend - xstart)**2
-         + sigma[0] * sigma[2] * (yend - ystart)**2
-         + sigma[0] * sigma[1] * (zend - zstart)**2)
-    b = -2 * (sigma[1] * sigma[2] * (p_[0] - xstart) * (xend - xstart) +
-              sigma[0] * sigma[2] * (p_[1] - ystart) * (yend - ystart) +
-              sigma[0] * sigma[1] * (p_[2] - zstart) * (zend - zstart))
-    c = (sigma[1] * sigma[2] * (p_[0] - xstart)**2 +
-         sigma[0] * sigma[2] * (p_[1] - ystart)**2 +
-         sigma[0] * sigma[1] * (p_[2] - zstart)**2)
+    idxs_1 = (rs < r_limit) & (rs >= atol)
+    idxs_2 = (rs < r_limit) & (rs < atol) & (np.abs(px) <= atol)
+    idxs_3 = (rs < r_limit) & (rs < atol) & (np.abs(px) > atol)
+
+    if np.any(idxs_1):
+        # move point in radial direction from the line segment
+        displace_vecs[:, idxs_1] = (pos[:, None] - closest_points[:, idxs_1])
+    if np.any(idxs_2):
+        # point is directly on line-segment, and we move it in a perpendicular
+        # direction. If px is zero, perpendicular direction is found from y,z
+        displace_vecs[:, idxs_2] = np.array([np.zeros(np.sum(idxs_2)),
+                                             pz[idxs_2],
+                                             -py[idxs_2]])
+    if np.any(idxs_3):
+        # point is directly on line-segment, and we move it in a perpendicular
+        # direction. Perpendicular direction is found from x,y
+        displace_vecs[:, idxs_3] = np.array([-py[idxs_3],
+                                             px[idxs_3],
+                                             np.zeros(np.sum(idxs_3))])
+
+    idxs = idxs_1 + idxs_2 + idxs_3
+    displace_vecs[:, idxs] /= np.linalg.norm(displace_vecs[:, idxs], axis=0)
+    dr_[:, idxs] = (closest_points[:, idxs] +
+                    displace_vecs[:, idxs] * r_limit[idxs] - r0_[:, idxs])
+
+    a = (sigma[1] * sigma[2] * px**2
+         + sigma[0] * sigma[2] * py**2
+         + sigma[0] * sigma[1] * pz**2)
+    b = -2 * (sigma[1] * sigma[2] * dr_[0, :] * px +
+              sigma[0] * sigma[2] * dr_[1, :] * py +
+              sigma[0] * sigma[1] * dr_[2, :] * pz)
+    c = (sigma[1] * sigma[2] * dr_[0, :]**2 +
+         sigma[0] * sigma[2] * dr_[1, :]**2 +
+         sigma[0] * sigma[1] * dr_[2, :]**2)
 
     i = np.abs(b) <= atol
     iia = (np.abs(4 * a * c - b * b) < atol) & (np.abs(a - c) < atol)
@@ -261,9 +276,9 @@ def calc_lfp_root_as_point_anisotropic(cell_x, cell_y, cell_z,
     # sources)
     rootinds = np.array([0])
 
-    dx2_root = (cell_x[rootinds, :].mean(axis=-1) - x)**2
-    dy2_root = (cell_y[rootinds, :].mean(axis=-1) - y)**2
-    dz2_root = (cell_z[rootinds, :].mean(axis=-1) - z)**2
+    dx2_root = (cell_x[rootinds, :].mean(axis=-1) - pos[0])**2
+    dy2_root = (cell_y[rootinds, :].mean(axis=-1) - pos[1])**2
+    dz2_root = (cell_z[rootinds, :].mean(axis=-1) - pos[2])**2
 
     r2_root = dx2_root + dy2_root + dz2_root
 
