@@ -19,7 +19,7 @@ import numpy as np
 
 def return_dist_from_segments(xstart, ystart, zstart, xend, yend, zend, p):
     """
-    Returns distance and closest point on line segments from point p
+    Returns distance and closest point on line-segments from point p
 
     Parameters
     ----------
@@ -41,17 +41,17 @@ def return_dist_from_segments(xstart, ystart, zstart, xend, yend, zend, p):
     Returns
     -------
     dist: ndarray
-        distance to segments
+        distance to the closest point in line
     closest_point: ndarray
-        closest point
+        the closest point on the line
     """
     px = xend - xstart
     py = yend - ystart
     pz = zend - zstart
 
     delta = px * px + py * py + pz * pz
-    u = ((p[0] - xstart) * px + (p[1] - ystart) * py + (p[2] - zstart) * pz
-         ) / delta
+    u = ((p[0] - xstart) * px + (p[1] - ystart) * py +
+         (p[2] - zstart) * pz) / delta
     u[u > 1] = 1.0
     u[u < 0] = 0.0
 
@@ -63,7 +63,7 @@ def return_dist_from_segments(xstart, ystart, zstart, xend, yend, zend, p):
 
 
 def calc_lfp_linesource_anisotropic(cell_x, cell_y, cell_z,
-                                    x, y, z, sigma, r_limit):
+                                    x, y, z, sigma, r_limit, atol=1e-8):
     """Calculate electric field potential using the line-source method, all
     segments treated as line sources.
 
@@ -85,85 +85,73 @@ def calc_lfp_linesource_anisotropic(cell_x, cell_y, cell_z,
         extracellular conductivity [sigma_x, sigma_y, sigma_z]
     r_limit: np.ndarray
         minimum distance to source current for each compartment
+    atol: float
+        numerical (absolute) tolerance for near-zero comparisons.
+        Should be a small number, and should normally not need to be changed.
     """
 
-    # some variables for h, r2, r_root calculations
     xstart = cell_x[:, 0]
     xend = cell_x[:, -1]
     ystart = cell_y[:, 0]
     yend = cell_y[:, -1]
     zstart = cell_z[:, 0]
     zend = cell_z[:, -1]
-    l_vecs = np.array([xend - xstart,
-                       yend - ystart,
-                       zend - zstart])
-
+    px = xend - xstart
+    py = yend - ystart
+    pz = zend - zstart
     pos = np.array([x, y, z])
-
     rs, closest_points = return_dist_from_segments(xstart, ystart, zstart,
                                                    xend, yend, zend, pos)
 
-    dx2 = (xend - xstart)**2
-    dy2 = (yend - ystart)**2
-    dz2 = (zend - zstart)**2
-    a = (sigma[1] * sigma[2] * dx2
-         + sigma[0] * sigma[2] * dy2
-         + sigma[0] * sigma[1] * dz2)
+    # If measurement point is too close we move it further away
+    dr_ = np.array([pos[0] - xstart,  pos[1] - ystart, pos[2] - zstart])
+    r0_ = np.array([xstart, ystart, zstart])
+    displace_vecs = np.zeros((3, len(xstart)))
 
-    b = -2 * (sigma[1] * sigma[2] * (x - xstart) * (xend - xstart) +
-              sigma[0] * sigma[2] * (y - ystart) * (yend - ystart) +
-              sigma[0] * sigma[1] * (z - zstart) * (zend - zstart))
-    c = (sigma[1] * sigma[2] * (x - xstart)**2 +
-         sigma[0] * sigma[2] * (y - ystart)**2 +
-         sigma[0] * sigma[1] * (z - zstart)**2)
+    idxs_1 = (rs < r_limit) & (rs >= atol)
+    idxs_2 = (rs < r_limit) & (rs < atol) & (np.abs(px) <= atol)
+    idxs_3 = (rs < r_limit) & (rs < atol) & (np.abs(px) > atol)
 
-    # this looks not optimal:
-    for idx in np.where(rs < r_limit)[0]:
-        r = rs[idx]
-        closest_point = closest_points[:, idx]
-        l_vec = l_vecs[:, idx]
+    if np.any(idxs_1):
+        # move point in radial direction from the line segment
+        displace_vecs[:, idxs_1] = (pos[:, None] - closest_points[:, idxs_1])
+    if np.any(idxs_2):
+        # point is directly on line-segment, and we move it in a perpendicular
+        # direction. If px is zero, perpendicular direction is found from y,z
+        displace_vecs[:, idxs_2] = np.array([np.zeros(np.sum(idxs_2)),
+                                             pz[idxs_2],
+                                             -py[idxs_2]])
+    if np.any(idxs_3):
+        # point is directly on line-segment, and we move it in a perpendicular
+        # direction. Perpendicular direction is found from x,y
+        displace_vecs[:, idxs_3] = np.array([-py[idxs_3],
+                                             px[idxs_3],
+                                             np.zeros(np.sum(idxs_3))])
 
-        p_ = pos.copy()
-        if np.abs(r) < 1e-12:
-            if np.abs(l_vec[0]) < 1e-12:
-                p_[0] += r_limit[idx]
-            elif np.abs(l_vec[1]) < 1e-12:
-                p_[1] += r_limit[idx]
-            elif np.abs(l_vec[2]) < 1e-12:
-                p_[2] += r_limit[idx]
-            else:
-                displace_vec = np.array([-l_vec[1], l_vec[0], 0])
-                displace_vec = displace_vec / np.sqrt(np.sum(displace_vec**2)
-                                                      ) * r_limit[idx]
-                p_[:] += displace_vec
-        else:
-            p_[:] = pos + (pos - closest_point) * (r_limit[idx] - r) / r
+    idxs = idxs_1 + idxs_2 + idxs_3
+    displace_vecs[:, idxs] /= np.linalg.norm(displace_vecs[:, idxs], axis=0)
+    dr_[:, idxs] = (closest_points[:, idxs] +
+                    displace_vecs[:, idxs] * r_limit[idxs] - r0_[:, idxs])
 
-        if np.sqrt(np.sum((p_ - closest_point)**2)) - r_limit[idx] > 1e-9:
-            print(p_, closest_point)
+    a = (sigma[1] * sigma[2] * px**2
+         + sigma[0] * sigma[2] * py**2
+         + sigma[0] * sigma[1] * pz**2)
+    b = -2 * (sigma[1] * sigma[2] * dr_[0, :] * px +
+              sigma[0] * sigma[2] * dr_[1, :] * py +
+              sigma[0] * sigma[1] * dr_[2, :] * pz)
+    c = (sigma[1] * sigma[2] * dr_[0, :]**2 +
+         sigma[0] * sigma[2] * dr_[1, :]**2 +
+         sigma[0] * sigma[1] * dr_[2, :]**2)
 
-            raise RuntimeError("Segment adjustment not working")
+    i = np.abs(b) <= atol
+    iia = (np.abs(4 * a * c - b * b) < atol) & (np.abs(a - c) < atol)
+    iib = (np.abs(4 * a * c - b * b) < atol) & (np.abs(a - c) >= atol)
+    iii = (4 * a * c - b * b < -atol) & (np.abs(b) > atol)
+    iiii = (4 * a * c - b * b > atol) & (np.abs(b) > atol)
 
-        b[idx] = -2 * ((sigma[1] * sigma[2] * (p_[0] - xstart[idx])
-                        * (xend[idx] - xstart[idx])) +
-                       (sigma[0] * sigma[2] * (p_[1] - ystart[idx])
-                        * (yend[idx] - ystart[idx])) +
-                       (sigma[0] * sigma[1] * (p_[2] - zstart[idx])
-                        * (zend[idx] - zstart[idx])))
-        c[idx] = (sigma[1] * sigma[2] * (p_[0] - xstart[idx])**2 +
-                  sigma[0] * sigma[2] * (p_[1] - ystart[idx])**2 +
-                  sigma[0] * sigma[1] * (p_[2] - zstart[idx])**2)
-
-    i = np.abs(b) <= 1e-6
-    iia = (np.abs(4 * a * c - b * b) < 1e-6) & (np.abs(a - c) < 1e-6)
-    iib = (np.abs(4 * a * c - b * b) < 1e-6) & (np.abs(a - c) >= 1e-6)
-    iii = (4 * a * c - b * b < -1e-6) & (np.abs(b) > 1e-6)
-    iiii = (4 * a * c - b * b > 1e-6) & (np.abs(b) > 1e-6)
-
-    if (i + iia + iib + iii + iiii).sum() != xstart.size:
-        print(a, b, c)
-        print(i, iia, iib, iii, iiii)
-        raise RuntimeError  # WHY?
+    # Consistency check that all indexes has been accounted for:
+    if not np.all(i + iia + iib + iii + iiii):
+        raise RuntimeError("Not all indexes were accounted for!")
 
     mapping = np.zeros(xstart.size)
     mapping[i] = _anisotropic_line_source_case_i(a[i], c[i])
@@ -180,7 +168,7 @@ def calc_lfp_linesource_anisotropic(cell_x, cell_y, cell_z,
 
 
 def calc_lfp_root_as_point_anisotropic(cell_x, cell_y, cell_z,
-                                       x, y, z, sigma, r_limit):
+                                       x, y, z, sigma, r_limit, atol=1e-8):
     """Calculate electric field potential, root is treated as point source, all
     segments except root are treated as line sources.
 
@@ -202,6 +190,9 @@ def calc_lfp_root_as_point_anisotropic(cell_x, cell_y, cell_z,
         extracellular conductivity [sigma_x, sigma_y, sigma_z]
     r_limit: np.ndarray
         minimum distance to source current for each compartment
+    atol: float
+        numerical (absolute) tolerance for near-zero comparisons.
+        Should be a small number, and should normally not need to be changed.
     """
 
     xstart = cell_x[:, 0]
@@ -210,73 +201,63 @@ def calc_lfp_root_as_point_anisotropic(cell_x, cell_y, cell_z,
     yend = cell_y[:, -1]
     zstart = cell_z[:, 0]
     zend = cell_z[:, -1]
-    l_vecs = np.array([xend - xstart, yend - ystart, zend - zstart])
-
+    px = xend - xstart
+    py = yend - ystart
+    pz = zend - zstart
+    # First we do line sources
     pos = np.array([x, y, z])
-
     rs, closest_points = return_dist_from_segments(xstart, ystart, zstart,
                                                    xend, yend, zend, pos)
 
-    dx2 = (xend - xstart)**2
-    dy2 = (yend - ystart)**2
-    dz2 = (zend - zstart)**2
-    a = (sigma[1] * sigma[2] * dx2 +
-         sigma[0] * sigma[2] * dy2 +
-         sigma[0] * sigma[1] * dz2)
+    # If measurement point is too close we move it further away
+    dr_ = np.array([pos[0] - xstart,  pos[1] - ystart, pos[2] - zstart])
+    r0_ = np.array([xstart, ystart, zstart])
+    displace_vecs = np.zeros((3, len(xstart)))
 
-    b = -2 * (sigma[1] * sigma[2] * (x - xstart) * (xend - xstart) +
-              sigma[0] * sigma[2] * (y - ystart) * (yend - ystart) +
-              sigma[0] * sigma[1] * (z - zstart) * (zend - zstart))
-    c = (sigma[1] * sigma[2] * (x - xstart)**2 +
-         sigma[0] * sigma[2] * (y - ystart)**2 +
-         sigma[0] * sigma[1] * (z - zstart)**2)
+    idxs_1 = (rs < r_limit) & (rs >= atol)
+    idxs_2 = (rs < r_limit) & (rs < atol) & (np.abs(px) <= atol)
+    idxs_3 = (rs < r_limit) & (rs < atol) & (np.abs(px) > atol)
 
-    # this looks not optimal:
-    for idx in np.where(rs < r_limit)[0]:
-        r = rs[idx]
-        closest_point = closest_points[:, idx]
-        l_vec = l_vecs[:, idx]
+    if np.any(idxs_1):
+        # move point in radial direction from the line segment
+        displace_vecs[:, idxs_1] = (pos[:, None] - closest_points[:, idxs_1])
+    if np.any(idxs_2):
+        # point is directly on line-segment, and we move it in a perpendicular
+        # direction. If px is zero, perpendicular direction is found from y,z
+        displace_vecs[:, idxs_2] = np.array([np.zeros(np.sum(idxs_2)),
+                                             pz[idxs_2],
+                                             -py[idxs_2]])
+    if np.any(idxs_3):
+        # point is directly on line-segment, and we move it in a perpendicular
+        # direction. Perpendicular direction is found from x,y
+        displace_vecs[:, idxs_3] = np.array([-py[idxs_3],
+                                             px[idxs_3],
+                                             np.zeros(np.sum(idxs_3))])
 
-        p_ = pos.copy()
-        if np.abs(r) < 1e-12:
-            if np.abs(l_vec[0]) < 1e-12:
-                p_[0] += r_limit[idx]
-            elif np.abs(l_vec[1]) < 1e-12:
-                p_[1] += r_limit[idx]
-            elif np.abs(l_vec[2]) < 1e-12:
-                p_[2] += r_limit[idx]
-            else:
-                displace_vec = np.array([-l_vec[1], l_vec[0], 0])
-                displace_vec = displace_vec / np.sqrt(np.sum(displace_vec**2)
-                                                      ) * r_limit[idx]
-                p_[:] += displace_vec
-        else:
-            p_[:] = pos + (pos - closest_point) * (r_limit[idx] - r) / r
+    idxs = idxs_1 + idxs_2 + idxs_3
+    displace_vecs[:, idxs] /= np.linalg.norm(displace_vecs[:, idxs], axis=0)
+    dr_[:, idxs] = (closest_points[:, idxs] +
+                    displace_vecs[:, idxs] * r_limit[idxs] - r0_[:, idxs])
 
-        if np.sqrt(np.sum((p_ - closest_point)**2)) - r_limit[idx] > 1e-9:
-            raise RuntimeError(f"Adjustment failed for segment {idx}",
-                               p_, closest_point)
+    a = (sigma[1] * sigma[2] * px**2
+         + sigma[0] * sigma[2] * py**2
+         + sigma[0] * sigma[1] * pz**2)
+    b = -2 * (sigma[1] * sigma[2] * dr_[0, :] * px +
+              sigma[0] * sigma[2] * dr_[1, :] * py +
+              sigma[0] * sigma[1] * dr_[2, :] * pz)
+    c = (sigma[1] * sigma[2] * dr_[0, :]**2 +
+         sigma[0] * sigma[2] * dr_[1, :]**2 +
+         sigma[0] * sigma[1] * dr_[2, :]**2)
 
-        b[idx] = -2 * ((sigma[1] * sigma[2] * (p_[0] - xstart[idx])
-                        * (xend[idx] - xstart[idx])) +
-                       (sigma[0] * sigma[2] * (p_[1] - ystart[idx])
-                        * (yend[idx] - ystart[idx])) +
-                       (sigma[0] * sigma[1] * (p_[2] - zstart[idx])
-                        * (zend[idx] - zstart[idx])))
-        c[idx] = (sigma[1] * sigma[2] * (p_[0] - xstart[idx])**2 +
-                  sigma[0] * sigma[2] * (p_[1] - ystart[idx])**2 +
-                  sigma[0] * sigma[1] * (p_[2] - zstart[idx])**2)
+    i = np.abs(b) <= atol
+    iia = (np.abs(4 * a * c - b * b) < atol) & (np.abs(a - c) < atol)
+    iib = (np.abs(4 * a * c - b * b) < atol) & (np.abs(a - c) >= atol)
+    iii = (4 * a * c - b * b < -atol) & (np.abs(b) > atol)
+    iiii = (4 * a * c - b * b > atol) & (np.abs(b) > atol)
 
-    i = np.abs(b) <= 1e-6
-    iia = (np.abs(4 * a * c - b * b) < 1e-6) & (np.abs(a - c) < 1e-6)
-    iib = (np.abs(4 * a * c - b * b) < 1e-6) & (np.abs(a - c) >= 1e-6)
-    iii = (4 * a * c - b * b < -1e-6) & (np.abs(b) > 1e-6)
-    iiii = (4 * a * c - b * b > 1e-6) & (np.abs(b) > 1e-6)
-
-    if (i + iia + iib + iii + iiii).sum() != xstart.size:
-        print(a, b, c)
-        print(i, iia, iib, iii, iiii)
-        raise RuntimeError  # WHY?
+    # Consistency check that all indexes has been accounted for:
+    if not np.all(i + iia + iib + iii + iiii):
+        raise RuntimeError("Not all indexes were accounted for!")
 
     mapping = np.zeros(xstart.size)
     mapping[i] = _anisotropic_line_source_case_i(a[i], c[i])
@@ -288,28 +269,26 @@ def calc_lfp_root_as_point_anisotropic(cell_x, cell_y, cell_z,
 
     if np.isnan(mapping).any():
         raise RuntimeError("NaN")
-
     mapping /= np.sqrt(a)
 
+    # Now we do root source:
     # Get compartment indices for root segment (to be treated as point
     # sources)
     rootinds = np.array([0])
 
-    dx2_root = (cell_x[rootinds, :].mean(axis=-1) - x)**2
-    dy2_root = (cell_y[rootinds, :].mean(axis=-1) - y)**2
-    dz2_root = (cell_z[rootinds, :].mean(axis=-1) - z)**2
+    dx2_root = (cell_x[rootinds, :].mean(axis=-1) - pos[0])**2
+    dy2_root = (cell_y[rootinds, :].mean(axis=-1) - pos[1])**2
+    dz2_root = (cell_z[rootinds, :].mean(axis=-1) - pos[2])**2
 
     r2_root = dx2_root + dy2_root + dz2_root
 
     # Go through and correct all (if any) root idxs that are too close
-    close_idx = r2_root < 1e-6
-    dx2_root[close_idx] += 0.001
-    r2_root[close_idx] += 0.001
+    # If measurement point is directly on root, we need to assign a direction:
+    dx2_root[r2_root < atol] = r_limit[rootinds]**2
+    r2_root[r2_root < atol] = r_limit[rootinds]**2
 
     close_idx = r2_root < r_limit[rootinds]**2
-    r2_scale_factor = r_limit[rootinds[close_idx]
-                              ] * r_limit[rootinds[close_idx]
-                                          ] / r2_root[close_idx]
+    r2_scale_factor = r_limit[rootinds[close_idx]]**2 / r2_root[close_idx]
     dx2_root[close_idx] *= r2_scale_factor
     dy2_root[close_idx] *= r2_scale_factor
     dz2_root[close_idx] *= r2_scale_factor
@@ -619,7 +598,7 @@ def calc_lfp_pointsource(cell_x, cell_y, cell_z,
 
 
 def calc_lfp_pointsource_anisotropic(cell_x, cell_y, cell_z,
-                                     x, y, z, sigma, r_limit):
+                                     x, y, z, sigma, r_limit, atol=1e-8):
     """Calculate extracellular potentials using the anisotropic point-source
     equation on all compartments
 
@@ -641,6 +620,9 @@ def calc_lfp_pointsource_anisotropic(cell_x, cell_y, cell_z,
         extracellular conductivity in [x,y,z]-direction
     r_limit: np.ndarray
         minimum distance to source current for each compartment
+    atol: float
+        numerical (absolute) tolerance for near-zero comparisons.
+        Should be a small number, and should normally not need to be changed.
     """
 
     dx2 = (cell_x.mean(axis=-1) - x)**2
@@ -648,13 +630,12 @@ def calc_lfp_pointsource_anisotropic(cell_x, cell_y, cell_z,
     dz2 = (cell_z.mean(axis=-1) - z)**2
 
     r2 = dx2 + dy2 + dz2
-    if (np.abs(r2) < 1e-6).any():
-        dx2[np.abs(r2) < 1e-6] += 0.001
-        r2[np.abs(r2) < 1e-6] += 0.001
+    zero_dist_idxs = np.abs(r2) < atol
+    dx2[zero_dist_idxs] = r_limit[zero_dist_idxs]**2
+    r2[zero_dist_idxs] = r_limit[zero_dist_idxs]**2
 
-    close_idxs = r2 < r_limit * r_limit
-
-    # For anisotropic media, the direction in which to move points matter.
+    close_idxs = r2 < r_limit**2
+    # For anisotropic media, the direction we move points matter
     # Radial distance between point source and electrode is scaled to r_limit
     r2_scale_factor = r_limit[close_idxs]**2 / r2[close_idxs]
     dx2[close_idxs] *= r2_scale_factor
@@ -753,7 +734,7 @@ def calc_lfp_pointsource_moi(cell_x, cell_y, cell_z,
 def calc_lfp_linesource_moi(cell_x, cell_y, cell_z,
                             x, y, z,
                             sigma_T, sigma_S, sigma_G,
-                            steps, h, r_limit, **kwargs):
+                            steps, h, r_limit, atol=1e-8, **kwargs):
     """Calculate extracellular potentials using the line-source
     equation on all compartments for in vitro Microelectrode Array (MEA) slices
 
@@ -785,6 +766,9 @@ def calc_lfp_linesource_moi(cell_x, cell_y, cell_z,
         Slice thickness in um.
     r_limit: np.ndarray
         minimum distance to source current for each compartment
+    atol: float
+        numerical (absolute) tolerance for near-zero comparisons.
+        Should be a small number, and should normally not need to be changed.
     """
 
     cell_z = cell_z.copy()  # Copy to safely shift coordinate system if needed
@@ -795,10 +779,10 @@ def calc_lfp_linesource_moi(cell_x, cell_y, cell_z,
         z_ -= kwargs["z_shift"]
         cell_z -= kwargs["z_shift"]
 
-    if np.abs(z_) > 1e-9:
+    if np.abs(z_) > atol:
         raise RuntimeError("This method can only handle electrodes "
                            "at the MEA plane z=0")
-    if np.abs(sigma_G) > 1e-9:
+    if np.abs(sigma_G) > atol:
         raise RuntimeError("This method can only handle sigma_G=0, i.e.,"
                            "a non-conducting MEA glass electrode plane.")
 
@@ -831,26 +815,25 @@ def calc_lfp_linesource_moi(cell_x, cell_y, cell_z,
     den = np.zeros(factor_a.shape)
 
     def _omega(a_z):
-        ''' See Rottman integration formula 46) page 137 for explanation '''
+        """ See Rottman integration formula 46) page 137 for explanation """
         factor_b = - a_x * dx - a_y * dy - a_z * dz
         factor_c = a_x * a_x + a_y * a_y + a_z * a_z
         b_2_ac = factor_b * factor_b - factor_a * factor_c
 
-        case1_idxs = np.abs(b_2_ac) <= 1e-12
-        case2_idxs = np.abs(b_2_ac) > 1e-12
+        case1_idxs = np.abs(b_2_ac) <= atol
+        case2_idxs = np.abs(b_2_ac) > atol
 
-        if case1_idxs.sum() > 0:
-            num[case1_idxs] = factor_a[case1_idxs] + factor_b[case1_idxs]
-            den[case1_idxs] = factor_b[case1_idxs]
-        if case2_idxs.sum() > 0:
-            num[case2_idxs] = (factor_a[case2_idxs] + factor_b[case2_idxs]
-                               + ds[case2_idxs]
-                               * np.sqrt(factor_a[case2_idxs]
-                                         + 2 * factor_b[case2_idxs]
-                                         + factor_c[case2_idxs])
-                               )
-            den[case2_idxs] = (factor_b[case2_idxs] +
-                               ds[case2_idxs] * np.sqrt(factor_c[case2_idxs]))
+        num[case1_idxs] = factor_a[case1_idxs] + factor_b[case1_idxs]
+        den[case1_idxs] = factor_b[case1_idxs]
+
+        num[case2_idxs] = (factor_a[case2_idxs] + factor_b[case2_idxs]
+                           + ds[case2_idxs]
+                           * np.sqrt(factor_a[case2_idxs]
+                                     + 2 * factor_b[case2_idxs]
+                                     + factor_c[case2_idxs])
+                           )
+        den[case2_idxs] = (factor_b[case2_idxs] +
+                           ds[case2_idxs] * np.sqrt(factor_c[case2_idxs]))
         return np.log(num / den)
 
     mapping = _omega(-z0_)
@@ -867,7 +850,7 @@ def calc_lfp_linesource_moi(cell_x, cell_y, cell_z,
 def calc_lfp_root_as_point_moi(cell_x, cell_y, cell_z,
                                x, y, z,
                                sigma_T, sigma_S, sigma_G,
-                               steps, h, r_limit, **kwargs):
+                               steps, h, r_limit, atol=1e-8, **kwargs):
     """Calculate extracellular potentials for in vitro
     Microelectrode Array (MEA) slices, where root (compartment zero) is
     treated as a point source, and all other compartments as line sources.
@@ -900,6 +883,9 @@ def calc_lfp_root_as_point_moi(cell_x, cell_y, cell_z,
         Slice thickness in um.
     r_limit: np.ndarray
         minimum distance to source current for each compartment
+    atol: float
+        numerical (absolute) tolerance for near-zero comparisons.
+        Should be a small number, and should normally not need to be changed.
     """
 
     cell_z = cell_z.copy()  # Copy to safely shift coordinate system if needed
@@ -910,10 +896,10 @@ def calc_lfp_root_as_point_moi(cell_x, cell_y, cell_z,
         z_ -= kwargs["z_shift"]
         cell_z -= kwargs["z_shift"]
 
-    if np.abs(z_) > 1e-9:
+    if np.abs(z_) > atol:
         raise RuntimeError("This method can only handle electrodes "
                            "at the MEA plane z=0")
-    if np.abs(sigma_G) > 1e-9:
+    if np.abs(sigma_G) > atol:
         raise RuntimeError("This method can only handle sigma_G=0, i.e.,"
                            "a non-conducting MEA glass electrode plane.")
 
@@ -945,26 +931,25 @@ def calc_lfp_root_as_point_moi(cell_x, cell_y, cell_z,
     den = np.zeros(factor_a.shape)
 
     def _omega(a_z):
-        ''' See Rottman integration formula 46) page 137 for explanation '''
+        """ See Rottman integration formula 46) page 137 for explanation """
         factor_b = - a_x * dx - a_y * dy - a_z * dz
         factor_c = a_x * a_x + a_y * a_y + a_z * a_z
         b_2_ac = factor_b * factor_b - factor_a * factor_c
 
-        case1_idxs = np.abs(b_2_ac) <= 1e-12
-        case2_idxs = np.abs(b_2_ac) > 1e-12
+        case1_idxs = np.abs(b_2_ac) <= atol
+        case2_idxs = np.abs(b_2_ac) > atol
 
-        if case1_idxs.sum() > 0:
-            num[case1_idxs] = factor_a[case1_idxs] + factor_b[case1_idxs]
-            den[case1_idxs] = factor_b[case1_idxs]
-        if case2_idxs.sum() > 0:
-            num[case2_idxs] = (factor_a[case2_idxs] + factor_b[case2_idxs] +
-                               + ds[case2_idxs]
-                               * np.sqrt(factor_a[case2_idxs]
-                                         + 2 * factor_b[case2_idxs]
-                                         + factor_c[case2_idxs])
-                               )
-            den[case2_idxs] = (factor_b[case2_idxs] +
-                               ds[case2_idxs] * np.sqrt(factor_c[case2_idxs]))
+        num[case1_idxs] = factor_a[case1_idxs] + factor_b[case1_idxs]
+        den[case1_idxs] = factor_b[case1_idxs]
+
+        num[case2_idxs] = (factor_a[case2_idxs] + factor_b[case2_idxs] +
+                           + ds[case2_idxs]
+                           * np.sqrt(factor_a[case2_idxs]
+                                     + 2 * factor_b[case2_idxs]
+                                     + factor_c[case2_idxs])
+                           )
+        den[case2_idxs] = (factor_b[case2_idxs] +
+                           ds[case2_idxs] * np.sqrt(factor_c[case2_idxs]))
         return np.log(num / den)
 
     mapping = _omega(-z0_)
@@ -990,8 +975,8 @@ def calc_lfp_root_as_point_moi(cell_x, cell_y, cell_z,
     inds = (dL2 + dz2) < (r_limit[rootinds] * r_limit[rootinds])
     dL2[inds] = r_limit[rootinds][inds] * r_limit[rootinds][inds] - dz2[inds]
 
-    def _omega(dz):
-        return 1 / np.sqrt(dL2 + dz * dz)
+    def _omega(dz_):
+        return 1 / np.sqrt(dL2 + dz_ * dz_)
 
     mapping[rootinds] = _omega(z_ - cell_z[rootinds, :].mean(axis=-1))
     mapping[rootinds] += (W * _omega(cell_z[rootinds, :].mean(axis=-1) - 2 * h
@@ -999,12 +984,12 @@ def calc_lfp_root_as_point_moi(cell_x, cell_y, cell_z,
                           + _omega(cell_z[rootinds, :].mean(axis=-1)))
 
     n = np.arange(1, steps)
-    a = (W)**n[:, None] * (W * _omega(cell_z[rootinds, :].mean(axis=-1)
-                                      - 2 * (n[:, None] + 1) * h)
-                           + 2 * _omega(cell_z[rootinds, :].mean(axis=-1)
-                                        + 2 * n[:, None] * h)
-                           + _omega(cell_z[rootinds, :].mean(axis=-1)
-                                    - 2 * n[:, None] * h))
+    a = W**n[:, None] * (W * _omega(cell_z[rootinds, :].mean(axis=-1)
+                         - 2 * (n[:, None] + 1) * h)
+                         + 2 * _omega(cell_z[rootinds, :].mean(axis=-1)
+                         + 2 * n[:, None] * h)
+                         + _omega(cell_z[rootinds, :].mean(axis=-1)
+                         - 2 * n[:, None] * h))
     mapping[rootinds] += np.sum(a, axis=0)
     mapping[rootinds] *= 1 / (4 * np.pi * sigma_T)
 
