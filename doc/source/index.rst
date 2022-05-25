@@ -139,6 +139,15 @@ class :class:`eegmegcalc.NYHeadModel`
     :undoc-members:
 
 
+Module :mod:`lfpykit.special`
+=============================
+.. automodule:: lfpykit.special
+    :members:
+    :show-inheritance:
+    :undoc-members:
+
+
+
 Indices and tables
 ==================
 
