@@ -21,13 +21,19 @@ class CellGeometryArbor(CellGeometry):
     '''
     Class inherited from  ``lfpykit.CellGeometry`` for easier forward-model
     predictions in Arbor that keeps track of arbor.segment information
-    for each CV.
+    for each CV, stored in the array ``CellGeometryArbor._compartment_index``
+
+    This class is usable with the forward models implemented in
+    ``lfpykit.special.CurrentDipoleMoment``,
+    ``lfpykit.special.PointSourcePotential``,
+    and ``lfpykit.special.LineSourcePotential``.
 
     Parameters
     ----------
-    p: ``arbor.place_pwlin`` object
-        3-d locations and cables in a morphology (cf. ``arbor.place_pwlin``)
-    cables: ``list``
+    p: object
+        ``arbor.place_pwlin`` object with 3-d locations and cables in a
+        morphology (cf. ``arbor.place_pwlin``)
+    cables: list
         ``list`` of corresponding ``arbor.cable`` objects where transmembrane
         currents are recorded (cf. ``arbor.cable_probe_total_current_cell``)
 
@@ -56,12 +62,19 @@ class CellGeometryArbor(CellGeometry):
 class CellGeometryNeuron(CellGeometry):
     '''
     Class inherited from  ``lfpykit.CellGeometry`` for easier forward-model
-    predictions from NEURON that keeps track of pt3d information
-    for each compartment.
+    predictions from NEURON that keeps track of pt3d information for each
+    compartment, stored in the array ``CellGeometryNeuron._compartment_index``
+
+    This class is usable with the forward models implemented in
+    ``lfpykit.special.CurrentDipoleMoment``,
+    ``lfpykit.special.PointSourcePotential``,
+    and ``lfpykit.special.LineSourcePotential``.
 
     Parameters
     ----------
-    cell: ``Cell`` object
+    cell: object
+        ``Cell`` object instantiated using the ``neuron.h.Import3d_GUI``
+        functionality
 
     See also
     --------
@@ -145,11 +158,18 @@ class CellGeometryLFPyPt3d(CellGeometry):
     '''
     Class inherited from  ``lfpykit.CellGeometry`` for easier forward-model
     predictions in LFPy that keeps track of pt3d information
-    for each compartment.
+    for each compartment. ``LFPy.Cell`` must be instantiated with the
+    keyword argument ``pt3d=True``.
+
+    This class is usable with the forward models implemented in
+    ``lfpykit.special.CurrentDipoleMoment``,
+    ``lfpykit.special.PointSourcePotential``,
+    and ``lfpykit.special.LineSourcePotential``.
 
     Parameters
     ----------
-    cell: ``LFPy.Cell`` object
+    cell: object
+        ``LFPy.Cell`` like object
 
     See also
     --------
