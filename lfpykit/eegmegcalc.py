@@ -1343,7 +1343,7 @@ class NYHeadModel(Model):
     ----------
     nyhead_file: str [optional]
         Location of file containing New York Head Model. If empty (or None),
-        it will be looked for in the main LFPykit folder. If not present
+        it will be looked for in the present working directory. If not present
         the user is asked if it should be downloaded from
         https://www.parralab.org/nyhead/sa_nyhead.mat
 
@@ -1403,14 +1403,13 @@ class NYHeadModel(Model):
                               "It is needed for loading New York Head model.")
 
         if nyhead_file is None:
-            lfpykit_folder = os.path.dirname(os.path.realpath(__file__))
-            nyhead_file = os.path.join(lfpykit_folder, "sa_nyhead.mat")
+            nyhead_file = os.path.join(os.getcwd(), "sa_nyhead.mat")
         self.head_file = os.path.abspath(nyhead_file)
         if not os.path.isfile(self.head_file):
             from urllib.request import urlopen
             import ssl
-            print("New York head model not found: %s" % self.head_file)
-            yn = input("Should it be downloaded (710 MB)? [y/n]: ")
+            print("New York head-model file not found: %s" % self.head_file)
+            yn = input(f"Download as {self.head_file} (710 MB)? [y/n]: ")
             if yn == 'y':
                 print("Now downloading. This might take a while ...")
                 nyhead_url = 'https://www.parralab.org/nyhead/sa_nyhead.mat'
