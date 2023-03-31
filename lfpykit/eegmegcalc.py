@@ -1409,11 +1409,7 @@ class NYHeadModel(Model):
             from urllib.request import urlopen
             import ssl
             print("New York head-model file not found: %s" % self.head_file)
-            try:
-                yn = input(f"Download as {self.head_file} (710 MB)? [y/n]: ")
-            except StdinNotImplementedError:
-                # If no input device is available, we just go ahead and download.
-                yn = 'y'
+            yn = input(f"Download as {self.head_file} (710 MB)? [y/n]: ")
             if yn == 'y':
                 print("Now downloading. This might take a while ...")
                 nyhead_url = 'https://www.parralab.org/nyhead/sa_nyhead.mat'
