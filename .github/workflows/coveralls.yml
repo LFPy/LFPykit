@@ -38,4 +38,4 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         py.test -v --cov=lfpykit/tests/
-        coveralls
+        coveralls --service=github
