@@ -1409,7 +1409,8 @@ class NYHeadModel(Model):
             from urllib.request import urlopen
             import ssl
             print(f"New York head model file not found: {self.head_file}")
-            print(f"Now downloading as {self.head_file} (710 MB). This might take a while ...")
+            print(f"Now downloading as {self.head_file} (710 MB). "
+                  + "This might take a while ...")
             try:
                 nyhead_url = 'https://www.parralab.org/nyhead/sa_nyhead.mat'
                 u = urlopen(nyhead_url,
@@ -1419,7 +1420,8 @@ class NYHeadModel(Model):
                 localFile.close()
                 print("Download done!")
             except:
-                print("Unable to find or download New York head model file. Exiting program ...")
+                print("Unable to find or download New York head model file. "
+                      + "Exiting program ...")
                 sys.exit()
 
         self.head_data = h5py.File(self.head_file, 'r')["sa"]
