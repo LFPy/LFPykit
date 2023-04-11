@@ -1408,14 +1408,9 @@ class NYHeadModel(Model):
         if not os.path.isfile(self.head_file):
             from urllib.request import urlopen
             import ssl
-            print("New York head-model file not found: %s" % self.head_file)
+            print(f"New York head model file not found: {self.head_file}")
+            print(f"Now downloading as {self.head_file} (710 MB). This might take a while ...")
             try:
-                yn = input(f"Download as {self.head_file} (710 MB)? [y/n]: ")
-            except StdinNotImplementedError:
-                # If no input device is available, we just go ahead and download.
-                yn = 'y'
-            if yn == 'y':
-                print("Now downloading. This might take a while ...")
                 nyhead_url = 'https://www.parralab.org/nyhead/sa_nyhead.mat'
                 u = urlopen(nyhead_url,
                             context=ssl._create_unverified_context())
@@ -1423,8 +1418,8 @@ class NYHeadModel(Model):
                 localFile.write(u.read())
                 localFile.close()
                 print("Download done!")
-            else:
-                print("Exiting program ...")
+            except:
+                print("Unable to find or download New York head model file. Exiting program ...")
                 sys.exit()
 
         self.head_data = h5py.File(self.head_file, 'r')["sa"]
