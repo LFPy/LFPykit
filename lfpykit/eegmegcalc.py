@@ -1410,9 +1410,10 @@ class NYHeadModel(Model):
             print(f"New York head model file not found: {self.head_file}")
             print(f"Now downloading as {self.head_file} (710 MB). "
                   + "This might take a while ...")
+            import urllib
+            from urllib.request import urlopen
+            import ssl
             try:
-                from urllib.request import urlopen
-                import ssl
                 nyhead_url = 'https://www.parralab.org/nyhead/sa_nyhead.mat'
                 u = urlopen(nyhead_url,
                             context=ssl._create_unverified_context())
@@ -1420,6 +1421,12 @@ class NYHeadModel(Model):
                 localFile.write(u.read())
                 localFile.close()
                 print("Download done!")
+            except urllib.error.URLError:
+                print("URLError: Is the internet connection working?")
+                raise
+            except PermissionError:
+                print("PermissionError: Write access is needed for downloading head model.")
+                raise
             except Exception:
                 print("Unable to find or download New York head model file")
                 raise
