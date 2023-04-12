@@ -1406,12 +1406,14 @@ class NYHeadModel(Model):
             nyhead_file = os.path.join(os.getcwd(), "sa_nyhead.mat")
         self.head_file = os.path.abspath(nyhead_file)
         if not os.path.isfile(self.head_file):
+
+            print(f"New York head model file not found: {self.head_file}")
+            print(f"Now downloading as {self.head_file} (710 MB). "
+                  + "This might take a while ...")
+            import urllib
             from urllib.request import urlopen
             import ssl
-            print("New York head-model file not found: %s" % self.head_file)
-            yn = input(f"Download as {self.head_file} (710 MB)? [y/n]: ")
-            if yn == 'y':
-                print("Now downloading. This might take a while ...")
+            try:
                 nyhead_url = 'https://www.parralab.org/nyhead/sa_nyhead.mat'
                 u = urlopen(nyhead_url,
                             context=ssl._create_unverified_context())
@@ -1419,9 +1421,16 @@ class NYHeadModel(Model):
                 localFile.write(u.read())
                 localFile.close()
                 print("Download done!")
-            else:
-                print("Exiting program ...")
-                sys.exit()
+            except urllib.error.URLError:
+                print("URLError: Is the internet connection working?")
+                raise
+            except PermissionError:
+                print("PermissionError: Write access is needed "
+                      + "for downloading head model.")
+                raise
+            except Exception:
+                print("Unable to find or download New York head model file")
+                raise
 
         self.head_data = h5py.File(self.head_file, 'r')["sa"]
         self.cortex = np.array(self.head_data["cortex75K"]["vc"])
