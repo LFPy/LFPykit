@@ -1425,7 +1425,8 @@ class NYHeadModel(Model):
                 print("URLError: Is the internet connection working?")
                 raise
             except PermissionError:
-                print("PermissionError: Write access is needed for downloading head model.")
+                print("PermissionError: Write access is needed "
+                      + "for downloading head model.")
                 raise
             except Exception:
                 print("Unable to find or download New York head model file")
