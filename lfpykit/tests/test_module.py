@@ -826,7 +826,6 @@ class TestSuite(unittest.TestCase):
 
         np.testing.assert_allclose(M_gt, M)
 
-
     def test_LaminarCurrentSourceDensity_07(self):
         '''test LaminarCurrentSourceDensity implementation
 
@@ -841,7 +840,7 @@ class TestSuite(unittest.TestCase):
         r = 200.
         M_gt = np.array([[1., 0.5],
                          [0., 0.5]]) / (np.pi * r**2 * h)
-        
+
         z = np.array([[-h, 0.], [0., h]])
         r = np.array([r, r])
 
@@ -865,7 +864,7 @@ class TestSuite(unittest.TestCase):
         r = 200.
         M_gt = np.array([[1., 0.5],
                          [0., 0.5]]) / (np.pi * r**2 * h)
-        
+
         z = np.array([[-h, 0.], [0., h]])
         r = np.array([r, r])
 
