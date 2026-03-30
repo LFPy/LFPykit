@@ -1,6 +1,9 @@
 # LFPykit
 
-This Python module contain freestanding implementations of electrostatic
+The online documentation of `LFPykit` can be found here:
+https://lfpykit.readthedocs.io/en/latest
+
+`LFPykit` is a freestanding implementations of electrostatic
 forward models incorporated in LFPy
 (https://github.com/LFPy/LFPy, https://LFPy.readthedocs.io).
 
