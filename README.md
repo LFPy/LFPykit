@@ -266,7 +266,7 @@ https://lfpykit.readthedocs.io/en/latest
 
 ## Dependencies
 
-`LFPykit` is implemented in Python and is written (and continuously tested) for `Python >= 3.7`.
+`LFPykit` is implemented in Python and is written (and continuously tested) for `Python >= 3.10`.
 The main `LFPykit` module depends on `numpy`, `scipy` and `MEAutility` (https://github.com/alejoe91/MEAutility, https://meautility.readthedocs.io/en/latest/).
 
 Running all unit tests and example files may in addition require `py.test`, `matplotlib`,
