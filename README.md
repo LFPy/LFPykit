@@ -1,9 +1,11 @@
 # LFPykit
 
-This Python module contain freestanding implementations of electrostatic
+The online documentation of `LFPykit` can be found here:
+https://lfpykit.readthedocs.io/en/latest
+
+`LFPykit` is a freestanding implementations of electrostatic
 forward models incorporated in LFPy
 (https://github.com/LFPy/LFPy, https://LFPy.readthedocs.io).
-
 The aim of the `LFPykit` module is to provide electrostatic models
 in a manner that facilitates forward-model predictions of extracellular
 potentials and related measures from multicompartment neuron models, but
