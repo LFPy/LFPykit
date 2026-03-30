@@ -2063,8 +2063,34 @@ class LaminarCurrentSourceDensity(LinearModel):
 
             z2 = np.array([z_i[0], z_i[1], z_i[0]])
             z3 = np.array([z_i[0], z_i[1], z_i[1]])
+
+            def _get_fraction_from_z_crossing(k, z_cross, endpoint):
+                z0 = self.cell.z[k, 0]
+                z1 = self.cell.z[k, 1]
+                dz = z1 - z0
+                if np.isclose(dz, 0.):
+                    return None
+
+                t = (z_cross - z0) / dz
+                if not (0. <= t <= 1.):
+                    return None
+
+                if endpoint == 0:
+                    return abs(t)
+                return abs(1. - t)
+
             # iterate over lower, right, upper boundary
             for k in np.where(inds)[0]:
+                # If both endpoints are inside the cylindrical radius, the
+                # in-volume fraction follows directly from z-intersection.
+                if kk1[k]:
+                    z_cross = z_i[1] if self.cell.z[k, 1] >= z_i[1] else z_i[0]
+                    frac = _get_fraction_from_z_crossing(
+                        k=k, z_cross=z_cross, endpoint=0)
+                    if frac is not None:
+                        M[i, k] = frac
+                        continue
+
                 for ll in range(3):
                     Pr, Pz, hit = _PrPz(r0=R[k, 0], z0=self.cell.z[k, 0],
                                         r1=R[k, 1], z1=self.cell.z[k, 1],
@@ -2080,6 +2106,16 @@ class LaminarCurrentSourceDensity(LinearModel):
             inds = (~ll0) & ll1
 
             for k in np.where(inds)[0]:
+                # If both endpoints are inside the cylindrical radius, the
+                # in-volume fraction follows directly from z-intersection.
+                if kk0[k]:
+                    z_cross = z_i[1] if self.cell.z[k, 0] >= z_i[1] else z_i[0]
+                    frac = _get_fraction_from_z_crossing(
+                        k=k, z_cross=z_cross, endpoint=1)
+                    if frac is not None:
+                        M[i, k] = frac
+                        continue
+
                 for ll in range(3):
                     Pr, Pz, hit = _PrPz(r0=R[k, 0], z0=self.cell.z[k, 0],
                                         r1=R[k, 1], z1=self.cell.z[k, 1],
@@ -2106,15 +2142,7 @@ def _PrPz(r0, z0, r1, z1, r2, z2, r3, z3):
                - (r0 - r1) * (r2 * z3 - r3 * z2)) / denom)
         Pz = (((r0 * z1 - z0 * r1) * (z2 - z3)
                - (z0 - z1) * (r2 * z3 - r3 * z2)) / denom)
-    # check if intersection point lies on lines
-    if (Pr >= r0) & (Pr <= r1) & (Pz >= z0) & (Pz <= z1):
-        hit = True
-    elif (Pr <= r0) & (Pr >= r1) & (Pz >= z0) & (Pz <= z1):
-        hit = True
-    elif (Pr >= r0) & (Pr <= r1) & (Pz <= z0) & (Pz >= z1):
-        hit = True
-    elif (Pr <= r0) & (Pr >= r1) & (Pz <= z0) & (Pz >= z1):
-        hit = True
-    else:
-        hit = False
+    # check if intersection point lies on line segment (r0, z0) -> (r1, z1)
+    hit = (min(r0, r1) <= Pr <= max(r0, r1)
+           and min(z0, z1) <= Pz <= max(z0, z1))
     return Pr, Pz, hit

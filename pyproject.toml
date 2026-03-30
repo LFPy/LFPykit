@@ -1,0 +1,21 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "LFPykit"
+version = "0.6.0"
+description = "Electrostatic models for multicompartment neuron models"
+authors = ["LFPy-team <lfpy@users.noreply.github.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+numpy = ">=1.15.2"
+scipy = ">=1.5.2"
+meautility = ">=1.5.1"
+
+[tool.poetry.extras]
+tests = ["pytest", "sympy"]
+docs = ["sphinx", "numpydoc", "sphinx_rtd_theme", "recommonmark"]
+
+[tool.poetry.dev-dependencies]
