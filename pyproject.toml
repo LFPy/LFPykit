@@ -24,4 +24,4 @@ recommonmark = {version = "*", optional = true}
 tests = ["pytest", "sympy"]
 docs = ["sphinx", "numpydoc", "sphinx_rtd_theme", "recommonmark"]
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
