@@ -17,6 +17,7 @@ import abc
 import sys
 from copy import deepcopy
 import numpy as np
+import warnings
 from . import lfpcalc
 import MEAutility as mu
 
@@ -1994,10 +1995,14 @@ class LaminarCurrentSourceDensity(LinearModel):
         assert r.ndim == 1, 'r.ndim != 1'
         assert r.shape[0] == z.shape[0], 'r.shape[0] != z.shape[0]'
         assert np.all(r > 0), 'r must be greater than 0'
-        len_msg = "All compartments must be shorter than CSD resolution. " +\
-            "Increase cell spatial resolution or decrease CSD resolution."
-        assert np.max(np.diff(z, axis=-1)) > np.max(cell.length), len_msg
 
+        if np.max(np.diff(z, axis=-1)) > np.max(cell.length):
+            warn_msg = (
+                "All compartments should be shorter than CSD resolution. "
+                "Consider increasing cell spatial resolution or "
+                "decreasing CSD resolution."
+            )
+            warnings.warn(warn_msg, UserWarning)
         self.z = z
         self.r = r
 
