@@ -1995,6 +1995,9 @@ class LaminarCurrentSourceDensity(LinearModel):
         assert r.ndim == 1, 'r.ndim != 1'
         assert r.shape[0] == z.shape[0], 'r.shape[0] != z.shape[0]'
         assert np.all(r > 0), 'r must be greater than 0'
+        len_msg = "All compartments must be shorter than CSD resolution. " +\
+            "Increase cell spatial resolution or decrease CSD resolution."
+        assert np.max(np.diff(z, axis=-1)) > np.max(cell.length), len_msg
 
         if np.max(np.diff(z, axis=-1)) > np.max(cell.length):
             warn_msg = (
