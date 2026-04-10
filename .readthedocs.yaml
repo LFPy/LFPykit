@@ -8,12 +8,7 @@ formats: all
 build:
   os: ubuntu-lts-latest
   tools:
-    python: "3.10"
+    python: "3.12"
 
 conda:
   environment: doc/source/environment.yml
-
-python:
-  install:
-    - method: pip
-      path: .

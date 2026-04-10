@@ -11,3 +11,4 @@ dependencies:
   - m2r2
   - pip
   - pip:
+    - .
