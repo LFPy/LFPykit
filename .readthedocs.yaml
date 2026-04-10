@@ -1,0 +1,17 @@
+version: 2
+
+sphinx:
+  configuration: doc/source/conf.py
+
+formats: all
+
+build:
+  os: ubuntu-lts-latest
+  tools:
+    python: "3.12"
+
+python:
+  install:
+    - requirements: doc/source/requirements-rtd.txt
+    - method: pip
+      path: .
