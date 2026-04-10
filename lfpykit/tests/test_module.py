@@ -732,7 +732,7 @@ class TestSuite(unittest.TestCase):
 
         np.testing.assert_allclose(M_gt, M)
 
-    def test_LaminarCurrentSourceDensity_3(self):
+    def test_LaminarCurrentSourceDensity_03(self):
         '''test LaminarCurrentSourceDensity implementation'''
         cell = get_cell(n_seg=3)
         cell.z = cell.z * 10
@@ -754,7 +754,7 @@ class TestSuite(unittest.TestCase):
 
         np.testing.assert_allclose(M_gt, M)
 
-    def test_LaminarCurrentSourceDensity_4(self):
+    def test_LaminarCurrentSourceDensity_04(self):
         '''test LaminarCurrentSourceDensity implementation'''
         cell = get_cell(n_seg=4)
         cell.z = cell.z * 10
@@ -823,6 +823,54 @@ class TestSuite(unittest.TestCase):
             z=np.array([[i * h, (i + 1) * h] for i in range(2)]),
             r=np.array([r, r]))
         M = csd.get_transformation_matrix()
+
+        np.testing.assert_allclose(M_gt, M)
+
+    def test_LaminarCurrentSourceDensity_07(self):
+        '''test LaminarCurrentSourceDensity implementation
+
+        Issue #196 (https://github.com/LFPy/LFPykit/issues/196)
+        '''
+        cell = lfp.CellGeometry(x=np.array([[50, 50], [50, -50]]),
+                                y=np.array([[0, 0], [0, 0]]),
+                                z=np.array([[-100, -50], [-50, 50]]),
+                                d=np.array([1, 1]))
+
+        h = 150.
+        r = 200.
+        M_gt = np.array([[1., 0.5],
+                         [0., 0.5]]) / (np.pi * r**2 * h)
+
+        z = np.array([[-h, 0.], [0., h]])
+        r = np.array([r, r])
+
+        # instantiate electrode, get linear response matrix
+        csd_lam = lfp.LaminarCurrentSourceDensity(cell=cell, z=z, r=r)
+        M = csd_lam.get_transformation_matrix()
+
+        np.testing.assert_allclose(M_gt, M)
+
+    def test_LaminarCurrentSourceDensity_08(self):
+        '''test LaminarCurrentSourceDensity implementation
+
+        Issue #196 (https://github.com/LFPy/LFPykit/issues/196)
+        '''
+        cell = lfp.CellGeometry(x=np.array([[0, 0], [0, 100]]),
+                                y=np.array([[0, 0], [0, 0]]),
+                                z=np.array([[-100, -50], [-50, 50]]),
+                                d=np.array([1, 1]))
+
+        h = 150.
+        r = 200.
+        M_gt = np.array([[1., 0.5],
+                         [0., 0.5]]) / (np.pi * r**2 * h)
+
+        z = np.array([[-h, 0.], [0., h]])
+        r = np.array([r, r])
+
+        # instantiate electrode, get linear response matrix
+        csd_lam = lfp.LaminarCurrentSourceDensity(cell=cell, z=z, r=r)
+        M = csd_lam.get_transformation_matrix()
 
         np.testing.assert_allclose(M_gt, M)
 
