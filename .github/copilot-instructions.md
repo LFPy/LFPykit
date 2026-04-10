@@ -24,9 +24,9 @@ LFPykit/
 │   └── tests/                # Unit tests (pytest)
 ├── doc/                      # Documentation source (Sphinx)
 ├── examples/                 # Example Jupyter notebooks
-├── requirements.txt          # pip dependencies
+├── requirements.txt          # pip dependencies (legacy)
 ├── environment.yml           # conda environment
-├── setup.py / setup.cfg      # Package setup
+├── pyproject.toml            # Poetry package configuration
 └── README.md                 # Project documentation
 ```
 
@@ -62,15 +62,18 @@ There are no explicit runtime checks for units — callers are responsible for c
 
 ## Installation
 
+The project uses [Poetry](https://python-poetry.org/) for dependency management and packaging (Python >= 3.10 required).
+
 ```bash
-# From source
+# Install with Poetry
+poetry install
+
+# Install with pip (from source)
 pip install .
 
-# Development (editable) install
-pip install -e .
-
-# Install dependencies only
-pip install -r requirements.txt
+# Install with optional test/doc extras
+pip install ".[tests]"
+pip install ".[docs]"
 ```
 
 ## Linting
@@ -100,10 +103,13 @@ Tests are located in `lfpykit/tests/` and use `pytest`. New features must includ
 
 ## Dependencies
 
+- `python >= 3.10`
 - `numpy >= 1.15.2` — array operations and linear algebra
-- `scipy` — special functions and numerical routines
-- `sympy` — symbolic mathematics (used in some analytical derivations)
-- `MEAutility` — multi-electrode array utilities
+- `scipy >= 1.5.2` — special functions and numerical routines
+- `sympy` — symbolic mathematics (used in some analytical derivations, optional)
+- `MEAutility >= 1.5.1` — multi-electrode array utilities
+
+Dependencies are managed via `pyproject.toml`.
 
 ## Contributing
 
