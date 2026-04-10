@@ -2,8 +2,9 @@
 # changes the version in lfpykit/version.py (e.g., when a PR is merged).
 # The release tag follows the convention v{version} (e.g., v0.6.0) and the
 # release name follows the convention LFPykit-{version}.
-# Once a release is created, the Upload Python Package workflow is triggered
-# automatically to publish the new version to PyPI.
+# After a new release is created, the deploy job publishes the package to PyPI.
+# Note: releases created via GITHUB_TOKEN do not trigger the separate
+# python-publish.yml workflow, so the publish steps are included here directly.
 
 name: Create GitHub Release
 
@@ -17,6 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
+    outputs:
+      released: ${{ steps.set_released.outputs.released }}
 
     steps:
     - uses: actions/checkout@v4
@@ -46,3 +50,42 @@ jobs:
         gh release create "v${{ steps.get_version.outputs.version }}" \
           --title "LFPykit-${{ steps.get_version.outputs.version }}" \
           --generate-notes
+
+    - name: Set released output
+      id: set_released
+      run: |
+        echo "released=${{ steps.check_tag.outputs.exists == 'false' }}" >> $GITHUB_OUTPUT
+
+  deploy:
+
+    needs: release
+    if: needs.release.outputs.released == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install poetry twine
+    - name: Build package
+      run: |
+        poetry build
+    - name: Build and publish to Test PyPI
+      env:
+        TWINE_USERNAME: ${{ secrets.TEST_PYPI_USERNAME }}
+        TWINE_PASSWORD: ${{ secrets.TEST_PYPI_PASSWORD }}
+      run: |
+        twine upload --repository-url https://test.pypi.org/legacy/ dist/* --verbose
+    - name: Publish to PyPI
+      env:
+        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      run: |
+        twine upload dist/* --verbose
