@@ -1,0 +1,48 @@
+# This workflow automatically creates a GitHub release when a push to master
+# changes the version in lfpykit/version.py (e.g., when a PR is merged).
+# The release tag follows the convention v{version} (e.g., v0.6.0) and the
+# release name follows the convention LFPykit-{version}.
+# Once a release is created, the Upload Python Package workflow is triggered
+# automatically to publish the new version to PyPI.
+
+name: Create GitHub Release
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  release:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Get version from version.py
+      id: get_version
+      run: |
+        version=$(grep -oP '(?<=version = ")[^"]+' lfpykit/version.py)
+        echo "version=${version}" >> $GITHUB_OUTPUT
+
+    - name: Check if release tag already exists
+      id: check_tag
+      run: |
+        if git ls-remote --exit-code --tags origin "refs/tags/v${{ steps.get_version.outputs.version }}" > /dev/null 2>&1; then
+          echo "exists=true" >> $GITHUB_OUTPUT
+        else
+          echo "exists=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create GitHub Release
+      if: steps.check_tag.outputs.exists == 'false'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release create "v${{ steps.get_version.outputs.version }}" \
+          --title "LFPykit-${{ steps.get_version.outputs.version }}" \
+          --generate-notes
