@@ -12,7 +12,7 @@ jobs:
       - name: Set up Python environment
         uses: actions/setup-python@v3
         with:
-          python-version: "3.8"
+          python-version: "3.12"
       - name: flake8 Lint
         uses: reviewdog/action-flake8@v3
         with:

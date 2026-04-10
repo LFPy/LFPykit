@@ -130,6 +130,7 @@ dmypy.json
 
 # MacOS crap
 .DS_Store
+__MACOSX/
 
 # NEURON
 arm64/
@@ -140,3 +141,4 @@ doc/source/_build
 
 # examples
 examples/src
+L5bPCmodelsEH/
